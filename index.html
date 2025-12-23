@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Anki iOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #1c1c1e;
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --accent: #0a84ff;
+            --danger: #ff453a;
+            --success: #32d74b;
+            --warning: #ff9f0a;
+            --card-bg: #2c2c2e;
+            --separator: #38383a;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding-top: calc(var(--safe-top) + 50px);
+            padding-bottom: calc(var(--safe-bottom) + 60px);
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .view.active {
+            display: flex;
+            opacity: 1;
+            z-index: 10;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(50px + var(--safe-top));
+            padding-top: var(--safe-top);
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 0.5px solid var(--separator);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-left: 16px;
+            padding-right: 16px;
+            z-index: 50;
+        }
+
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: calc(55px + var(--safe-bottom));
+            padding-bottom: var(--safe-bottom);
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 0.5px solid var(--separator);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 10px;
+            gap: 4px;
+        }
+
+        .tab-item.active { color: var(--accent); }
+        .tab-item i { font-size: 20px; }
+
+        .deck-item {
+            background-color: var(--bg-secondary);
+            padding: 16px;
+            margin: 8px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flashcard-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .flashcard {
+            background: var(--card-bg);
+            border-radius: 16px;
+            min-height: 280px;
+            padding: 24px;
+            font-size: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .review-controls {
+            position: fixed;
+            bottom: calc(70px + var(--safe-bottom));
+            left: 0;
+            width: 100%;
+            padding: 0 16px;
+            display: flex;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .btn-answer {
+            flex: 1;
+            padding: 12px 0;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: none;
+        }
+        .btn-answer span.time { font-size: 10px; opacity: 0.8; margin-top: 2px; }
+
+        .btn-again { background-color: var(--danger); }
+        .btn-hard { background-color: var(--warning); }
+        .btn-good { background-color: var(--success); }
+        .btn-easy { background-color: var(--accent); }
+
+        .btn-gemini-magic {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            margin: 10px 0;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .ai-tutor-badge {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        input, textarea, select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--separator);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 12px;
+            width: 100%;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: calc(80px + var(--safe-bottom));
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            z-index: 45;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 id="header-title" class="text-lg font-bold">Anki iOS</h1>
+        <div id="header-actions"></div>
+    </header>
+
+    <div id="loading-screen" class="loading-overlay">
+        <div class="spinner mb-4"></div>
+        <div id="loading-text" class="text-sm font-medium">✨ Gemini is thinking...</div>
+    </div>
+
+    <!-- 1. DECK LIST VIEW -->
+    <div id="view-decks" class="view active">
+        <div class="px-4 py-2">
+            <h2 class="text-xs text-gray-500 uppercase font-bold mb-2 tracking-wider">My Decks</h2>
+            <div id="deck-list-container"></div>
+        </div>
+        <button class="fab" onclick="app.showAddDeckModal()">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+    </div>
+
+    <!-- 2. REVIEW VIEW -->
+    <div id="view-review" class="view">
+        <div class="w-full flex justify-between px-4 py-2 text-xs text-gray-500">
+            <span id="review-counts" class="font-mono">
+                <span class="text-blue-400">0</span> 
+                <span class="text-red-400">0</span> 
+                <span class="text-green-400">0</span>
+            </span>
+            <span id="timer">0s</span>
+        </div>
+
+        <div class="flashcard-container" id="card-area">
+            <div class="flashcard" id="card-content">
+                <div class="text-gray-500">Loading...</div>
+            </div>
+            
+            <div id="ai-tutor-trigger" class="hidden flex justify-center w-full">
+                <button class="ai-tutor-badge" onclick="app.askAITutor()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> ✨ Explain with AI
+                </button>
+            </div>
+        </div>
+
+        <div id="ans-controls" class="review-controls hidden">
+            <button class="btn-answer btn-again" onclick="app.answerCard(1)">Again<span class="time" id="time-1">1m</span></button>
+            <button class="btn-answer btn-hard" onclick="app.answerCard(2)">Hard<span class="time" id="time-2">6m</span></button>
+            <button class="btn-answer btn-good" onclick="app.answerCard(3)">Good<span class="time" id="time-3">10m</span></button>
+            <button class="btn-answer btn-easy" onclick="app.answerCard(4)">Easy<span class="time" id="time-4">4d</span></button>
+        </div>
+        
+        <div id="show-ans-control" class="review-controls">
+            <button class="w-full bg-gray-700 text-white py-4 rounded-xl font-bold" onclick="app.showAnswer()">Show Answer</button>
+        </div>
+    </div>
+
+    <!-- 3. ADD VIEW -->
+    <div id="view-add" class="view">
+        <div class="px-4">
+            <label class="block text-xs text-gray-500 mb-1 font-bold">Current Deck</label>
+            <select id="add-deck-select"></select>
+
+            <!-- Gemini AI Card Generation -->
+            <button class="btn-gemini-magic" onclick="app.showMagicGenerateModal()">
+                <i class="fa-solid fa-sparkles"></i> ✨ Magic Generate Cards
+            </button>
+
+            <div class="relative py-4">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-800"></div></div>
+                <div class="relative flex justify-center text-xs uppercase"><span class="bg-black px-2 text-gray-600">or add manually</span></div>
+            </div>
+
+            <div id="fields-container">
+                <label class="block text-xs text-gray-500 mb-1 font-bold">Front</label>
+                <textarea id="f-front" rows="3" placeholder="Question or Concept"></textarea>
+                
+                <label class="block text-xs text-gray-500 mb-1 font-bold">Back</label>
+                <textarea id="f-back" rows="3" placeholder="Answer or Explanation"></textarea>
+            </div>
+            
+            <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold mt-4" onclick="app.saveNote()">Add Card</button>
+        </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <div class="tab-item active" onclick="app.nav('decks')" id="tab-decks">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Decks</span>
+        </div>
+        <div class="tab-item" onclick="app.nav('add')" id="tab-add">
+            <i class="fa-solid fa-plus-circle"></i>
+            <span>Add</span>
+        </div>
+        <div class="tab-item" onclick="app.nav('stats')" id="tab-stats">
+            <i class="fa-solid fa-chart-simple"></i>
+            <span>Stats</span>
+        </div>
+    </div>
+
+    <script>
+    /**
+     * ------------------------------------------------------------------
+     * GEMINI API INTEGRATION
+     * ------------------------------------------------------------------
+     */
+    const apiKey = ""; // Environment provided
+    const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
+
+    async function callGemini(prompt, systemInstruction = "", isJson = false) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+        
+        const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+            systemInstruction: { parts: [{ text: systemInstruction }] }
+        };
+
+        if (isJson) {
+            payload.generationConfig = { responseMimeType: "application/json" };
+        }
+
+        let retries = 5;
+        let delay = 1000;
+
+        while (retries > 0) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (data.error) throw new Error(data.error.message);
+                return data.candidates?.[0]?.content?.parts?.[0]?.text;
+            } catch (err) {
+                retries--;
+                if (retries === 0) throw err;
+                await new Promise(r => setTimeout(r, delay));
+                delay *= 2;
+            }
+        }
+    }
+
+    /**
+     * ------------------------------------------------------------------
+     * APP CORE
+     * ------------------------------------------------------------------
+     */
+    class AnkiApp {
+        constructor() {
+            this.decks = JSON.parse(localStorage.getItem('anki_decks')) || [{ id: 1, name: "Default" }];
+            this.cards = JSON.parse(localStorage.getItem('anki_cards')) || [];
+            this.currentDeckId = 1;
+            this.studyQueue = [];
+            this.currentCard = null;
+            this.isShowingBack = false;
+        }
+
+        save() {
+            localStorage.setItem('anki_decks', JSON.stringify(this.decks));
+            localStorage.setItem('anki_cards', JSON.stringify(this.cards));
+        }
+
+        nav(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${view}`).classList.add('active');
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${view}`)?.classList.add('active');
+            
+            if (view === 'decks') this.renderDecks();
+            if (view === 'add') this.setupAddView();
+            if (view === 'stats') this.renderStats();
+            
+            const titles = { decks: "My Decks", add: "Add Card", stats: "Stats", review: "Study" };
+            document.getElementById('header-title').innerText = titles[view] || "Anki iOS";
+        }
+
+        setLoading(show, text = "✨ Gemini is thinking...") {
+            const loader = document.getElementById('loading-screen');
+            document.getElementById('loading-text').innerText = text;
+            loader.style.display = show ? 'flex' : 'none';
+        }
+
+        /* --- Gemini Features --- */
+
+        async showMagicGenerateModal() {
+            const topic = prompt("What topic would you like to generate cards for? (e.g. 'Introductory Japanese' or paste a short article)");
+            if (!topic) return;
+
+            this.setLoading(true, "✨ Generating cards...");
+            try {
+                const system = "You are a professional flashcard creator. Return a JSON array of objects, each with 'front' and 'back' keys. Create 5 high-quality, concise flashcards based on the user's topic.";
+                const response = await callGemini(topic, system, true);
+                const result = JSON.parse(response);
+
+                result.forEach(item => {
+                    this.addCard(this.currentDeckId, item.front, item.back);
+                });
+
+                this.save();
+                alert(`✨ Successfully added ${result.length} cards!`);
+            } catch (err) {
+                alert("Failed to generate cards. Please try again.");
+            } finally {
+                this.setLoading(false);
+            }
+        }
+
+        async askAITutor() {
+            if (!this.currentCard) return;
+
+            this.setLoading(true, "✨ Consulting AI Tutor...");
+            try {
+                const prompt = `I'm studying this card. 
+                Front: "${this.currentCard.front}" 
+                Back: "${this.currentCard.back}"
+                
+                Explain this concept clearly and provide a clever mnemonic device to help me remember it. Keep the total response under 100 words.`;
+                
+                const explanation = await callGemini(prompt, "You are a helpful educational tutor.");
+                
+                // Show in custom modal or simple alert for now
+                alert(`✨ AI Tutor says:\n\n${explanation}`);
+            } catch (err) {
+                alert("The AI Tutor is busy right now. Please try again later.");
+            } finally {
+                this.setLoading(false);
+            }
+        }
+
+        /* --- Deck/Card Management --- */
+
+        renderDecks() {
+            const container = document.getElementById('deck-list-container');
+            container.innerHTML = '';
+            this.decks.forEach(d => {
+                const deckCards = this.cards.filter(c => c.deckId === d.id);
+                const dueCount = deckCards.filter(c => new Date(c.due) <= new Date()).length;
+                const div = document.createElement('div');
+                div.className = 'deck-item active:scale-95 transition-transform';
+                div.innerHTML = `
+                    <div class="flex-1 font-bold text-lg" onclick="app.startReview(${d.id})">${d.name}</div>
+                    <div class="flex gap-3 text-sm font-mono">
+                        <span class="text-blue-400 font-bold">${deckCards.filter(c=>c.reps===0).length}</span>
+                        <span class="text-green-400 font-bold">${dueCount}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        setupAddView() {
+            const select = document.getElementById('add-deck-select');
+            select.innerHTML = '';
+            this.decks.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.id;
+                opt.innerText = d.name;
+                select.appendChild(opt);
+            });
+            select.value = this.currentDeckId;
+        }
+
+        saveNote() {
+            const front = document.getElementById('f-front').value;
+            const back = document.getElementById('f-back').value;
+            const did = parseInt(document.getElementById('add-deck-select').value);
+            
+            if (!front || !back) return alert("Please fill both sides");
+            
+            this.addCard(did, front, back);
+            this.save();
+            
+            document.getElementById('f-front').value = '';
+            document.getElementById('f-back').value = '';
+            alert("Card saved!");
+        }
+
+        addCard(deckId, front, back) {
+            this.cards.push({
+                id: Date.now() + Math.random(),
+                deckId, front, back,
+                due: new Date().toISOString(),
+                interval: 0,
+                factor: 2.5,
+                reps: 0
+            });
+        }
+
+        startReview(deckId) {
+            this.currentDeckId = deckId;
+            const deckCards = this.cards.filter(c => c.deckId === deckId);
+            this.studyQueue = deckCards
+                .filter(c => new Date(c.due) <= new Date())
+                .sort((a,b) => new Date(a.due) - new Date(b.due));
+            
+            if (this.studyQueue.length === 0) {
+                alert("No cards due in this deck!");
+                return;
+            }
+
+            this.nav('review');
+            this.nextCard();
+        }
+
+        nextCard() {
+            if (this.studyQueue.length === 0) {
+                alert("Review complete!");
+                this.nav('decks');
+                return;
+            }
+            this.currentCard = this.studyQueue[0];
+            this.isShowingBack = false;
+            this.renderCard();
+        }
+
+        renderCard() {
+            const content = document.getElementById('card-content');
+            const tutorTrigger = document.getElementById('ai-tutor-trigger');
+            
+            if (!this.isShowingBack) {
+                content.innerHTML = `<div class="font-medium">${this.currentCard.front}</div>`;
+                document.getElementById('show-ans-control').classList.remove('hidden');
+                document.getElementById('ans-controls').classList.add('hidden');
+                tutorTrigger.classList.add('hidden');
+            } else {
+                content.innerHTML = `
+                    <div class="text-sm text-gray-500 mb-6 pb-4 border-b border-gray-700 w-full">${this.currentCard.front}</div>
+                    <div class="font-bold">${this.currentCard.back}</div>
+                `;
+                document.getElementById('show-ans-control').classList.add('hidden');
+                document.getElementById('ans-controls').classList.remove('hidden');
+                tutorTrigger.classList.remove('hidden');
+            }
+        }
+
+        showAnswer() {
+            this.isShowingBack = true;
+            this.renderCard();
+        }
+
+        answerCard(rating) {
+            // Simple SM-2 Implementation
+            const c = this.currentCard;
+            let interval = 1;
+            
+            if (rating > 1) {
+                if (c.reps === 0) interval = 1;
+                else if (c.reps === 1) interval = 4;
+                else interval = Math.round(c.interval * c.factor);
+                
+                c.factor = Math.max(1.3, c.factor + (0.1 - (5 - rating) * (0.08 + (5 - rating) * 0.02)));
+                c.reps++;
+            } else {
+                c.reps = 0;
+                interval = 0; // Immediate repeat in logic
+            }
+
+            const nextDue = new Date();
+            nextDue.setDate(nextDue.getDate() + interval);
+            c.due = nextDue.toISOString();
+            c.interval = interval;
+
+            this.studyQueue.shift();
+            if (rating === 1) this.studyQueue.push(c); // Put back for immediate review
+
+            this.save();
+            this.nextCard();
+        }
+
+        renderStats() {
+            const total = this.cards.length;
+            const learned = this.cards.filter(c => c.reps > 5).length;
+            const container = document.getElementById('view-stats');
+            container.innerHTML = `
+                <div class="px-6 py-10">
+                    <h2 class="text-2xl font-bold mb-8">Performance</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-800 p-6 rounded-2xl">
+                            <div class="text-3xl font-bold text-blue-400">${total}</div>
+                            <div class="text-xs text-gray-400 uppercase tracking-widest mt-1">Total Cards</div>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-2xl">
+                            <div class="text-3xl font-bold text-green-400">${learned}</div>
+                            <div class="text-xs text-gray-400 uppercase tracking-widest mt-1">Learned</div>
+                        </div>
+                    </div>
+                    <div class="mt-10 p-6 bg-gray-900 border border-gray-800 rounded-2xl">
+                        <p class="text-sm text-gray-500 leading-relaxed italic">
+                            "Repetition is the mother of learning, the father of action, which makes it the architect of accomplishment."
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        showAddDeckModal() {
+            const name = prompt("Deck Name:");
+            if (name) {
+                this.decks.push({ id: Date.now(), name });
+                this.save();
+                this.renderDecks();
+            }
+        }
+    }
+
+    const app = new AnkiApp();
+    window.onload = () => app.nav('decks');
+    </script>
+</body>
+</html>
