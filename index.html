@@ -536,6 +536,10 @@
             else if (card.type === 3) {
                  if (rating === 1) { // Again
                     nextDue = now + 60;
+                    nextIvl = 60;
+                 } else if (rating === 2) { // Hard (Fixed: repeat with short interval)
+                    nextDue = now + 300;
+                    nextIvl = 300;
                  } else if (rating === 3) { // Good
                     nextType = 2;
                     nextIvl = 1;
@@ -586,6 +590,8 @@
             this.currentCard = null;
             this.currentNote = null;
             this.isShowingBack = false;
+            this.timerInterval = null;
+            this.startTime = 0;
         }
 
         async init() {
@@ -698,7 +704,7 @@
             
             // Persist values simply
             container.innerHTML = `
-                <label class="block text-sm text-gray-500 mb-1">Front ${type === 'cloze' ? '(Use {{c1::cloze}})' : ''}</label>
+                <label class="block text-sm text-gray-500 mb-1">Front ${type === 'cloze' ? '(Use {{c1::cloze::hint}} for multiple)' : ''}</label>
                 <textarea id="f-front" rows="3" class="w-full bg-gray-800 rounded p-2 text-white">${front}</textarea>
                 
                 <label class="block text-sm text-gray-500 mb-1">Back ${type === 'cloze' ? '(Extra info)' : ''}</label>
@@ -771,8 +777,8 @@
             
             // 3. Cloze (Simplified: only finds c1, c2 etc)
             if (type === 'cloze') {
-                // Regex to find cloze deletions {{c(\d+)::.*?}}
-                const regex = /{{c(\d+)::(.*?)}}/g;
+                // Regex to find cloze deletions {{c(\d+)::(.*?)(?:::(.*?))?}}
+                const regex = /{{c(\d+)::(.*?)(?:::(.*?))?}}/g;
                 const matches = [...front.matchAll(regex)];
                 const ords = new Set(matches.map(m => parseInt(m[1]) - 1)); // 0-indexed ords
                 
@@ -824,6 +830,16 @@
                 return;
             }
 
+            // Update review counts
+            const newCount = newCards.length;
+            const learnCount = learning.length;
+            const reviewCount = review.length;
+            document.getElementById('review-counts').innerHTML = `
+                <span class="text-blue-400">${newCount}</span> 
+                <span class="text-red-400">${learnCount}</span> 
+                <span class="text-green-400">${reviewCount}</span>
+            `;
+
             this.nav('review');
             this.nextCard();
         }
@@ -834,6 +850,15 @@
                 this.nav('decks');
                 return;
             }
+
+            // Start timer
+            clearInterval(this.timerInterval);
+            this.startTime = Date.now();
+            document.getElementById('timer').textContent = '0s';
+            this.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                document.getElementById('timer').textContent = elapsed + 's';
+            }, 1000);
 
             this.currentCard = this.studyQueue[0];
             this.currentNote = await this.db.get('notes', this.currentCard.nid);
@@ -852,10 +877,12 @@
             // Handle Cloze
             if (this.currentNote.mid === 'cloze') {
                 const ord = this.currentCard.ord + 1;
-                // Replace active cloze with [...]
-                frontText = frontText.replace(new RegExp(`{{c${ord}::(.*?)}}`, 'g'), '<span class="cloze">[...]</span>');
+                // Replace active cloze with [hint] or [...]
+                frontText = frontText.replace(new RegExp(`{{c${ord}::(.*?)(?:::(.*?))?}}`, 'g'), (m, content, hint) => {
+                    return hint ? `<span class="cloze">[${hint}]</span>` : '<span class="cloze">[...]</span>';
+                });
                 // Replace other clozes with their content
-                frontText = frontText.replace(/{{c\d+::(.*?)}}/g, '$1');
+                frontText = frontText.replace(new RegExp(`{{c(?!${ord}\\b)\\d+::(.*?)(?:::(.*?))?}}`, 'g'), '$1');
             } else if (this.currentCard.ord === 1) {
                 // Reversed card: Front is Back field
                 frontText = this.currentNote.flds[1];
@@ -876,8 +903,9 @@
             if (this.currentNote.mid === 'cloze') {
                 const ord = this.currentCard.ord + 1;
                 // Highlight active cloze
-                frontText = this.currentNote.flds[0].replace(new RegExp(`{{c${ord}::(.*?)}}`, 'g'), '<span class="cloze">$1</span>');
-                frontText = frontText.replace(/{{c\d+::(.*?)}}/g, '$1');
+                frontText = frontText.replace(new RegExp(`{{c${ord}::(.*?)(?:::(.*?))?}}`, 'g'), '<span class="cloze">$1</span>');
+                // Replace other clozes with content
+                frontText = frontText.replace(new RegExp(`{{c(?!${ord}\\b)\\d+::(.*?)(?:::(.*?))?}}`, 'g'), '$1');
                 backText = `<div class="mb-4 border-b border-gray-600 pb-4">${frontText}</div><div>${backText}</div>`;
             } else if (this.currentCard.ord === 1) {
                 // Reversed: Back is Front field
@@ -907,6 +935,9 @@
         }
 
         async answerCard(rating) {
+            // Get elapsed time
+            const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+
             // 1. Calculate new state
             const newCardState = SCHEDULER.answerCard(this.currentCard, rating);
             
@@ -918,7 +949,7 @@
                 ivl: newCardState.ivl,
                 lastIvl: this.currentCard.ivl,
                 factor: this.currentCard.factor,
-                time: 0 // TODO: timer implementation
+                time: elapsed * 1000 // ms
             };
             await this.db.add('revlog', log);
 
@@ -973,13 +1004,29 @@
 
             filtered.forEach(n => {
                 const el = document.createElement('div');
-                el.className = 'p-4 bg-gray-900';
+                el.className = 'p-4 bg-gray-900 flex justify-between items-center';
                 el.innerHTML = `
-                    <div class="font-bold truncate">${n.flds[0]}</div>
-                    <div class="text-sm text-gray-500 truncate">${n.flds[1]}</div>
+                    <div class="flex-1">
+                        <div class="font-bold truncate">${n.flds[0]}</div>
+                        <div class="text-sm text-gray-500 truncate">${n.flds[1]}</div>
+                    </div>
+                    <button class="text-red-500 ml-4" onclick="app.deleteNote(${n.id})"><i class="fa-solid fa-trash"></i></button>
                 `;
                 list.appendChild(el);
             });
+        }
+
+        async deleteNote(noteId) {
+            if (confirm("Delete note and its cards?")) {
+                await this.db.delete('notes', noteId);
+                // Delete associated cards
+                const cards = await this.db.getAll('cards');
+                const toDelete = cards.filter(c => c.nid === noteId);
+                for (const c of toDelete) {
+                    await this.db.delete('cards', c.id);
+                }
+                this.renderBrowser();
+            }
         }
 
         /* --- STATISTICS --- */
@@ -1037,26 +1084,20 @@
                          } else {
                              // Zone logic: Left=Again, Right=Good
                              const width = window.innerWidth;
-                             if (endX < width * 0.3) this.answerCard(1); // Left
-                             else if (endX > width * 0.7) this.answerCard(3); // Right
+                             if (startX < width / 2) {
+                                 this.answerCard(1); // Left = Again
+                             } else {
+                                 this.answerCard(3); // Right = Good
+                             }
                          }
                      }
                 }
-            });
+            }, {passive: true});
         }
     }
 
-    // Initialize
     const app = new AnkiApp();
-    window.addEventListener('DOMContentLoaded', async () => {
-        try {
-            await app.init();
-            await app.toggleFields(); // Init add form
-        } catch (e) {
-            console.error("Failed to initialize app:", e);
-        }
-    });
-
+    app.init();
     </script>
 </body>
 </html>
