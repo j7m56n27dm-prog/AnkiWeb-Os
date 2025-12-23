@@ -24,7 +24,6 @@
             --separator: #38383a;
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
-            --ai-gradient: linear-gradient(135deg, #FFD700, #FFA500);
         }
 
         body {
@@ -183,35 +182,6 @@
         .btn-good { background-color: var(--success); }
         .btn-easy { background-color: var(--accent); }
 
-        /* AI Buttons */
-        .btn-ai-magic {
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            color: white;
-            font-weight: bold;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 2px 8px rgba(168, 85, 247, 0.4);
-        }
-        
-        .btn-ai-tutor {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fbbf24;
-            font-weight: 600;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-top: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
         /* Inputs */
         input, textarea, select {
             background: var(--bg-secondary);
@@ -243,38 +213,6 @@
 
         /* Cloze Styles */
         .cloze { color: var(--accent); font-weight: bold; }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 100;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .modal-content {
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            border: 1px solid var(--separator);
-        }
-        .loading-spinner {
-            border: 3px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            border-top: 3px solid var(--accent);
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -316,12 +254,6 @@
                 <!-- Card content -->
                 <div class="text-gray-500">Loading...</div>
             </div>
-            <!-- AI Tutor Button (injected by JS when answer shown) -->
-            <div id="ai-tutor-container" class="absolute bottom-40 left-0 w-full flex justify-center z-30 hidden">
-                 <button class="btn-ai-tutor" onclick="app.askAITutor()">
-                    <i class="fa-solid fa-sparkles"></i> AI Tutor
-                 </button>
-            </div>
         </div>
 
         <!-- Review Controls -->
@@ -342,17 +274,6 @@
         <div class="px-4">
             <label class="block text-sm text-gray-500 mb-1">Deck</label>
             <select id="add-deck-select"></select>
-
-            <!-- Gemini Feature -->
-            <button class="btn-ai-magic w-full" onclick="app.openMagicModal()">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Magic Generate
-            </button>
-
-            <div class="flex items-center my-4">
-                <div class="h-px bg-gray-800 flex-1"></div>
-                <span class="px-2 text-xs text-gray-500 uppercase">Or Manual</span>
-                <div class="h-px bg-gray-800 flex-1"></div>
-            </div>
 
             <label class="block text-sm text-gray-500 mb-1">Type</label>
             <select id="add-note-type" onchange="app.toggleFields()">
@@ -398,33 +319,6 @@
         </div>
     </div>
 
-    <!-- Modals -->
-    <div id="ai-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 id="ai-modal-title" class="text-lg font-bold mb-2">Generate Cards</h3>
-            <p class="text-sm text-gray-400 mb-4">Enter a topic or paste text to generate cards automatically.</p>
-            <textarea id="ai-input" rows="4" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white" placeholder="e.g. 'Spanish food vocabulary' or paste a paragraph about Photosynthesis."></textarea>
-            <div id="ai-loading" class="hidden flex items-center gap-2 mb-4 text-sm text-yellow-400">
-                <div class="loading-spinner"></div> Generating with Gemini...
-            </div>
-            <div class="flex gap-2">
-                <button class="flex-1 py-2 bg-gray-700 rounded font-semibold" onclick="document.getElementById('ai-modal').style.display='none'">Cancel</button>
-                <button class="flex-1 py-2 bg-purple-600 rounded font-semibold text-white" onclick="app.runMagicGenerate()">Generate</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="tutor-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 class="text-lg font-bold mb-2 flex items-center gap-2"><i class="fa-solid fa-sparkles text-yellow-400"></i> AI Tutor</h3>
-            <div id="tutor-content" class="text-sm text-gray-300 mb-4 leading-relaxed max-h-60 overflow-y-auto"></div>
-            <div id="tutor-loading" class="hidden flex items-center gap-2 mb-4 text-sm text-yellow-400">
-                <div class="loading-spinner"></div> Thinking...
-            </div>
-            <button class="w-full py-2 bg-gray-700 rounded font-semibold" onclick="document.getElementById('tutor-modal').style.display='none'">Close</button>
-        </div>
-    </div>
-
     <!-- Tab Bar -->
     <div class="tab-bar">
         <div class="tab-item active" onclick="app.nav('decks')" id="tab-decks">
@@ -465,17 +359,21 @@
 
                 request.onupgradeneeded = (e) => {
                     const db = e.target.result;
+                    // Decks: stores deck config
                     if (!db.objectStoreNames.contains('decks')) {
                         db.createObjectStore('decks', { keyPath: 'id' });
                     }
+                    // Notes: stores raw content
                     if (!db.objectStoreNames.contains('notes')) {
                         const noteStore = db.createObjectStore('notes', { keyPath: 'id' });
                     }
+                    // Cards: stores scheduling info
                     if (!db.objectStoreNames.contains('cards')) {
                         const cardStore = db.createObjectStore('cards', { keyPath: 'id' });
                         cardStore.createIndex('did', 'did', { unique: false });
                         cardStore.createIndex('due', 'due', { unique: false });
                     }
+                    // RevLog: stores history
                     if (!db.objectStoreNames.contains('revlog')) {
                         const revStore = db.createObjectStore('revlog', { keyPath: 'id' });
                         revStore.createIndex('cid', 'cid', { unique: false });
@@ -495,12 +393,15 @@
             return new Promise((resolve, reject) => {
                 const tx = this.db.transaction(storeNames, mode);
                 const results = {};
+                
                 tx.oncomplete = () => resolve(results);
                 tx.onerror = () => reject(tx.error);
+
                 callback(tx, results);
             });
         }
 
+        // Generic Helpers
         async getAll(store) {
             if (!this.db) throw new Error("Database not initialized");
             return new Promise((resolve) => {
@@ -553,43 +454,97 @@
      * ------------------------------------------------------------------
      */
     const SCHEDULER = {
+        // Time constants
         MINUTE: 60,
         DAY: 86400,
-        STARTING_EASE: 2500,
+
+        // Defaults
+        STARTING_EASE: 2500, // 250%
         EASY_BONUS: 1.3,
         INTERVAL_MODIFIER: 1.0,
         HARD_INTERVAL: 1.2,
         
+        /**
+         * Calculate next schedule for a card
+         * @param {Object} card - The current card object
+         * @param {Number} rating - 1=Again, 2=Hard, 3=Good, 4=Easy
+         */
         answerCard(card, rating) {
-            const now = Date.now() / 1000 | 0;
-            const today = (now / this.DAY) | 0;
+            const now = Date.now() / 1000 | 0; // Current unix timestamp in seconds
+            const today = (now / this.DAY) | 0; // Days since epoch
+
             let nextIvl = 0;
             let nextFactor = card.factor;
             let nextType = card.type;
             let nextDue = 0;
 
+            // --- NEW CARDS (Type 0) & LEARNING (Type 1) ---
             if (card.type === 0 || card.type === 1) {
-                if (rating === 1) { nextType = 1; nextDue = now + 60; nextIvl = 60; }
-                else if (rating === 2) { nextType = 1; nextDue = now + 300; nextIvl = 300; }
-                else if (rating === 3) {
-                    if (card.ivl < 600) { nextType = 1; nextDue = now + 600; nextIvl = 600; }
-                    else { nextType = 2; nextIvl = 1; nextDue = today + 1; }
-                } else if (rating === 4) { nextType = 2; nextIvl = 4; nextDue = today + 4; }
+                // Steps logic: 1m, 10m. If graduated -> 1 day.
+                // Simplified for this implementation:
+                // Step 1: 1 min (60s)
+                // Step 2: 10 min (600s)
+                // Graduation: 1 day
+                
+                if (rating === 1) { // Again
+                    nextType = 1; // Learning
+                    nextDue = now + 60; // 1 min
+                    nextIvl = 60;
+                } else if (rating === 2) { // Hard
+                    nextType = 1;
+                    nextDue = now + 300; // 5 min
+                    nextIvl = 300;
+                } else if (rating === 3) { // Good
+                    if (card.ivl < 600) { // Was at step 1 (1m) -> move to step 2 (10m)
+                         nextType = 1;
+                         nextDue = now + 600;
+                         nextIvl = 600;
+                    } else { // Graduate
+                        nextType = 2; // Review
+                        nextIvl = 1; // 1 day
+                        nextDue = today + 1;
+                    }
+                } else if (rating === 4) { // Easy
+                    nextType = 2; // Graduate immediately
+                    nextIvl = 4; // 4 days
+                    nextDue = today + 4;
+                }
             } 
+            // --- REVIEW CARDS (Type 2) ---
             else if (card.type === 2) {
-                if (rating === 1) {
-                    nextType = 3; nextFactor = Math.max(1300, card.factor - 200); nextIvl = 60; nextDue = now + 60;
+                if (rating === 1) { // Again
+                    nextType = 3; // Relearning (Lapse)
+                    nextFactor = Math.max(1300, card.factor - 200);
+                    nextIvl = 60; // 1 min step for relearning
+                    nextDue = now + 60;
                 } else {
-                    if (rating === 2) { nextFactor = Math.max(1300, card.factor - 150); nextIvl = Math.floor(card.ivl * 1.2); }
-                    else if (rating === 3) { nextIvl = Math.floor(card.ivl * (card.factor / 1000)); }
-                    else if (rating === 4) { nextFactor = Math.min(5000, card.factor + 150); nextIvl = Math.floor(card.ivl * (card.factor / 1000) * this.EASY_BONUS); }
+                    // Update Ease
+                    if (rating === 2) { // Hard
+                        nextFactor = Math.max(1300, card.factor - 150);
+                        nextIvl = Math.floor(card.ivl * 1.2);
+                    } else if (rating === 3) { // Good
+                        nextIvl = Math.floor(card.ivl * (card.factor / 1000));
+                    } else if (rating === 4) { // Easy
+                        nextFactor = Math.min(5000, card.factor + 150);
+                        nextIvl = Math.floor(card.ivl * (card.factor / 1000) * this.EASY_BONUS);
+                    }
+                    
                     nextDue = today + nextIvl;
                 }
             }
+            // --- RELEARNING CARDS (Type 3) ---
             else if (card.type === 3) {
-                 if (rating === 1) { nextDue = now + 60; }
-                 else if (rating === 3) { nextType = 2; nextIvl = 1; nextDue = today + 1; }
-                 else if (rating === 4) { nextType = 2; nextIvl = 4; nextDue = today + 4; }
+                 if (rating === 1) { // Again
+                    nextDue = now + 60;
+                 } else if (rating === 3) { // Good
+                    nextType = 2;
+                    nextIvl = 1;
+                    nextDue = today + 1;
+                 } else if (rating === 4) {
+                     nextType = 2;
+                     nextIvl = 4;
+                     nextDue = today + 4;
+                 }
             }
 
             return {
@@ -603,12 +558,14 @@
             };
         },
 
+        // Helper to format interval text for buttons
         formatTime(secondsOrDays, isReview) {
             if (!isReview && secondsOrDays < 86400) {
                 if (secondsOrDays < 60) return secondsOrDays + 's';
                 if (secondsOrDays < 3600) return Math.floor(secondsOrDays/60) + 'm';
                 return Math.floor(secondsOrDays/3600) + 'h';
             }
+            // If it's a review card, input is days
             const days = isReview ? secondsOrDays : Math.floor(secondsOrDays / 86400);
             if (days < 30) return days + 'd';
             if (days < 365) return (days/30).toFixed(1) + 'mo';
@@ -633,14 +590,22 @@
 
         async init() {
             await this.db.init();
+            
+            // Create Default Deck if empty
             const decks = await this.db.getAll('decks');
             if (decks.length === 0) {
                 await this.db.add('decks', { id: Date.now(), name: 'Default' });
             }
+
             this.renderDeckList();
+            this.setupNavigation();
             this.setupTouchGestures();
+            
+            // Check for mathjax
             if (window.MathJax) {
-               window.MathJax.startup.promise.then(() => console.log('MathJax ready'));
+               window.MathJax.startup.promise.then(() => {
+                 console.log('MathJax ready');
+               });
             }
         }
 
@@ -658,6 +623,7 @@
             if (viewName === 'browse') this.renderBrowser();
             if (viewName === 'stats') this.renderStats();
             
+            // Reset Header
             const titleMap = {
                 'decks': 'My Decks',
                 'add': 'Add Card',
@@ -668,122 +634,18 @@
             document.getElementById('header-title').textContent = titleMap[viewName] || 'Anki iOS';
         }
 
-        /* --- GEMINI AI FEATURES --- */
-        async callGemini(prompt, isJson = false) {
-            const apiKey = ""; // Provided by execution environment
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            
-            const payload = {
-                contents: [{ parts: [{ text: prompt }] }]
-            };
-
-            if (isJson) {
-                payload.generationConfig = {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: {
-                                front: { type: "STRING" },
-                                back: { type: "STRING" }
-                            }
-                        }
-                    }
-                };
-            }
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                if (!response.ok) throw new Error("API Error: " + response.statusText);
-                
-                const data = await response.json();
-                return data.candidates?.[0]?.content?.parts?.[0]?.text;
-            } catch (e) {
-                console.error(e);
-                alert("Gemini Connection Failed: " + e.message);
-                return null;
-            }
-        }
-
-        openMagicModal() {
-            document.getElementById('ai-modal').style.display = 'flex';
-            document.getElementById('ai-input').value = '';
-            document.getElementById('ai-loading').classList.add('hidden');
-        }
-
-        async runMagicGenerate() {
-            const input = document.getElementById('ai-input').value;
-            if (!input) return;
-
-            const loader = document.getElementById('ai-loading');
-            loader.classList.remove('hidden');
-            
-            const prompt = `Generate 5 flashcards based on this topic or text: "${input}". 
-            Make them suitable for Anki spaced repetition. Keep answers concise.`;
-            
-            const result = await this.callGemini(prompt, true);
-            loader.classList.add('hidden');
-
-            if (result) {
-                try {
-                    const cards = JSON.parse(result);
-                    const deckId = parseInt(document.getElementById('add-deck-select').value);
-                    
-                    for (const card of cards) {
-                        await this.saveNoteDirect(deckId, card.front, card.back, 'basic');
-                    }
-                    
-                    document.getElementById('ai-modal').style.display = 'none';
-                    alert(`✨ Successfully generated ${cards.length} cards!`);
-                } catch (e) {
-                    alert("Failed to parse AI response.");
-                }
-            }
-        }
-
-        async askAITutor() {
-            if (!this.currentNote) return;
-            
-            document.getElementById('tutor-modal').style.display = 'flex';
-            document.getElementById('tutor-content').innerHTML = '';
-            document.getElementById('tutor-loading').classList.remove('hidden');
-
-            const front = this.currentNote.flds[0];
-            const back = this.currentNote.flds[1];
-            
-            const prompt = `I am studying this flashcard and I am stuck. 
-            Front: "${front}"
-            Back: "${back}"
-            
-            Please:
-            1. Explain the concept simply.
-            2. Provide a mnemonic or memory aid to help me remember this.
-            3. Keep it brief.`;
-
-            const result = await this.callGemini(prompt, false);
-            
-            document.getElementById('tutor-loading').classList.add('hidden');
-            if (result) {
-                document.getElementById('tutor-content').innerHTML = this.formatText(result);
-            }
-        }
-
         /* --- DECK MANAGEMENT --- */
         async renderDeckList() {
             const container = document.getElementById('deck-list-container');
             container.innerHTML = '';
+            
             const decks = await this.db.getAll('decks');
             const cards = await this.db.getAll('cards');
             const now = Date.now() / 1000 | 0;
             const today = (now / 86400) | 0;
 
             for (const deck of decks) {
+                // Calculate counts
                 const deckCards = cards.filter(c => c.did === deck.id);
                 const newCount = deckCards.filter(c => c.type === 0).length;
                 const learnCount = deckCards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).length;
@@ -814,11 +676,14 @@
 
         async deleteDeck(id) {
             if (confirm("Delete deck and all its cards?")) {
+                // Delete deck
                 await this.db.delete('decks', id);
+                // Delete cards
                 const allCards = await this.db.getAll('cards');
                 const toDelete = allCards.filter(c => c.did === id);
                 for (const c of toDelete) {
                     await this.db.delete('cards', c.id);
+                    // Also delete orphan notes? (Skip for simplicity, keep notes)
                 }
                 this.renderDeckList();
             }
@@ -831,6 +696,7 @@
             const front = document.getElementById('f-front').value;
             const back = document.getElementById('f-back').value;
             
+            // Persist values simply
             container.innerHTML = `
                 <label class="block text-sm text-gray-500 mb-1">Front ${type === 'cloze' ? '(Use {{c1::cloze}})' : ''}</label>
                 <textarea id="f-front" rows="3" class="w-full bg-gray-800 rounded p-2 text-white">${front}</textarea>
@@ -839,6 +705,7 @@
                 <textarea id="f-back" rows="3" class="w-full bg-gray-800 rounded p-2 text-white">${back}</textarea>
             `;
             
+            // Populate deck select
             const deckSelect = document.getElementById('add-deck-select');
             if (deckSelect.options.length === 0) {
                 const decks = await this.db.getAll('decks');
@@ -858,16 +725,10 @@
             const type = document.getElementById('add-note-type').value;
 
             if (!front) return alert("Front field required");
-            await this.saveNoteDirect(deckId, front, back, type);
-            
-            document.getElementById('f-front').value = '';
-            document.getElementById('f-back').value = '';
-            alert("Card added!");
-        }
 
-        async saveNoteDirect(deckId, front, back, type) {
-            const noteId = Date.now() + Math.floor(Math.random() * 1000);
+            const noteId = Date.now();
             
+            // Save Note
             await this.db.add('notes', {
                 id: noteId,
                 mid: type,
@@ -875,13 +736,14 @@
                 tags: []
             });
 
-            // Basic
+            // Create Card(s) based on type
+            // 1. Basic
             await this.db.add('cards', {
-                id: Date.now() + Math.floor(Math.random() * 1000),
+                id: Date.now(),
                 nid: noteId,
                 did: deckId,
                 ord: 0,
-                type: 0, 
+                type: 0, // New
                 queue: 0,
                 due: 0,
                 ivl: 0,
@@ -890,13 +752,13 @@
                 lapses: 0
             });
 
-            // Basic & Rev
+            // 2. Basic & Reversed
             if (type === 'basic-rev') {
                 await this.db.add('cards', {
-                    id: Date.now() + Math.floor(Math.random() * 1000),
+                    id: Date.now() + 1, // ensure unique
                     nid: noteId,
                     did: deckId,
-                    ord: 1,
+                    ord: 1, // Reversed
                     type: 0,
                     queue: 0,
                     due: 0,
@@ -907,16 +769,19 @@
                 });
             }
             
-            // Cloze
+            // 3. Cloze (Simplified: only finds c1, c2 etc)
             if (type === 'cloze') {
+                // Regex to find cloze deletions {{c(\d+)::.*?}}
                 const regex = /{{c(\d+)::(.*?)}}/g;
                 const matches = [...front.matchAll(regex)];
-                const ords = new Set(matches.map(m => parseInt(m[1]) - 1));
+                const ords = new Set(matches.map(m => parseInt(m[1]) - 1)); // 0-indexed ords
+                
+                // If no cloze found but type is cloze, treat as basic 1 card
                 if (ords.size === 0) ords.add(0);
 
                 for (let ord of ords) {
                     await this.db.add('cards', {
-                        id: Date.now() + Math.floor(Math.random() * 1000),
+                        id: Date.now() + ord,
                         nid: noteId,
                         did: deckId,
                         ord: ord,
@@ -930,6 +795,11 @@
                     });
                 }
             }
+
+            // Clear inputs
+            document.getElementById('f-front').value = '';
+            document.getElementById('f-back').value = '';
+            alert("Card added!");
         }
 
         /* --- STUDY / REVIEW --- */
@@ -939,10 +809,13 @@
             const now = Date.now() / 1000 | 0;
             const today = (now / 86400) | 0;
 
+            // Filter cards for this deck
+            // Sort: Learning (due < now) -> Review (due <= today) -> New
             const deckCards = allCards.filter(c => c.did === deckId);
+            
             const learning = deckCards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).sort((a,b) => a.due - b.due);
             const review = deckCards.filter(c => c.type === 2 && c.due <= today).sort((a,b) => a.due - b.due);
-            const newCards = deckCards.filter(c => c.type === 0).slice(0, 20);
+            const newCards = deckCards.filter(c => c.type === 0).slice(0, 20); // Limit 20 new/day simplified
 
             this.studyQueue = [...learning, ...review, ...newCards];
             
@@ -969,18 +842,22 @@
             this.renderCardFront();
             document.getElementById('ans-controls').classList.add('hidden');
             document.getElementById('show-ans-control').classList.remove('hidden');
-            document.getElementById('ai-tutor-container').classList.add('hidden');
         }
 
         renderCardFront() {
             const content = document.getElementById('card-content');
+            
             let frontText = this.currentNote.flds[0];
             
+            // Handle Cloze
             if (this.currentNote.mid === 'cloze') {
                 const ord = this.currentCard.ord + 1;
+                // Replace active cloze with [...]
                 frontText = frontText.replace(new RegExp(`{{c${ord}::(.*?)}}`, 'g'), '<span class="cloze">[...]</span>');
+                // Replace other clozes with their content
                 frontText = frontText.replace(/{{c\d+::(.*?)}}/g, '$1');
             } else if (this.currentCard.ord === 1) {
+                // Reversed card: Front is Back field
                 frontText = this.currentNote.flds[1];
             }
 
@@ -995,27 +872,32 @@
             let frontText = this.currentNote.flds[0];
             let backText = this.currentNote.flds[1];
 
+            // Handle Cloze Back
             if (this.currentNote.mid === 'cloze') {
                 const ord = this.currentCard.ord + 1;
+                // Highlight active cloze
                 frontText = this.currentNote.flds[0].replace(new RegExp(`{{c${ord}::(.*?)}}`, 'g'), '<span class="cloze">$1</span>');
                 frontText = frontText.replace(/{{c\d+::(.*?)}}/g, '$1');
                 backText = `<div class="mb-4 border-b border-gray-600 pb-4">${frontText}</div><div>${backText}</div>`;
             } else if (this.currentCard.ord === 1) {
+                // Reversed: Back is Front field
                 const temp = frontText;
-                frontText = backText;
-                backText = temp;
+                frontText = backText; // Front was actually field 1
+                backText = temp;      // Back is field 0
                 backText = `<div class="mb-4 border-b border-gray-600 pb-4">${frontText}</div><div>${backText}</div>`;
             } else {
+                 // Standard Basic
                  backText = `<div class="mb-4 border-b border-gray-600 pb-4">${frontText}</div><div>${backText}</div>`;
             }
 
             content.innerHTML = this.formatText(backText);
             this.refreshMath();
 
+            // Setup Buttons
             document.getElementById('show-ans-control').classList.add('hidden');
             document.getElementById('ans-controls').classList.remove('hidden');
-            document.getElementById('ai-tutor-container').classList.remove('hidden');
 
+            // Calculate estimated times for UI
             const ratings = [1, 2, 3, 4];
             ratings.forEach(r => {
                 const pred = SCHEDULER.answerCard(this.currentCard, r);
@@ -1025,7 +907,10 @@
         }
 
         async answerCard(rating) {
+            // 1. Calculate new state
             const newCardState = SCHEDULER.answerCard(this.currentCard, rating);
+            
+            // 2. Log review
             const log = {
                 id: Date.now(),
                 cid: this.currentCard.id,
@@ -1033,14 +918,20 @@
                 ivl: newCardState.ivl,
                 lastIvl: this.currentCard.ivl,
                 factor: this.currentCard.factor,
-                time: 0
+                time: 0 // TODO: timer implementation
             };
             await this.db.add('revlog', log);
+
+            // 3. Update Card in DB
             await this.db.put('cards', newCardState);
-            this.studyQueue.shift();
+
+            // 4. Update Queue
+            this.studyQueue.shift(); // Remove current
             
+            // If it's a learning card and due soon, re-queue it
             const now = Date.now() / 1000 | 0;
-            if ((newCardState.type === 1 || newCardState.type === 3) && newCardState.due < now + 1200) {
+            if ((newCardState.type === 1 || newCardState.type === 3) && newCardState.due < now + 1200) { // If due within 20 mins
+                // Insert based on due time (simple insertion sort)
                 let inserted = false;
                 for(let i=0; i<this.studyQueue.length; i++) {
                     if (this.studyQueue[i].due > newCardState.due) {
@@ -1051,10 +942,13 @@
                 }
                 if (!inserted) this.studyQueue.push(newCardState);
             }
+
+            // 5. Next
             this.nextCard();
         }
 
         formatText(text) {
+            // Basic Markdown-ish
             return text
                 .replace(/\n/g, '<br>')
                 .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
@@ -1074,6 +968,7 @@
             list.innerHTML = '';
             
             const notes = await this.db.getAll('notes');
+            // Join with cards needed? Just searching notes for now
             const filtered = notes.filter(n => n.flds.some(f => f.toLowerCase().includes(query))).slice(0, 50);
 
             filtered.forEach(n => {
@@ -1092,13 +987,21 @@
             const cards = await this.db.getAll('cards');
             const now = Date.now() / 1000 | 0;
             const today = (now / 86400) | 0;
+
             document.getElementById('stat-total').innerText = cards.length;
+            
             const dueCount = cards.filter(c => 
                 (c.type === 2 && c.due <= today) || 
                 ((c.type === 1 || c.type === 3) && c.due < now) ||
                 (c.type === 0)
             ).length;
+
             document.getElementById('stat-due').innerText = dueCount;
+        }
+
+        setupNavigation() {
+            // History API / Back button handling could go here
+            // For now, simple SPA
         }
 
         setupTouchGestures() {
@@ -1117,21 +1020,25 @@
                 const diffX = endX - startX;
                 const diffY = endY - startY;
 
+                // Swipe Detection
                 if (Math.abs(diffX) > 100 && Math.abs(diffY) < 50) {
                     if (this.isShowingBack) {
-                        if (diffX < 0) this.answerCard(3);
-                        else this.answerCard(1);
+                        if (diffX < 0) this.answerCard(3); // Left swipe = Good
+                        else this.answerCard(1); // Right swipe = Again
                     }
                 }
                 
+                // Tap Zones
                 if (Math.abs(diffX) < 10 && Math.abs(diffY) < 10) {
-                     if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                     // Check if target is not a button
+                     if (e.target.tagName !== 'BUTTON') {
                          if (!this.isShowingBack) {
                              this.showAnswer();
                          } else {
+                             // Zone logic: Left=Again, Right=Good
                              const width = window.innerWidth;
-                             if (endX < width * 0.3) this.answerCard(1);
-                             else if (endX > width * 0.7) this.answerCard(3);
+                             if (endX < width * 0.3) this.answerCard(1); // Left
+                             else if (endX > width * 0.7) this.answerCard(3); // Right
                          }
                      }
                 }
@@ -1144,7 +1051,7 @@
     window.addEventListener('DOMContentLoaded', async () => {
         try {
             await app.init();
-            await app.toggleFields();
+            await app.toggleFields(); // Init add form
         } catch (e) {
             console.error("Failed to initialize app:", e);
         }
