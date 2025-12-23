@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Anki iOS</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/icon-180.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="assets/icons/icon-167.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="lib/quill.snow.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script src="lib/mathjax.js" async></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Anki...</div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="app-container" style="display: none;">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <button id="menu-toggle" class="icon-button" aria-label="Menu">
+                    <span class="icon">≡</span>
+                </button>
+                <h1 id="page-title" class="page-title">Decks</h1>
+            </div>
+            <div class="header-right">
+                <button id="sync-button" class="icon-button" aria-label="Sync">
+                    <span class="icon">↻</span>
+                </button>
+                <button id="add-button" class="icon-button primary" aria-label="Add">
+                    <span class="icon">+</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="main-content">
+            <!-- Decks View -->
+            <div id="decks-view" class="view active">
+                <div class="decks-container">
+                    <div class="decks-header">
+                        <h2>Your Decks</h2>
+                        <button id="create-deck-btn" class="text-button">+ New Deck</button>
+                    </div>
+                    <div id="decks-list" class="decks-list">
+                        <!-- Decks loaded dynamically -->
+                    </div>
+                    <div class="study-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="due-count">0</div>
+                            <div class="stat-label">Due</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="new-count">0</div>
+                            <div class="stat-label">New</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="learning-count">0</div>
+                            <div class="stat-label">Learning</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review View -->
+            <div id="review-view" class="view">
+                <div class="review-container">
+                    <div class="review-header">
+                        <div class="deck-info">
+                            <span id="review-deck-name">Default</span>
+                            <span id="review-progress">0/0</span>
+                        </div>
+                        <div class="review-controls">
+                            <button id="undo-btn" class="icon-button small" aria-label="Undo">
+                                <span class="icon">↶</span>
+                            </button>
+                            <button id="more-options-btn" class="icon-button small" aria-label="More options">
+                                <span class="icon">⋯</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-container">
+                        <div id="question-card" class="card">
+                            <div class="card-content" id="question-content">
+                                <!-- Question content loaded here -->
+                            </div>
+                            <div class="card-footer">
+                                <button class="tag-button" id="flag-card-btn">Flag</button>
+                                <button class="tag-button" id="mark-card-btn">Mark</button>
+                            </div>
+                        </div>
+                        
+                        <div id="answer-card" class="card hidden">
+                            <div class="card-content" id="answer-content">
+                                <!-- Answer content loaded here -->
+                            </div>
+                            <div class="answer-buttons">
+                                <button class="answer-btn again" data-ease="1">Again</button>
+                                <button class="answer-btn hard" data-ease="2">Hard</button>
+                                <button class="answer-btn good" data-ease="3">Good</button>
+                                <button class="answer-btn easy" data-ease="4">Easy</button>
+                            </div>
+                            <div class="card-timing">
+                                <span>Time: <span id="card-time">0s</span></span>
+                                <span>Interval: <span id="card-interval">0d</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="gesture-hint">
+                        <div class="gesture-item">
+                            <span class="gesture-icon">←</span>
+                            <span>Again</span>
+                        </div>
+                        <div class="gesture-item">
+                            <span class="gesture-icon">↓</span>
+                            <span>Hard</span>
+                        </div>
+                        <div class="gesture-item">
+                            <span class="gesture-icon">↑</span>
+                            <span>Good</span>
+                        </div>
+                        <div class="gesture-item">
+                            <span class="gesture-icon">→</span>
+                            <span>Easy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Browser View -->
+            <div id="browser-view" class="view">
+                <div class="browser-container">
+                    <div class="browser-header">
+                        <div class="search-box">
+                            <input type="text" id="card-search" placeholder="Search cards...">
+                            <button id="search-btn" class="icon-button">🔍</button>
+                        </div>
+                        <div class="filter-controls">
+                            <select id="deck-filter">
+                                <option value="all">All Decks</option>
+                            </select>
+                            <select id="card-type-filter">
+                                <option value="all">All Cards</option>
+                                <option value="new">New</option>
+                                <option value="learning">Learning</option>
+                                <option value="review">Review</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="browser-toolbar">
+                        <button id="select-cards-btn" class="toolbar-btn">Select</button>
+                        <button id="filter-deck-btn" class="toolbar-btn">Filter Deck</button>
+                        <button id="export-cards-btn" class="toolbar-btn">Export</button>
+                    </div>
+                    <div id="browser-results" class="browser-results">
+                        <!-- Search results loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats View -->
+            <div id="stats-view" class="view">
+                <div class="stats-container">
+                    <div class="stats-header">
+                        <h2>Statistics</h2>
+                        <select id="stats-period">
+                            <option value="1">Last Day</option>
+                            <option value="7" selected>Last Week</option>
+                            <option value="30">Last Month</option>
+                            <option value="365">Last Year</option>
+                            <option value="0">All Time</option>
+                        </select>
+                    </div>
+                    <div class="stats-cards">
+                        <div class="stat-card-large">
+                            <div class="stat-title">Cards Reviewed</div>
+                            <div class="stat-value-large" id="total-reviewed">0</div>
+                            <div class="stat-trend" id="review-trend">+0%</div>
+                        </div>
+                        <div class="stat-card-large">
+                            <div class="stat-title">Average Time</div>
+                            <div class="stat-value-large" id="avg-time">0s</div>
+                            <div class="stat-trend" id="time-trend">+0%</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="review-chart"></canvas>
+                    </div>
+                    <div class="detailed-stats">
+                        <h3>Deck Performance</h3>
+                        <div id="deck-stats-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="settings-view" class="view">
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h3>Review Settings</h3>
+                        <div class="setting-item">
+                            <label for="new-cards-day">New Cards/Day</label>
+                            <input type="number" id="new-cards-day" min="1" max="1000" value="20">
+                        </div>
+                        <div class="setting-item">
+                            <label for="max-reviews-day">Max Reviews/Day</label>
+                            <input type="number" id="max-reviews-day" min="1" max="1000" value="200">
+                        </div>
+                        <div class="setting-item">
+                            <label for="learning-steps">Learning Steps (minutes)</label>
+                            <input type="text" id="learning-steps" value="1 10">
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3>Appearance</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="dark-mode" checked>
+                                Dark Mode
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label for="font-size">Font Size</label>
+                            <select id="font-size">
+                                <option value="small">Small</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="large">Large</option>
+                                <option value="x-large">Extra Large</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3>Data Management</h3>
+                        <button id="export-data-btn" class="full-width-btn">Export All Data</button>
+                        <button id="import-data-btn" class="full-width-btn">Import Data</button>
+                        <button id="clear-data-btn" class="full-width-btn destructive">Clear All Data</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-view="decks">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">Decks</span>
+            </button>
+            <button class="nav-btn" data-view="review">
+                <span class="nav-icon">✏️</span>
+                <span class="nav-label">Review</span>
+                <span id="review-badge" class="nav-badge">0</span>
+            </button>
+            <button class="nav-btn" data-view="browser">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-label">Browse</span>
+            </button>
+            <button class="nav-btn" data-view="stats">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Stats</span>
+            </button>
+            <button class="nav-btn" data-view="settings">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">More</span>
+            </button>
+        </nav>
+
+        <!-- Modals -->
+        <div id="modal-overlay" class="modal-overlay"></div>
+        
+        <!-- Add Card Modal -->
+        <div id="add-card-modal" class="modal">
+            <div class="modal-header">
+                <h3>Add Card</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="card-type">Card Type</label>
+                    <select id="card-type">
+                        <option value="basic">Basic</option>
+                        <option value="basic-reverse">Basic (and reverse card)</option>
+                        <option value="basic-optional">Basic (optional reverse)</option>
+                        <option value="cloze">Cloze</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="card-deck">Deck</label>
+                    <select id="card-deck"></select>
+                </div>
+                <div id="card-fields">
+                    <div class="form-group">
+                        <label for="card-front">Front</label>
+                        <div id="front-editor" class="rich-editor"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="card-back">Back</label>
+                        <div id="back-editor" class="rich-editor"></div>
+                    </div>
+                </div>
+                <div id="cloze-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="cloze-text">Text with Cloze Deletions</label>
+                        <textarea id="cloze-text" placeholder="Type text and surround cloze deletions with {{c1:: }}"></textarea>
+                        <div class="hint">Use {{c1::word}} for cloze deletions</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="card-tags">Tags (comma separated)</label>
+                    <input type="text" id="card-tags" placeholder="tag1, tag2, tag3">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary modal-close">Cancel</button>
+                <button id="save-card-btn" class="btn primary">Add Card</button>
+            </div>
+        </div>
+
+        <!-- Deck Options Modal -->
+        <div id="deck-options-modal" class="modal">
+            <div class="modal-header">
+                <h3>Deck Options</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Deck options loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- Context Menu -->
+        <div id="context-menu" class="context-menu"></div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="lib/dexie.min.js"></script>
+    <script src="lib/quill.min.js"></script>
+    
+    <!-- Application Code -->
+    <script src="storage.js"></script>
+    <script src="scheduler.js"></script>
+    <script src="editor.js"></script>
+    <script src="review.js"></script>
+    <script src="browser.js"></script>
+    <script src="deck-manager.js"></script>
+    <script src="sync.js"></script>
+    <script src="utils.js"></script>
+    <script src="app.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
