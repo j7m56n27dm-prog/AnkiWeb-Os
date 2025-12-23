@@ -24,17 +24,19 @@
             --separator: #38383a;
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
+            --ai-gradient: linear-gradient(135deg, #FFD700, #FFA500);
         }
 
         body {
             background-color: var(--bg-primary);
             color: var(--text-primary);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
+            overflow: hidden; /* Prevent body scroll, handle in views */
             height: 100vh;
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Views */
         .view {
             position: absolute;
             top: 0;
@@ -56,6 +58,7 @@
             z-index: 10;
         }
 
+        /* Header */
         header {
             position: fixed;
             top: 0;
@@ -74,6 +77,7 @@
             z-index: 50;
         }
 
+        /* Tab Bar */
         .tab-bar {
             position: fixed;
             bottom: 0;
@@ -101,9 +105,15 @@
             gap: 4px;
         }
 
-        .tab-item.active { color: var(--accent); }
-        .tab-item i { font-size: 20px; }
+        .tab-item.active {
+            color: var(--accent);
+        }
 
+        .tab-item i {
+            font-size: 20px;
+        }
+
+        /* Deck List */
         .deck-item {
             background-color: var(--bg-secondary);
             padding: 16px;
@@ -114,6 +124,7 @@
             align-items: center;
         }
 
+        /* Card Styling */
         .flashcard-container {
             flex: 1;
             display: flex;
@@ -126,9 +137,10 @@
         .flashcard {
             background: var(--card-bg);
             border-radius: 16px;
-            min-height: 280px;
+            min-height: 300px;
             padding: 24px;
-            font-size: 22px;
+            font-size: 20px;
+            line-height: 1.5;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -138,9 +150,10 @@
             position: relative;
         }
 
+        /* Answer Buttons */
         .review-controls {
             position: fixed;
-            bottom: calc(70px + var(--safe-bottom));
+            bottom: calc(60px + var(--safe-bottom));
             left: 0;
             width: 100%;
             padding: 0 16px;
@@ -161,42 +174,45 @@
             flex-direction: column;
             align-items: center;
             border: none;
+            cursor: pointer;
         }
-        .btn-answer span.time { font-size: 10px; opacity: 0.8; margin-top: 2px; }
+        .btn-answer span.time { font-size: 10px; opacity: 0.8; font-weight: normal; margin-top: 2px; }
 
         .btn-again { background-color: var(--danger); }
         .btn-hard { background-color: var(--warning); }
         .btn-good { background-color: var(--success); }
         .btn-easy { background-color: var(--accent); }
 
-        .btn-gemini-magic {
+        /* AI Buttons */
+        .btn-ai-magic {
             background: linear-gradient(135deg, #6366f1, #a855f7);
             color: white;
-            padding: 14px;
-            border-radius: 12px;
-            margin: 10px 0;
             font-weight: bold;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            width: 100%;
+            box-shadow: 0 2px 8px rgba(168, 85, 247, 0.4);
         }
-
-        .ai-tutor-badge {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.3);
+        
+        .btn-ai-tutor {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: #fbbf24;
-            padding: 4px 12px;
+            font-weight: 600;
+            padding: 8px 16px;
             border-radius: 20px;
             font-size: 12px;
+            margin-top: 12px;
             display: flex;
             align-items: center;
-            gap: 4px;
-            margin-top: 20px;
-            cursor: pointer;
+            gap: 6px;
         }
 
+        /* Inputs */
         input, textarea, select {
             background: var(--bg-secondary);
             border: 1px solid var(--separator);
@@ -207,10 +223,10 @@
             margin-bottom: 12px;
             font-size: 16px;
         }
-
+        
         .fab {
             position: fixed;
-            bottom: calc(80px + var(--safe-bottom));
+            bottom: calc(70px + var(--safe-bottom));
             right: 20px;
             width: 56px;
             height: 56px;
@@ -225,23 +241,37 @@
             z-index: 45;
         }
 
-        .loading-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
+        /* Cloze Styles */
+        .cloze { color: var(--accent); font-weight: bold; }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255,255,255,0.1);
-            border-top: 4px solid var(--accent);
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            border: 1px solid var(--separator);
+        }
+        .loading-spinner {
+            border: 3px solid rgba(255,255,255,0.1);
             border-radius: 50%;
+            border-top: 3px solid var(--accent);
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -249,21 +279,21 @@
 </head>
 <body>
 
+    <!-- Header -->
     <header>
         <h1 id="header-title" class="text-lg font-bold">Anki iOS</h1>
         <div id="header-actions"></div>
     </header>
 
-    <div id="loading-screen" class="loading-overlay">
-        <div class="spinner mb-4"></div>
-        <div id="loading-text" class="text-sm font-medium">✨ Gemini is thinking...</div>
-    </div>
-
+    <!-- Views -->
+    
     <!-- 1. DECK LIST VIEW -->
     <div id="view-decks" class="view active">
         <div class="px-4 py-2">
-            <h2 class="text-xs text-gray-500 uppercase font-bold mb-2 tracking-wider">My Decks</h2>
-            <div id="deck-list-container"></div>
+            <h2 class="text-sm text-gray-500 uppercase font-bold mb-2">My Decks</h2>
+            <div id="deck-list-container">
+                <!-- Decks injected here -->
+            </div>
         </div>
         <button class="fab" onclick="app.showAddDeckModal()">
             <i class="fa-solid fa-plus"></i>
@@ -271,8 +301,8 @@
     </div>
 
     <!-- 2. REVIEW VIEW -->
-    <div id="view-review" class="view">
-        <div class="w-full flex justify-between px-4 py-2 text-xs text-gray-500">
+    <div id="view-review" class="view" style="padding-bottom: 0;">
+        <div class="w-full flex justify-between px-4 py-2 text-sm text-gray-500">
             <span id="review-counts" class="font-mono">
                 <span class="text-blue-400">0</span> 
                 <span class="text-red-400">0</span> 
@@ -283,16 +313,18 @@
 
         <div class="flashcard-container" id="card-area">
             <div class="flashcard" id="card-content">
+                <!-- Card content -->
                 <div class="text-gray-500">Loading...</div>
             </div>
-            
-            <div id="ai-tutor-trigger" class="hidden flex justify-center w-full">
-                <button class="ai-tutor-badge" onclick="app.askAITutor()">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> ✨ Explain with AI
-                </button>
+            <!-- AI Tutor Button (injected by JS when answer shown) -->
+            <div id="ai-tutor-container" class="absolute bottom-40 left-0 w-full flex justify-center z-30 hidden">
+                 <button class="btn-ai-tutor" onclick="app.askAITutor()">
+                    <i class="fa-solid fa-sparkles"></i> AI Tutor
+                 </button>
             </div>
         </div>
 
+        <!-- Review Controls -->
         <div id="ans-controls" class="review-controls hidden">
             <button class="btn-answer btn-again" onclick="app.answerCard(1)">Again<span class="time" id="time-1">1m</span></button>
             <button class="btn-answer btn-hard" onclick="app.answerCard(2)">Hard<span class="time" id="time-2">6m</span></button>
@@ -301,35 +333,95 @@
         </div>
         
         <div id="show-ans-control" class="review-controls">
-            <button class="w-full bg-gray-700 text-white py-4 rounded-xl font-bold" onclick="app.showAnswer()">Show Answer</button>
+            <button class="w-full bg-gray-700 text-white py-3 rounded-lg font-semibold" onclick="app.showAnswer()">Show Answer</button>
         </div>
     </div>
 
-    <!-- 3. ADD VIEW -->
+    <!-- 3. ADD/EDIT VIEW -->
     <div id="view-add" class="view">
         <div class="px-4">
-            <label class="block text-xs text-gray-500 mb-1 font-bold">Current Deck</label>
+            <label class="block text-sm text-gray-500 mb-1">Deck</label>
             <select id="add-deck-select"></select>
 
-            <!-- Gemini AI Card Generation -->
-            <button class="btn-gemini-magic" onclick="app.showMagicGenerateModal()">
-                <i class="fa-solid fa-sparkles"></i> ✨ Magic Generate Cards
+            <!-- Gemini Feature -->
+            <button class="btn-ai-magic w-full" onclick="app.openMagicModal()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Magic Generate
             </button>
 
-            <div class="relative py-4">
-                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-800"></div></div>
-                <div class="relative flex justify-center text-xs uppercase"><span class="bg-black px-2 text-gray-600">or add manually</span></div>
+            <div class="flex items-center my-4">
+                <div class="h-px bg-gray-800 flex-1"></div>
+                <span class="px-2 text-xs text-gray-500 uppercase">Or Manual</span>
+                <div class="h-px bg-gray-800 flex-1"></div>
             </div>
 
+            <label class="block text-sm text-gray-500 mb-1">Type</label>
+            <select id="add-note-type" onchange="app.toggleFields()">
+                <option value="basic">Basic</option>
+                <option value="basic-rev">Basic (and Reversed Card)</option>
+                <option value="cloze">Cloze</option>
+            </select>
+
             <div id="fields-container">
-                <label class="block text-xs text-gray-500 mb-1 font-bold">Front</label>
-                <textarea id="f-front" rows="3" placeholder="Question or Concept"></textarea>
+                <label class="block text-sm text-gray-500 mb-1">Front</label>
+                <textarea id="f-front" rows="3" placeholder="Front side"></textarea>
                 
-                <label class="block text-xs text-gray-500 mb-1 font-bold">Back</label>
-                <textarea id="f-back" rows="3" placeholder="Answer or Explanation"></textarea>
+                <label class="block text-sm text-gray-500 mb-1">Back</label>
+                <textarea id="f-back" rows="3" placeholder="Back side"></textarea>
             </div>
             
-            <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold mt-4" onclick="app.saveNote()">Add Card</button>
+            <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold mt-4" onclick="app.saveNote()">Add Card</button>
+        </div>
+    </div>
+
+    <!-- 4. BROWSER VIEW -->
+    <div id="view-browse" class="view">
+        <div class="px-4 mb-2">
+            <input type="text" id="search-input" placeholder="Search cards..." oninput="app.renderBrowser()" class="w-full">
+        </div>
+        <div id="browser-list" class="divide-y divide-gray-800"></div>
+    </div>
+
+    <!-- 5. STATS VIEW -->
+    <div id="view-stats" class="view">
+        <div class="px-4 text-center mt-10">
+            <h2 class="text-2xl font-bold mb-4">Statistics</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-800 p-4 rounded-xl">
+                    <div class="text-3xl font-bold text-blue-500" id="stat-total">0</div>
+                    <div class="text-xs text-gray-400">Total Cards</div>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-xl">
+                    <div class="text-3xl font-bold text-green-500" id="stat-due">0</div>
+                    <div class="text-xs text-gray-400">Due Today</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="ai-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="ai-modal-title" class="text-lg font-bold mb-2">Generate Cards</h3>
+            <p class="text-sm text-gray-400 mb-4">Enter a topic or paste text to generate cards automatically.</p>
+            <textarea id="ai-input" rows="4" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white" placeholder="e.g. 'Spanish food vocabulary' or paste a paragraph about Photosynthesis."></textarea>
+            <div id="ai-loading" class="hidden flex items-center gap-2 mb-4 text-sm text-yellow-400">
+                <div class="loading-spinner"></div> Generating with Gemini...
+            </div>
+            <div class="flex gap-2">
+                <button class="flex-1 py-2 bg-gray-700 rounded font-semibold" onclick="document.getElementById('ai-modal').style.display='none'">Cancel</button>
+                <button class="flex-1 py-2 bg-purple-600 rounded font-semibold text-white" onclick="app.runMagicGenerate()">Generate</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tutor-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-lg font-bold mb-2 flex items-center gap-2"><i class="fa-solid fa-sparkles text-yellow-400"></i> AI Tutor</h3>
+            <div id="tutor-content" class="text-sm text-gray-300 mb-4 leading-relaxed max-h-60 overflow-y-auto"></div>
+            <div id="tutor-loading" class="hidden flex items-center gap-2 mb-4 text-sm text-yellow-400">
+                <div class="loading-spinner"></div> Thinking...
+            </div>
+            <button class="w-full py-2 bg-gray-700 rounded font-semibold" onclick="document.getElementById('tutor-modal').style.display='none'">Close</button>
         </div>
     </div>
 
@@ -343,210 +435,519 @@
             <i class="fa-solid fa-plus-circle"></i>
             <span>Add</span>
         </div>
+        <div class="tab-item" onclick="app.nav('browse')" id="tab-browse">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Browse</span>
+        </div>
         <div class="tab-item" onclick="app.nav('stats')" id="tab-stats">
             <i class="fa-solid fa-chart-simple"></i>
             <span>Stats</span>
         </div>
     </div>
 
+    <!-- JAVASCRIPT LOGIC -->
     <script>
     /**
      * ------------------------------------------------------------------
-     * GEMINI API INTEGRATION
+     * 1. DATABASE LAYER (IndexedDB Wrapper)
      * ------------------------------------------------------------------
      */
-    const apiKey = ""; // Environment provided
-    const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
-
-    async function callGemini(prompt, systemInstruction = "", isJson = false) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-        
-        const payload = {
-            contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: { parts: [{ text: systemInstruction }] }
-        };
-
-        if (isJson) {
-            payload.generationConfig = { responseMimeType: "application/json" };
+    class AnkiDB {
+        constructor() {
+            this.dbName = 'AnkiCloneDB';
+            this.version = 1;
+            this.db = null;
         }
 
-        let retries = 5;
-        let delay = 1000;
+        async init() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(this.dbName, this.version);
 
-        while (retries > 0) {
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('decks')) {
+                        db.createObjectStore('decks', { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains('notes')) {
+                        const noteStore = db.createObjectStore('notes', { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains('cards')) {
+                        const cardStore = db.createObjectStore('cards', { keyPath: 'id' });
+                        cardStore.createIndex('did', 'did', { unique: false });
+                        cardStore.createIndex('due', 'due', { unique: false });
+                    }
+                    if (!db.objectStoreNames.contains('revlog')) {
+                        const revStore = db.createObjectStore('revlog', { keyPath: 'id' });
+                        revStore.createIndex('cid', 'cid', { unique: false });
+                    }
+                };
+
+                request.onsuccess = (e) => {
+                    this.db = e.target.result;
+                    resolve(this);
+                };
+                request.onerror = (e) => reject(e);
+            });
+        }
+
+        async transaction(storeNames, mode, callback) {
+            if (!this.db) throw new Error("Database not initialized");
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(storeNames, mode);
+                const results = {};
+                tx.oncomplete = () => resolve(results);
+                tx.onerror = () => reject(tx.error);
+                callback(tx, results);
+            });
+        }
+
+        async getAll(store) {
+            if (!this.db) throw new Error("Database not initialized");
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(store, 'readonly');
+                const req = tx.objectStore(store).getAll();
+                req.onsuccess = () => resolve(req.result);
+            });
+        }
+        
+        async add(store, item) {
+            if (!this.db) throw new Error("Database not initialized");
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(store, 'readwrite');
+                tx.objectStore(store).add(item);
+                tx.oncomplete = () => resolve();
+            });
+        }
+
+        async put(store, item) {
+            if (!this.db) throw new Error("Database not initialized");
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(store, 'readwrite');
+                tx.objectStore(store).put(item);
+                tx.oncomplete = () => resolve();
+            });
+        }
+
+        async get(store, key) {
+            if (!this.db) throw new Error("Database not initialized");
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(store, 'readonly');
+                const req = tx.objectStore(store).get(key);
+                req.onsuccess = () => resolve(req.result);
+            });
+        }
+
+        async delete(store, key) {
+            if (!this.db) throw new Error("Database not initialized");
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(store, 'readwrite');
+                tx.objectStore(store).delete(key);
+                tx.oncomplete = () => resolve();
+            });
+        }
+    }
+
+    /**
+     * ------------------------------------------------------------------
+     * 2. SCHEDULER (SM-2 ALGORITHM)
+     * ------------------------------------------------------------------
+     */
+    const SCHEDULER = {
+        MINUTE: 60,
+        DAY: 86400,
+        STARTING_EASE: 2500,
+        EASY_BONUS: 1.3,
+        INTERVAL_MODIFIER: 1.0,
+        HARD_INTERVAL: 1.2,
+        
+        answerCard(card, rating) {
+            const now = Date.now() / 1000 | 0;
+            const today = (now / this.DAY) | 0;
+            let nextIvl = 0;
+            let nextFactor = card.factor;
+            let nextType = card.type;
+            let nextDue = 0;
+
+            if (card.type === 0 || card.type === 1) {
+                if (rating === 1) { nextType = 1; nextDue = now + 60; nextIvl = 60; }
+                else if (rating === 2) { nextType = 1; nextDue = now + 300; nextIvl = 300; }
+                else if (rating === 3) {
+                    if (card.ivl < 600) { nextType = 1; nextDue = now + 600; nextIvl = 600; }
+                    else { nextType = 2; nextIvl = 1; nextDue = today + 1; }
+                } else if (rating === 4) { nextType = 2; nextIvl = 4; nextDue = today + 4; }
+            } 
+            else if (card.type === 2) {
+                if (rating === 1) {
+                    nextType = 3; nextFactor = Math.max(1300, card.factor - 200); nextIvl = 60; nextDue = now + 60;
+                } else {
+                    if (rating === 2) { nextFactor = Math.max(1300, card.factor - 150); nextIvl = Math.floor(card.ivl * 1.2); }
+                    else if (rating === 3) { nextIvl = Math.floor(card.ivl * (card.factor / 1000)); }
+                    else if (rating === 4) { nextFactor = Math.min(5000, card.factor + 150); nextIvl = Math.floor(card.ivl * (card.factor / 1000) * this.EASY_BONUS); }
+                    nextDue = today + nextIvl;
+                }
+            }
+            else if (card.type === 3) {
+                 if (rating === 1) { nextDue = now + 60; }
+                 else if (rating === 3) { nextType = 2; nextIvl = 1; nextDue = today + 1; }
+                 else if (rating === 4) { nextType = 2; nextIvl = 4; nextDue = today + 4; }
+            }
+
+            return {
+                ...card,
+                type: nextType,
+                ivl: nextIvl,
+                factor: nextFactor,
+                due: nextDue,
+                reps: card.reps + 1,
+                lapses: (rating === 1 && card.type === 2) ? card.lapses + 1 : card.lapses
+            };
+        },
+
+        formatTime(secondsOrDays, isReview) {
+            if (!isReview && secondsOrDays < 86400) {
+                if (secondsOrDays < 60) return secondsOrDays + 's';
+                if (secondsOrDays < 3600) return Math.floor(secondsOrDays/60) + 'm';
+                return Math.floor(secondsOrDays/3600) + 'h';
+            }
+            const days = isReview ? secondsOrDays : Math.floor(secondsOrDays / 86400);
+            if (days < 30) return days + 'd';
+            if (days < 365) return (days/30).toFixed(1) + 'mo';
+            return (days/365).toFixed(1) + 'y';
+        }
+    };
+
+    /**
+     * ------------------------------------------------------------------
+     * 3. APP CONTROLLER
+     * ------------------------------------------------------------------
+     */
+    class AnkiApp {
+        constructor() {
+            this.db = new AnkiDB();
+            this.currentDeck = null;
+            this.studyQueue = [];
+            this.currentCard = null;
+            this.currentNote = null;
+            this.isShowingBack = false;
+        }
+
+        async init() {
+            await this.db.init();
+            const decks = await this.db.getAll('decks');
+            if (decks.length === 0) {
+                await this.db.add('decks', { id: Date.now(), name: 'Default' });
+            }
+            this.renderDeckList();
+            this.setupTouchGestures();
+            if (window.MathJax) {
+               window.MathJax.startup.promise.then(() => console.log('MathJax ready'));
+            }
+        }
+
+        /* --- NAVIGATION --- */
+        nav(viewName) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            
+            document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+            if(document.getElementById(`tab-${viewName}`)) {
+                document.getElementById(`tab-${viewName}`).classList.add('active');
+            }
+
+            if (viewName === 'decks') this.renderDeckList();
+            if (viewName === 'browse') this.renderBrowser();
+            if (viewName === 'stats') this.renderStats();
+            
+            const titleMap = {
+                'decks': 'My Decks',
+                'add': 'Add Card',
+                'browse': 'Browser',
+                'stats': 'Statistics',
+                'review': 'Study'
+            };
+            document.getElementById('header-title').textContent = titleMap[viewName] || 'Anki iOS';
+        }
+
+        /* --- GEMINI AI FEATURES --- */
+        async callGemini(prompt, isJson = false) {
+            const apiKey = ""; // Provided by execution environment
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }]
+            };
+
+            if (isJson) {
+                payload.generationConfig = {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                front: { type: "STRING" },
+                                back: { type: "STRING" }
+                            }
+                        }
+                    }
+                };
+            }
+
             try {
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+                
+                if (!response.ok) throw new Error("API Error: " + response.statusText);
+                
                 const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
                 return data.candidates?.[0]?.content?.parts?.[0]?.text;
-            } catch (err) {
-                retries--;
-                if (retries === 0) throw err;
-                await new Promise(r => setTimeout(r, delay));
-                delay *= 2;
+            } catch (e) {
+                console.error(e);
+                alert("Gemini Connection Failed: " + e.message);
+                return null;
             }
         }
-    }
 
-    /**
-     * ------------------------------------------------------------------
-     * APP CORE
-     * ------------------------------------------------------------------
-     */
-    class AnkiApp {
-        constructor() {
-            this.decks = JSON.parse(localStorage.getItem('anki_decks')) || [{ id: 1, name: "Default" }];
-            this.cards = JSON.parse(localStorage.getItem('anki_cards')) || [];
-            this.currentDeckId = 1;
-            this.studyQueue = [];
-            this.currentCard = null;
-            this.isShowingBack = false;
+        openMagicModal() {
+            document.getElementById('ai-modal').style.display = 'flex';
+            document.getElementById('ai-input').value = '';
+            document.getElementById('ai-loading').classList.add('hidden');
         }
 
-        save() {
-            localStorage.setItem('anki_decks', JSON.stringify(this.decks));
-            localStorage.setItem('anki_cards', JSON.stringify(this.cards));
-        }
+        async runMagicGenerate() {
+            const input = document.getElementById('ai-input').value;
+            if (!input) return;
 
-        nav(view) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(`view-${view}`).classList.add('active');
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            document.getElementById(`tab-${view}`)?.classList.add('active');
+            const loader = document.getElementById('ai-loading');
+            loader.classList.remove('hidden');
             
-            if (view === 'decks') this.renderDecks();
-            if (view === 'add') this.setupAddView();
-            if (view === 'stats') this.renderStats();
+            const prompt = `Generate 5 flashcards based on this topic or text: "${input}". 
+            Make them suitable for Anki spaced repetition. Keep answers concise.`;
             
-            const titles = { decks: "My Decks", add: "Add Card", stats: "Stats", review: "Study" };
-            document.getElementById('header-title').innerText = titles[view] || "Anki iOS";
-        }
+            const result = await this.callGemini(prompt, true);
+            loader.classList.add('hidden');
 
-        setLoading(show, text = "✨ Gemini is thinking...") {
-            const loader = document.getElementById('loading-screen');
-            document.getElementById('loading-text').innerText = text;
-            loader.style.display = show ? 'flex' : 'none';
-        }
-
-        /* --- Gemini Features --- */
-
-        async showMagicGenerateModal() {
-            const topic = prompt("What topic would you like to generate cards for? (e.g. 'Introductory Japanese' or paste a short article)");
-            if (!topic) return;
-
-            this.setLoading(true, "✨ Generating cards...");
-            try {
-                const system = "You are a professional flashcard creator. Return a JSON array of objects, each with 'front' and 'back' keys. Create 5 high-quality, concise flashcards based on the user's topic.";
-                const response = await callGemini(topic, system, true);
-                const result = JSON.parse(response);
-
-                result.forEach(item => {
-                    this.addCard(this.currentDeckId, item.front, item.back);
-                });
-
-                this.save();
-                alert(`✨ Successfully added ${result.length} cards!`);
-            } catch (err) {
-                alert("Failed to generate cards. Please try again.");
-            } finally {
-                this.setLoading(false);
+            if (result) {
+                try {
+                    const cards = JSON.parse(result);
+                    const deckId = parseInt(document.getElementById('add-deck-select').value);
+                    
+                    for (const card of cards) {
+                        await this.saveNoteDirect(deckId, card.front, card.back, 'basic');
+                    }
+                    
+                    document.getElementById('ai-modal').style.display = 'none';
+                    alert(`✨ Successfully generated ${cards.length} cards!`);
+                } catch (e) {
+                    alert("Failed to parse AI response.");
+                }
             }
         }
 
         async askAITutor() {
-            if (!this.currentCard) return;
+            if (!this.currentNote) return;
+            
+            document.getElementById('tutor-modal').style.display = 'flex';
+            document.getElementById('tutor-content').innerHTML = '';
+            document.getElementById('tutor-loading').classList.remove('hidden');
 
-            this.setLoading(true, "✨ Consulting AI Tutor...");
-            try {
-                const prompt = `I'm studying this card. 
-                Front: "${this.currentCard.front}" 
-                Back: "${this.currentCard.back}"
-                
-                Explain this concept clearly and provide a clever mnemonic device to help me remember it. Keep the total response under 100 words.`;
-                
-                const explanation = await callGemini(prompt, "You are a helpful educational tutor.");
-                
-                // Show in custom modal or simple alert for now
-                alert(`✨ AI Tutor says:\n\n${explanation}`);
-            } catch (err) {
-                alert("The AI Tutor is busy right now. Please try again later.");
-            } finally {
-                this.setLoading(false);
+            const front = this.currentNote.flds[0];
+            const back = this.currentNote.flds[1];
+            
+            const prompt = `I am studying this flashcard and I am stuck. 
+            Front: "${front}"
+            Back: "${back}"
+            
+            Please:
+            1. Explain the concept simply.
+            2. Provide a mnemonic or memory aid to help me remember this.
+            3. Keep it brief.`;
+
+            const result = await this.callGemini(prompt, false);
+            
+            document.getElementById('tutor-loading').classList.add('hidden');
+            if (result) {
+                document.getElementById('tutor-content').innerHTML = this.formatText(result);
             }
         }
 
-        /* --- Deck/Card Management --- */
-
-        renderDecks() {
+        /* --- DECK MANAGEMENT --- */
+        async renderDeckList() {
             const container = document.getElementById('deck-list-container');
             container.innerHTML = '';
-            this.decks.forEach(d => {
-                const deckCards = this.cards.filter(c => c.deckId === d.id);
-                const dueCount = deckCards.filter(c => new Date(c.due) <= new Date()).length;
-                const div = document.createElement('div');
-                div.className = 'deck-item active:scale-95 transition-transform';
-                div.innerHTML = `
-                    <div class="flex-1 font-bold text-lg" onclick="app.startReview(${d.id})">${d.name}</div>
+            const decks = await this.db.getAll('decks');
+            const cards = await this.db.getAll('cards');
+            const now = Date.now() / 1000 | 0;
+            const today = (now / 86400) | 0;
+
+            for (const deck of decks) {
+                const deckCards = cards.filter(c => c.did === deck.id);
+                const newCount = deckCards.filter(c => c.type === 0).length;
+                const learnCount = deckCards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).length;
+                const reviewCount = deckCards.filter(c => c.type === 2 && c.due <= today).length;
+
+                const el = document.createElement('div');
+                el.className = 'deck-item active:scale-95 transition-transform';
+                el.innerHTML = `
+                    <div class="flex-1 font-semibold text-lg" onclick="app.startStudy(${deck.id})">${deck.name}</div>
                     <div class="flex gap-3 text-sm font-mono">
-                        <span class="text-blue-400 font-bold">${deckCards.filter(c=>c.reps===0).length}</span>
-                        <span class="text-green-400 font-bold">${dueCount}</span>
+                        <span class="text-blue-400 font-bold">${newCount}</span>
+                        <span class="text-red-400 font-bold">${learnCount}</span>
+                        <span class="text-green-400 font-bold">${reviewCount}</span>
                     </div>
+                    <button class="ml-4 text-gray-500" onclick="app.deleteDeck(${deck.id})"><i class="fa-solid fa-trash"></i></button>
                 `;
-                container.appendChild(div);
-            });
+                container.appendChild(el);
+            }
         }
 
-        setupAddView() {
-            const select = document.getElementById('add-deck-select');
-            select.innerHTML = '';
-            this.decks.forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d.id;
-                opt.innerText = d.name;
-                select.appendChild(opt);
-            });
-            select.value = this.currentDeckId;
+        async showAddDeckModal() {
+            const name = prompt("Enter new deck name:");
+            if (name) {
+                await this.db.add('decks', { id: Date.now(), name: name });
+                this.renderDeckList();
+            }
         }
 
-        saveNote() {
+        async deleteDeck(id) {
+            if (confirm("Delete deck and all its cards?")) {
+                await this.db.delete('decks', id);
+                const allCards = await this.db.getAll('cards');
+                const toDelete = allCards.filter(c => c.did === id);
+                for (const c of toDelete) {
+                    await this.db.delete('cards', c.id);
+                }
+                this.renderDeckList();
+            }
+        }
+
+        /* --- ADDING CARDS --- */
+        async toggleFields() {
+            const type = document.getElementById('add-note-type').value;
+            const container = document.getElementById('fields-container');
             const front = document.getElementById('f-front').value;
             const back = document.getElementById('f-back').value;
-            const did = parseInt(document.getElementById('add-deck-select').value);
             
-            if (!front || !back) return alert("Please fill both sides");
+            container.innerHTML = `
+                <label class="block text-sm text-gray-500 mb-1">Front ${type === 'cloze' ? '(Use {{c1::cloze}})' : ''}</label>
+                <textarea id="f-front" rows="3" class="w-full bg-gray-800 rounded p-2 text-white">${front}</textarea>
+                
+                <label class="block text-sm text-gray-500 mb-1">Back ${type === 'cloze' ? '(Extra info)' : ''}</label>
+                <textarea id="f-back" rows="3" class="w-full bg-gray-800 rounded p-2 text-white">${back}</textarea>
+            `;
             
-            this.addCard(did, front, back);
-            this.save();
+            const deckSelect = document.getElementById('add-deck-select');
+            if (deckSelect.options.length === 0) {
+                const decks = await this.db.getAll('decks');
+                decks.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.id;
+                    opt.text = d.name;
+                    deckSelect.appendChild(opt);
+                });
+            }
+        }
+
+        async saveNote() {
+            const front = document.getElementById('f-front').value;
+            const back = document.getElementById('f-back').value;
+            const deckId = parseInt(document.getElementById('add-deck-select').value);
+            const type = document.getElementById('add-note-type').value;
+
+            if (!front) return alert("Front field required");
+            await this.saveNoteDirect(deckId, front, back, type);
             
             document.getElementById('f-front').value = '';
             document.getElementById('f-back').value = '';
-            alert("Card saved!");
+            alert("Card added!");
         }
 
-        addCard(deckId, front, back) {
-            this.cards.push({
-                id: Date.now() + Math.random(),
-                deckId, front, back,
-                due: new Date().toISOString(),
-                interval: 0,
-                factor: 2.5,
-                reps: 0
+        async saveNoteDirect(deckId, front, back, type) {
+            const noteId = Date.now() + Math.floor(Math.random() * 1000);
+            
+            await this.db.add('notes', {
+                id: noteId,
+                mid: type,
+                flds: [front, back],
+                tags: []
             });
+
+            // Basic
+            await this.db.add('cards', {
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                nid: noteId,
+                did: deckId,
+                ord: 0,
+                type: 0, 
+                queue: 0,
+                due: 0,
+                ivl: 0,
+                factor: 2500,
+                reps: 0,
+                lapses: 0
+            });
+
+            // Basic & Rev
+            if (type === 'basic-rev') {
+                await this.db.add('cards', {
+                    id: Date.now() + Math.floor(Math.random() * 1000),
+                    nid: noteId,
+                    did: deckId,
+                    ord: 1,
+                    type: 0,
+                    queue: 0,
+                    due: 0,
+                    ivl: 0,
+                    factor: 2500,
+                    reps: 0,
+                    lapses: 0
+                });
+            }
+            
+            // Cloze
+            if (type === 'cloze') {
+                const regex = /{{c(\d+)::(.*?)}}/g;
+                const matches = [...front.matchAll(regex)];
+                const ords = new Set(matches.map(m => parseInt(m[1]) - 1));
+                if (ords.size === 0) ords.add(0);
+
+                for (let ord of ords) {
+                    await this.db.add('cards', {
+                        id: Date.now() + Math.floor(Math.random() * 1000),
+                        nid: noteId,
+                        did: deckId,
+                        ord: ord,
+                        type: 0,
+                        queue: 0,
+                        due: 0,
+                        ivl: 0,
+                        factor: 2500,
+                        reps: 0,
+                        lapses: 0
+                    });
+                }
+            }
         }
 
-        startReview(deckId) {
-            this.currentDeckId = deckId;
-            const deckCards = this.cards.filter(c => c.deckId === deckId);
-            this.studyQueue = deckCards
-                .filter(c => new Date(c.due) <= new Date())
-                .sort((a,b) => new Date(a.due) - new Date(b.due));
+        /* --- STUDY / REVIEW --- */
+        async startStudy(deckId) {
+            this.currentDeck = deckId;
+            const allCards = await this.db.getAll('cards');
+            const now = Date.now() / 1000 | 0;
+            const today = (now / 86400) | 0;
+
+            const deckCards = allCards.filter(c => c.did === deckId);
+            const learning = deckCards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).sort((a,b) => a.due - b.due);
+            const review = deckCards.filter(c => c.type === 2 && c.due <= today).sort((a,b) => a.due - b.due);
+            const newCards = deckCards.filter(c => c.type === 0).slice(0, 20);
+
+            this.studyQueue = [...learning, ...review, ...newCards];
             
             if (this.studyQueue.length === 0) {
-                alert("No cards due in this deck!");
+                alert("No cards due today!");
                 return;
             }
 
@@ -554,109 +955,201 @@
             this.nextCard();
         }
 
-        nextCard() {
+        async nextCard() {
             if (this.studyQueue.length === 0) {
-                alert("Review complete!");
+                alert("Deck finished!");
                 this.nav('decks');
                 return;
             }
+
             this.currentCard = this.studyQueue[0];
+            this.currentNote = await this.db.get('notes', this.currentCard.nid);
             this.isShowingBack = false;
-            this.renderCard();
+
+            this.renderCardFront();
+            document.getElementById('ans-controls').classList.add('hidden');
+            document.getElementById('show-ans-control').classList.remove('hidden');
+            document.getElementById('ai-tutor-container').classList.add('hidden');
         }
 
-        renderCard() {
+        renderCardFront() {
             const content = document.getElementById('card-content');
-            const tutorTrigger = document.getElementById('ai-tutor-trigger');
+            let frontText = this.currentNote.flds[0];
             
-            if (!this.isShowingBack) {
-                content.innerHTML = `<div class="font-medium">${this.currentCard.front}</div>`;
-                document.getElementById('show-ans-control').classList.remove('hidden');
-                document.getElementById('ans-controls').classList.add('hidden');
-                tutorTrigger.classList.add('hidden');
-            } else {
-                content.innerHTML = `
-                    <div class="text-sm text-gray-500 mb-6 pb-4 border-b border-gray-700 w-full">${this.currentCard.front}</div>
-                    <div class="font-bold">${this.currentCard.back}</div>
-                `;
-                document.getElementById('show-ans-control').classList.add('hidden');
-                document.getElementById('ans-controls').classList.remove('hidden');
-                tutorTrigger.classList.remove('hidden');
+            if (this.currentNote.mid === 'cloze') {
+                const ord = this.currentCard.ord + 1;
+                frontText = frontText.replace(new RegExp(`{{c${ord}::(.*?)}}`, 'g'), '<span class="cloze">[...]</span>');
+                frontText = frontText.replace(/{{c\d+::(.*?)}}/g, '$1');
+            } else if (this.currentCard.ord === 1) {
+                frontText = this.currentNote.flds[1];
             }
+
+            content.innerHTML = `<div class="front">${this.formatText(frontText)}</div>`;
+            this.refreshMath();
         }
 
         showAnswer() {
             this.isShowingBack = true;
-            this.renderCard();
-        }
-
-        answerCard(rating) {
-            // Simple SM-2 Implementation
-            const c = this.currentCard;
-            let interval = 1;
+            const content = document.getElementById('card-content');
             
-            if (rating > 1) {
-                if (c.reps === 0) interval = 1;
-                else if (c.reps === 1) interval = 4;
-                else interval = Math.round(c.interval * c.factor);
-                
-                c.factor = Math.max(1.3, c.factor + (0.1 - (5 - rating) * (0.08 + (5 - rating) * 0.02)));
-                c.reps++;
+            let frontText = this.currentNote.flds[0];
+            let backText = this.currentNote.flds[1];
+
+            if (this.currentNote.mid === 'cloze') {
+                const ord = this.currentCard.ord + 1;
+                frontText = this.currentNote.flds[0].replace(new RegExp(`{{c${ord}::(.*?)}}`, 'g'), '<span class="cloze">$1</span>');
+                frontText = frontText.replace(/{{c\d+::(.*?)}}/g, '$1');
+                backText = `<div class="mb-4 border-b border-gray-600 pb-4">${frontText}</div><div>${backText}</div>`;
+            } else if (this.currentCard.ord === 1) {
+                const temp = frontText;
+                frontText = backText;
+                backText = temp;
+                backText = `<div class="mb-4 border-b border-gray-600 pb-4">${frontText}</div><div>${backText}</div>`;
             } else {
-                c.reps = 0;
-                interval = 0; // Immediate repeat in logic
+                 backText = `<div class="mb-4 border-b border-gray-600 pb-4">${frontText}</div><div>${backText}</div>`;
             }
 
-            const nextDue = new Date();
-            nextDue.setDate(nextDue.getDate() + interval);
-            c.due = nextDue.toISOString();
-            c.interval = interval;
+            content.innerHTML = this.formatText(backText);
+            this.refreshMath();
 
+            document.getElementById('show-ans-control').classList.add('hidden');
+            document.getElementById('ans-controls').classList.remove('hidden');
+            document.getElementById('ai-tutor-container').classList.remove('hidden');
+
+            const ratings = [1, 2, 3, 4];
+            ratings.forEach(r => {
+                const pred = SCHEDULER.answerCard(this.currentCard, r);
+                const isReview = (pred.type === 2);
+                document.getElementById(`time-${r}`).textContent = SCHEDULER.formatTime(pred.ivl, isReview);
+            });
+        }
+
+        async answerCard(rating) {
+            const newCardState = SCHEDULER.answerCard(this.currentCard, rating);
+            const log = {
+                id: Date.now(),
+                cid: this.currentCard.id,
+                ease: newCardState.factor,
+                ivl: newCardState.ivl,
+                lastIvl: this.currentCard.ivl,
+                factor: this.currentCard.factor,
+                time: 0
+            };
+            await this.db.add('revlog', log);
+            await this.db.put('cards', newCardState);
             this.studyQueue.shift();
-            if (rating === 1) this.studyQueue.push(c); // Put back for immediate review
-
-            this.save();
+            
+            const now = Date.now() / 1000 | 0;
+            if ((newCardState.type === 1 || newCardState.type === 3) && newCardState.due < now + 1200) {
+                let inserted = false;
+                for(let i=0; i<this.studyQueue.length; i++) {
+                    if (this.studyQueue[i].due > newCardState.due) {
+                        this.studyQueue.splice(i, 0, newCardState);
+                        inserted = true;
+                        break;
+                    }
+                }
+                if (!inserted) this.studyQueue.push(newCardState);
+            }
             this.nextCard();
         }
 
-        renderStats() {
-            const total = this.cards.length;
-            const learned = this.cards.filter(c => c.reps > 5).length;
-            const container = document.getElementById('view-stats');
-            container.innerHTML = `
-                <div class="px-6 py-10">
-                    <h2 class="text-2xl font-bold mb-8">Performance</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-gray-800 p-6 rounded-2xl">
-                            <div class="text-3xl font-bold text-blue-400">${total}</div>
-                            <div class="text-xs text-gray-400 uppercase tracking-widest mt-1">Total Cards</div>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-2xl">
-                            <div class="text-3xl font-bold text-green-400">${learned}</div>
-                            <div class="text-xs text-gray-400 uppercase tracking-widest mt-1">Learned</div>
-                        </div>
-                    </div>
-                    <div class="mt-10 p-6 bg-gray-900 border border-gray-800 rounded-2xl">
-                        <p class="text-sm text-gray-500 leading-relaxed italic">
-                            "Repetition is the mother of learning, the father of action, which makes it the architect of accomplishment."
-                        </p>
-                    </div>
-                </div>
-            `;
+        formatText(text) {
+            return text
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.*?)\*/g, '<i>$1</i>');
         }
 
-        showAddDeckModal() {
-            const name = prompt("Deck Name:");
-            if (name) {
-                this.decks.push({ id: Date.now(), name });
-                this.save();
-                this.renderDecks();
+        refreshMath() {
+            if (window.MathJax) {
+                window.MathJax.typesetPromise([document.getElementById('card-content')]);
             }
+        }
+
+        /* --- BROWSER --- */
+        async renderBrowser() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const list = document.getElementById('browser-list');
+            list.innerHTML = '';
+            
+            const notes = await this.db.getAll('notes');
+            const filtered = notes.filter(n => n.flds.some(f => f.toLowerCase().includes(query))).slice(0, 50);
+
+            filtered.forEach(n => {
+                const el = document.createElement('div');
+                el.className = 'p-4 bg-gray-900';
+                el.innerHTML = `
+                    <div class="font-bold truncate">${n.flds[0]}</div>
+                    <div class="text-sm text-gray-500 truncate">${n.flds[1]}</div>
+                `;
+                list.appendChild(el);
+            });
+        }
+
+        /* --- STATISTICS --- */
+        async renderStats() {
+            const cards = await this.db.getAll('cards');
+            const now = Date.now() / 1000 | 0;
+            const today = (now / 86400) | 0;
+            document.getElementById('stat-total').innerText = cards.length;
+            const dueCount = cards.filter(c => 
+                (c.type === 2 && c.due <= today) || 
+                ((c.type === 1 || c.type === 3) && c.due < now) ||
+                (c.type === 0)
+            ).length;
+            document.getElementById('stat-due').innerText = dueCount;
+        }
+
+        setupTouchGestures() {
+            const cardArea = document.getElementById('view-review');
+            let startX = 0;
+            let startY = 0;
+
+            cardArea.addEventListener('touchstart', e => {
+                startX = e.changedTouches[0].screenX;
+                startY = e.changedTouches[0].screenY;
+            }, {passive: true});
+
+            cardArea.addEventListener('touchend', e => {
+                const endX = e.changedTouches[0].screenX;
+                const endY = e.changedTouches[0].screenY;
+                const diffX = endX - startX;
+                const diffY = endY - startY;
+
+                if (Math.abs(diffX) > 100 && Math.abs(diffY) < 50) {
+                    if (this.isShowingBack) {
+                        if (diffX < 0) this.answerCard(3);
+                        else this.answerCard(1);
+                    }
+                }
+                
+                if (Math.abs(diffX) < 10 && Math.abs(diffY) < 10) {
+                     if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                         if (!this.isShowingBack) {
+                             this.showAnswer();
+                         } else {
+                             const width = window.innerWidth;
+                             if (endX < width * 0.3) this.answerCard(1);
+                             else if (endX > width * 0.7) this.answerCard(3);
+                         }
+                     }
+                }
+            });
         }
     }
 
+    // Initialize
     const app = new AnkiApp();
-    window.onload = () => app.nav('decks');
+    window.addEventListener('DOMContentLoaded', async () => {
+        try {
+            await app.init();
+            await app.toggleFields();
+        } catch (e) {
+            console.error("Failed to initialize app:", e);
+        }
+    });
+
     </script>
 </body>
 </html>
