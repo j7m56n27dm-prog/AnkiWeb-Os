@@ -30,12 +30,11 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden; /* Prevent body scroll, handle in views */
+            overflow: hidden;
             height: 100vh;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Views */
         .view {
             position: absolute;
             top: 0;
@@ -57,7 +56,6 @@
             z-index: 10;
         }
 
-        /* Header */
         header {
             position: fixed;
             top: 0;
@@ -76,7 +74,6 @@
             z-index: 50;
         }
 
-        /* Tab Bar */
         .tab-bar {
             position: fixed;
             bottom: 0;
@@ -102,6 +99,7 @@
             color: var(--text-secondary);
             font-size: 10px;
             gap: 4px;
+            cursor: pointer;
         }
 
         .tab-item.active {
@@ -112,7 +110,6 @@
             font-size: 20px;
         }
 
-        /* Deck List */
         .deck-item {
             background-color: var(--bg-secondary);
             padding: 16px;
@@ -121,9 +118,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
         }
 
-        /* Card Styling */
         .flashcard-container {
             flex: 1;
             display: flex;
@@ -147,9 +144,9 @@
             text-align: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             position: relative;
+            cursor: pointer;
         }
 
-        /* Answer Buttons */
         .review-controls {
             position: fixed;
             bottom: calc(60px + var(--safe-bottom));
@@ -182,7 +179,6 @@
         .btn-good { background-color: var(--success); }
         .btn-easy { background-color: var(--accent); }
 
-        /* Inputs */
         input, textarea, select {
             background: var(--bg-secondary);
             border: 1px solid var(--separator);
@@ -209,10 +205,42 @@
             font-size: 24px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             z-index: 45;
+            cursor: pointer;
+            border: none;
         }
 
-        /* Cloze Styles */
         .cloze { color: var(--accent); font-weight: bold; }
+        .cloze-blank { background: rgba(10, 132, 255, 0.1); padding: 2px 6px; border-radius: 4px; }
+        .hidden { display: none !important; }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: calc(50px + var(--safe-top));
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        
+        /* Cloze+++ styles */
+        .cloze-container {
+            display: inline-block;
+            margin: 2px;
+            position: relative;
+        }
+        .cloze-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
@@ -222,6 +250,9 @@
         <h1 id="header-title" class="text-lg font-bold">Anki iOS</h1>
         <div id="header-actions"></div>
     </header>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
 
     <!-- Views -->
     
@@ -239,18 +270,18 @@
     </div>
 
     <!-- 2. REVIEW VIEW -->
-    <div id="view-review" class="view" style="padding-bottom: 0;">
+    <div id="view-review" class="view">
         <div class="w-full flex justify-between px-4 py-2 text-sm text-gray-500">
             <span id="review-counts" class="font-mono">
-                <span class="text-blue-400">0</span> 
-                <span class="text-red-400">0</span> 
-                <span class="text-green-400">0</span>
+                <span class="text-blue-400" id="new-count">0</span> 
+                <span class="text-red-400" id="learn-count">0</span> 
+                <span class="text-green-400" id="review-count">0</span>
             </span>
             <span id="timer">0s</span>
         </div>
 
         <div class="flashcard-container" id="card-area">
-            <div class="flashcard" id="card-content">
+            <div class="flashcard" id="card-content" onclick="app.toggleCard()">
                 <!-- Card content -->
                 <div class="text-gray-500">Loading...</div>
             </div>
@@ -264,8 +295,12 @@
             <button class="btn-answer btn-easy" onclick="app.answerCard(4)">Easy<span class="time" id="time-4">4d</span></button>
         </div>
         
-        <div id="show-ans-control" class="review-controls">
+        <div id="show-ans-control" class="review-controls hidden">
             <button class="w-full bg-gray-700 text-white py-3 rounded-lg font-semibold" onclick="app.showAnswer()">Show Answer</button>
+        </div>
+        
+        <div id="flip-control" class="review-controls">
+            <button class="w-full bg-gray-700 text-white py-3 rounded-lg font-semibold" onclick="app.flipCard()">Flip Card</button>
         </div>
     </div>
 
@@ -280,14 +315,11 @@
                 <option value="basic">Basic</option>
                 <option value="basic-rev">Basic (and Reversed Card)</option>
                 <option value="cloze">Cloze</option>
+                <option value="cloze-plus">Cloze+++</option>
             </select>
 
             <div id="fields-container">
-                <label class="block text-sm text-gray-500 mb-1">Front</label>
-                <textarea id="f-front" rows="3" placeholder="Front side"></textarea>
-                
-                <label class="block text-sm text-gray-500 mb-1">Back</label>
-                <textarea id="f-back" rows="3" placeholder="Back side"></textarea>
+                <!-- Fields will be injected here -->
             </div>
             
             <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold mt-4" onclick="app.saveNote()">Add Card</button>
@@ -329,6 +361,10 @@
             <i class="fa-solid fa-plus-circle"></i>
             <span>Add</span>
         </div>
+        <div class="tab-item" onclick="app.nav('review')" id="tab-review">
+            <i class="fa-solid fa-play-circle"></i>
+            <span>Review</span>
+        </div>
         <div class="tab-item" onclick="app.nav('browse')" id="tab-browse">
             <i class="fa-solid fa-magnifying-glass"></i>
             <span>Browse</span>
@@ -359,21 +395,24 @@
 
                 request.onupgradeneeded = (e) => {
                     const db = e.target.result;
-                    // Decks: stores deck config
+                    
                     if (!db.objectStoreNames.contains('decks')) {
-                        db.createObjectStore('decks', { keyPath: 'id' });
+                        const deckStore = db.createObjectStore('decks', { keyPath: 'id' });
+                        deckStore.createIndex('name', 'name', { unique: false });
                     }
-                    // Notes: stores raw content
+                    
                     if (!db.objectStoreNames.contains('notes')) {
                         const noteStore = db.createObjectStore('notes', { keyPath: 'id' });
+                        noteStore.createIndex('mid', 'mid', { unique: false });
                     }
-                    // Cards: stores scheduling info
+                    
                     if (!db.objectStoreNames.contains('cards')) {
                         const cardStore = db.createObjectStore('cards', { keyPath: 'id' });
                         cardStore.createIndex('did', 'did', { unique: false });
                         cardStore.createIndex('due', 'due', { unique: false });
+                        cardStore.createIndex('nid', 'nid', { unique: false });
                     }
-                    // RevLog: stores history
+                    
                     if (!db.objectStoreNames.contains('revlog')) {
                         const revStore = db.createObjectStore('revlog', { keyPath: 'id' });
                         revStore.createIndex('cid', 'cid', { unique: false });
@@ -384,66 +423,102 @@
                     this.db = e.target.result;
                     resolve(this);
                 };
-                request.onerror = (e) => reject(e);
+                
+                request.onerror = (e) => {
+                    console.error('Database error:', e.target.error);
+                    reject(e.target.error);
+                };
             });
         }
 
         async transaction(storeNames, mode, callback) {
-            if (!this.db) throw new Error("Database not initialized");
             return new Promise((resolve, reject) => {
                 const tx = this.db.transaction(storeNames, mode);
-                const results = {};
-                
-                tx.oncomplete = () => resolve(results);
-                tx.onerror = () => reject(tx.error);
-
-                callback(tx, results);
+                tx.oncomplete = () => resolve();
+                tx.onerror = (e) => {
+                    console.error('Transaction error:', e.target.error);
+                    reject(e.target.error);
+                };
+                callback(tx);
             });
         }
 
-        // Generic Helpers
         async getAll(store) {
-            if (!this.db) throw new Error("Database not initialized");
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 const tx = this.db.transaction(store, 'readonly');
-                const req = tx.objectStore(store).getAll();
-                req.onsuccess = () => resolve(req.result);
+                const objectStore = tx.objectStore(store);
+                const request = objectStore.getAll();
+                
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = (e) => reject(e.target.error);
             });
         }
         
         async add(store, item) {
-            if (!this.db) throw new Error("Database not initialized");
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 const tx = this.db.transaction(store, 'readwrite');
-                tx.objectStore(store).add(item);
-                tx.oncomplete = () => resolve();
+                const objectStore = tx.objectStore(store);
+                const request = objectStore.add(item);
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (e) => reject(e.target.error);
             });
         }
 
         async put(store, item) {
-            if (!this.db) throw new Error("Database not initialized");
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 const tx = this.db.transaction(store, 'readwrite');
-                tx.objectStore(store).put(item);
-                tx.oncomplete = () => resolve();
+                const objectStore = tx.objectStore(store);
+                const request = objectStore.put(item);
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (e) => reject(e.target.error);
             });
         }
 
         async get(store, key) {
-            if (!this.db) throw new Error("Database not initialized");
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 const tx = this.db.transaction(store, 'readonly');
-                const req = tx.objectStore(store).get(key);
-                req.onsuccess = () => resolve(req.result);
+                const objectStore = tx.objectStore(store);
+                const request = objectStore.get(key);
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (e) => reject(e.target.error);
             });
         }
 
         async delete(store, key) {
-            if (!this.db) throw new Error("Database not initialized");
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 const tx = this.db.transaction(store, 'readwrite');
-                tx.objectStore(store).delete(key);
-                tx.oncomplete = () => resolve();
+                const objectStore = tx.objectStore(store);
+                const request = objectStore.delete(key);
+                
+                request.onsuccess = () => resolve();
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async getCardsByDeck(deckId) {
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(['cards'], 'readonly');
+                const store = tx.objectStore('cards');
+                const index = store.index('did');
+                const request = index.getAll(deckId);
+                
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async getCardsByNote(noteId) {
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(['cards'], 'readonly');
+                const store = tx.objectStore('cards');
+                const index = store.index('nid');
+                const request = index.getAll(noteId);
+                
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = (e) => reject(e.target.error);
             });
         }
     }
@@ -454,126 +529,112 @@
      * ------------------------------------------------------------------
      */
     const SCHEDULER = {
-        // Time constants
         MINUTE: 60,
         DAY: 86400,
-
-        // Defaults
-        STARTING_EASE: 2500, // 250%
+        
+        STARTING_EASE: 2500,
         EASY_BONUS: 1.3,
         INTERVAL_MODIFIER: 1.0,
         HARD_INTERVAL: 1.2,
         
-        /**
-         * Calculate next schedule for a card
-         * @param {Object} card - The current card object
-         * @param {Number} rating - 1=Again, 2=Hard, 3=Good, 4=Easy
-         */
+        // Learning steps (in minutes)
+        LEARNING_STEPS: [1, 10],
+        
         answerCard(card, rating) {
-            const now = Date.now() / 1000 | 0; // Current unix timestamp in seconds
-            const today = (now / this.DAY) | 0; // Days since epoch
-
-            let nextIvl = 0;
-            let nextFactor = card.factor;
-            let nextType = card.type;
-            let nextDue = 0;
-
-            // --- NEW CARDS (Type 0) & LEARNING (Type 1) ---
-            if (card.type === 0 || card.type === 1) {
-                // Steps logic: 1m, 10m. If graduated -> 1 day.
-                // Simplified for this implementation:
-                // Step 1: 1 min (60s)
-                // Step 2: 10 min (600s)
-                // Graduation: 1 day
-                
+            const now = Math.floor(Date.now() / 1000);
+            const today = Math.floor(now / this.DAY);
+            
+            let newCard = {
+                ...card,
+                reps: card.reps + 1
+            };
+            
+            // NEW CARDS (type 0)
+            if (card.type === 0) {
                 if (rating === 1) { // Again
-                    nextType = 1; // Learning
-                    nextDue = now + 60; // 1 min
-                    nextIvl = 60;
+                    newCard.type = 1; // Learning
+                    newCard.ivl = this.LEARNING_STEPS[0] * 60;
+                    newCard.due = now + newCard.ivl;
                 } else if (rating === 2) { // Hard
-                    nextType = 1;
-                    nextDue = now + 300; // 5 min
-                    nextIvl = 300;
+                    newCard.type = 1;
+                    newCard.ivl = this.LEARNING_STEPS[0] * 60 * 2;
+                    newCard.due = now + newCard.ivl;
                 } else if (rating === 3) { // Good
-                    if (card.ivl < 600) { // Was at step 1 (1m) -> move to step 2 (10m)
-                         nextType = 1;
-                         nextDue = now + 600;
-                         nextIvl = 600;
-                    } else { // Graduate
-                        nextType = 2; // Review
-                        nextIvl = 1; // 1 day
-                        nextDue = today + 1;
+                    newCard.type = 2; // Review
+                    newCard.ivl = 1; // 1 day
+                    newCard.due = today + newCard.ivl;
+                    newCard.factor = this.STARTING_EASE;
+                } else if (rating === 4) { // Easy
+                    newCard.type = 2;
+                    newCard.ivl = 4; // 4 days
+                    newCard.due = today + newCard.ivl;
+                    newCard.factor = Math.min(5000, this.STARTING_EASE + 150);
+                }
+            }
+            // LEARNING CARDS (type 1)
+            else if (card.type === 1) {
+                if (rating === 1) { // Again
+                    newCard.ivl = this.LEARNING_STEPS[0] * 60;
+                    newCard.due = now + newCard.ivl;
+                } else if (rating === 2 || rating === 3) { // Hard or Good
+                    // Move to next step or graduate
+                    const currentStepIndex = this.LEARNING_STEPS.findIndex(step => 
+                        step * 60 === card.ivl
+                    );
+                    
+                    if (currentStepIndex < this.LEARNING_STEPS.length - 1) {
+                        // Next learning step
+                        newCard.ivl = this.LEARNING_STEPS[currentStepIndex + 1] * 60;
+                        newCard.due = now + newCard.ivl;
+                    } else {
+                        // Graduate to review
+                        newCard.type = 2;
+                        newCard.ivl = 1; // 1 day
+                        newCard.due = today + newCard.ivl;
                     }
                 } else if (rating === 4) { // Easy
-                    nextType = 2; // Graduate immediately
-                    nextIvl = 4; // 4 days
-                    nextDue = today + 4;
+                    newCard.type = 2;
+                    newCard.ivl = 4; // 4 days
+                    newCard.due = today + newCard.ivl;
                 }
-            } 
-            // --- REVIEW CARDS (Type 2) ---
+            }
+            // REVIEW CARDS (type 2)
             else if (card.type === 2) {
                 if (rating === 1) { // Again
-                    nextType = 3; // Relearning (Lapse)
-                    nextFactor = Math.max(1300, card.factor - 200);
-                    nextIvl = 60; // 1 min step for relearning
-                    nextDue = now + 60;
-                } else {
-                    // Update Ease
-                    if (rating === 2) { // Hard
-                        nextFactor = Math.max(1300, card.factor - 150);
-                        nextIvl = Math.floor(card.ivl * 1.2);
-                    } else if (rating === 3) { // Good
-                        nextIvl = Math.floor(card.ivl * (card.factor / 1000));
-                    } else if (rating === 4) { // Easy
-                        nextFactor = Math.min(5000, card.factor + 150);
-                        nextIvl = Math.floor(card.ivl * (card.factor / 1000) * this.EASY_BONUS);
-                    }
-                    
-                    nextDue = today + nextIvl;
+                    newCard.type = 1; // Back to learning
+                    newCard.lapses = (card.lapses || 0) + 1;
+                    newCard.factor = Math.max(1300, card.factor - 200);
+                    newCard.ivl = this.LEARNING_STEPS[0] * 60;
+                    newCard.due = now + newCard.ivl;
+                } else if (rating === 2) { // Hard
+                    newCard.factor = Math.max(1300, card.factor - 150);
+                    newCard.ivl = Math.max(1, Math.floor(card.ivl * this.HARD_INTERVAL));
+                    newCard.due = today + newCard.ivl;
+                } else if (rating === 3) { // Good
+                    newCard.ivl = Math.max(1, Math.floor(card.ivl * (card.factor / 1000)));
+                    newCard.due = today + newCard.ivl;
+                } else if (rating === 4) { // Easy
+                    newCard.factor = Math.min(5000, card.factor + 150);
+                    newCard.ivl = Math.max(1, Math.floor(card.ivl * (card.factor / 1000) * this.EASY_BONUS));
+                    newCard.due = today + newCard.ivl;
                 }
             }
-            // --- RELEARNING CARDS (Type 3) ---
-            else if (card.type === 3) {
-                 if (rating === 1) { // Again
-                    nextDue = now + 60;
-                    nextIvl = 60;
-                 } else if (rating === 2) { // Hard (Fixed: repeat with short interval)
-                    nextDue = now + 300;
-                    nextIvl = 300;
-                 } else if (rating === 3) { // Good
-                    nextType = 2;
-                    nextIvl = 1;
-                    nextDue = today + 1;
-                 } else if (rating === 4) {
-                     nextType = 2;
-                     nextIvl = 4;
-                     nextDue = today + 4;
-                 }
-            }
-
-            return {
-                ...card,
-                type: nextType,
-                ivl: nextIvl,
-                factor: nextFactor,
-                due: nextDue,
-                reps: card.reps + 1,
-                lapses: (rating === 1 && card.type === 2) ? card.lapses + 1 : card.lapses
-            };
+            
+            return newCard;
         },
 
-        // Helper to format interval text for buttons
-        formatTime(secondsOrDays, isReview) {
-            if (!isReview && secondsOrDays < 86400) {
-                if (secondsOrDays < 60) return secondsOrDays + 's';
-                if (secondsOrDays < 3600) return Math.floor(secondsOrDays/60) + 'm';
-                return Math.floor(secondsOrDays/3600) + 'h';
+        formatTime(interval, isReview = false) {
+            if (isReview || interval >= this.DAY) {
+                const days = interval;
+                if (days < 30) return `${days}d`;
+                if (days < 365) return `${Math.round(days/30)}mo`;
+                return `${Math.round(days/365)}y`;
+            } else {
+                if (interval < 60) return `${interval}s`;
+                if (interval < 3600) return `${Math.floor(interval/60)}m`;
+                if (interval < 86400) return `${Math.floor(interval/3600)}h`;
+                return `${Math.floor(interval/86400)}d`;
             }
-            // If it's a review card, input is days
-            const days = isReview ? secondsOrDays : Math.floor(secondsOrDays / 86400);
-            if (days < 30) return days + 'd';
-            if (days < 365) return (days/30).toFixed(1) + 'mo';
-            return (days/365).toFixed(1) + 'y';
         }
     };
 
@@ -589,401 +650,648 @@
             this.studyQueue = [];
             this.currentCard = null;
             this.currentNote = null;
-            this.isShowingBack = false;
+            this.isShowingAnswer = false;
+            this.studyTimer = null;
+            this.startTime = null;
             this.timerInterval = null;
-            this.startTime = 0;
         }
 
         async init() {
-            await this.db.init();
-            
-            // Create Default Deck if empty
-            const decks = await this.db.getAll('decks');
-            if (decks.length === 0) {
-                await this.db.add('decks', { id: Date.now(), name: 'Default' });
-            }
+            try {
+                await this.db.init();
+                
+                // Create Default Deck if empty
+                const decks = await this.db.getAll('decks');
+                if (decks.length === 0) {
+                    await this.db.add('decks', { 
+                        id: Date.now(), 
+                        name: 'Default',
+                        created: Date.now()
+                    });
+                }
 
-            this.renderDeckList();
-            this.setupNavigation();
-            this.setupTouchGestures();
-            
-            // Check for mathjax
-            if (window.MathJax) {
-               window.MathJax.startup.promise.then(() => {
-                 console.log('MathJax ready');
-               });
+                await this.renderDeckList();
+                await this.populateDeckSelect();
+                this.setupEventListeners();
+                
+                // Initialize MathJax
+                if (window.MathJax) {
+                    window.MathJax.startup.promise.then(() => {
+                        console.log('MathJax ready');
+                    });
+                }
+                
+                console.log('App initialized successfully');
+            } catch (error) {
+                console.error('Initialization error:', error);
+                this.showToast('Failed to initialize app', 'error');
             }
         }
 
-        /* --- NAVIGATION --- */
-        nav(viewName) {
-            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${viewName}`).classList.add('active');
+        showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast';
             
-            document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
-            if(document.getElementById(`tab-${viewName}`)) {
-                document.getElementById(`tab-${viewName}`).classList.add('active');
+            if (type === 'error') {
+                toast.style.backgroundColor = 'var(--danger)';
+            } else if (type === 'success') {
+                toast.style.backgroundColor = 'var(--success)';
             }
+            
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        setupEventListeners() {
+            // Add tab event listeners
+            document.querySelectorAll('.tab-item').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const view = e.currentTarget.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    this.nav(view);
+                });
+            });
+        }
+
+        nav(viewName) {
+            if (!viewName) return;
+            
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+            
+            const viewElement = document.getElementById(`view-${viewName}`);
+            const tabElement = document.getElementById(`tab-${viewName}`);
+            
+            if (viewElement) {
+                viewElement.classList.add('active');
+            }
+            
+            if (tabElement) {
+                tabElement.classList.add('active');
+            }
+
+            const titleMap = {
+                'decks': 'My Decks',
+                'add': 'Add Card',
+                'review': 'Study',
+                'browse': 'Browser',
+                'stats': 'Statistics'
+            };
+            
+            document.getElementById('header-title').textContent = titleMap[viewName] || 'Anki iOS';
 
             if (viewName === 'decks') this.renderDeckList();
             if (viewName === 'browse') this.renderBrowser();
             if (viewName === 'stats') this.renderStats();
+            if (viewName === 'add') this.toggleFields();
             
-            // Reset Header
-            const titleMap = {
-                'decks': 'My Decks',
-                'add': 'Add Card',
-                'browse': 'Browser',
-                'stats': 'Statistics',
-                'review': 'Study'
-            };
-            document.getElementById('header-title').textContent = titleMap[viewName] || 'Anki iOS';
-        }
-
-        /* --- DECK MANAGEMENT --- */
-        async renderDeckList() {
-            const container = document.getElementById('deck-list-container');
-            container.innerHTML = '';
-            
-            const decks = await this.db.getAll('decks');
-            const cards = await this.db.getAll('cards');
-            const now = Date.now() / 1000 | 0;
-            const today = (now / 86400) | 0;
-
-            for (const deck of decks) {
-                // Calculate counts
-                const deckCards = cards.filter(c => c.did === deck.id);
-                const newCount = deckCards.filter(c => c.type === 0).length;
-                const learnCount = deckCards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).length;
-                const reviewCount = deckCards.filter(c => c.type === 2 && c.due <= today).length;
-
-                const el = document.createElement('div');
-                el.className = 'deck-item active:scale-95 transition-transform';
-                el.innerHTML = `
-                    <div class="flex-1 font-semibold text-lg" onclick="app.startStudy(${deck.id})">${deck.name}</div>
-                    <div class="flex gap-3 text-sm font-mono">
-                        <span class="text-blue-400 font-bold">${newCount}</span>
-                        <span class="text-red-400 font-bold">${learnCount}</span>
-                        <span class="text-green-400 font-bold">${reviewCount}</span>
-                    </div>
-                    <button class="ml-4 text-gray-500" onclick="app.deleteDeck(${deck.id})"><i class="fa-solid fa-trash"></i></button>
-                `;
-                container.appendChild(el);
+            // Reset study state if leaving review
+            if (viewName !== 'review') {
+                this.stopTimer();
             }
         }
 
-        async showAddDeckModal() {
+        async renderDeckList() {
+            try {
+                const container = document.getElementById('deck-list-container');
+                container.innerHTML = '';
+                
+                const decks = await this.db.getAll('decks');
+                const cards = await this.db.getAll('cards');
+                const now = Math.floor(Date.now() / 1000);
+                const today = Math.floor(now / 86400);
+
+                if (decks.length === 0) {
+                    container.innerHTML = '<div class="text-center py-8 text-gray-500">No decks yet. Create one!</div>';
+                    return;
+                }
+
+                for (const deck of decks) {
+                    const deckCards = cards.filter(c => c.did === deck.id);
+                    const newCount = deckCards.filter(c => c.type === 0).length;
+                    const learnCount = deckCards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).length;
+                    const reviewCount = deckCards.filter(c => c.type === 2 && c.due <= today).length;
+
+                    const el = document.createElement('div');
+                    el.className = 'deck-item';
+                    el.innerHTML = `
+                        <div class="flex-1">
+                            <div class="font-semibold text-lg">${deck.name}</div>
+                            <div class="text-sm text-gray-500 mt-1">${deckCards.length} cards</div>
+                        </div>
+                        <div class="flex gap-3 text-sm font-mono">
+                            ${newCount > 0 ? `<span class="text-blue-400 font-bold">${newCount}</span>` : ''}
+                            ${learnCount > 0 ? `<span class="text-red-400 font-bold">${learnCount}</span>` : ''}
+                            ${reviewCount > 0 ? `<span class="text-green-400 font-bold">${reviewCount}</span>` : ''}
+                        </div>
+                        <button class="ml-4 text-gray-500 hover:text-red-400" onclick="event.stopPropagation(); app.deleteDeck(${deck.id})">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    `;
+                    
+                    el.addEventListener('click', () => this.startStudy(deck.id));
+                    container.appendChild(el);
+                }
+            } catch (error) {
+                console.error('Error rendering deck list:', error);
+                this.showToast('Failed to load decks', 'error');
+            }
+        }
+
+        async populateDeckSelect() {
+            const deckSelect = document.getElementById('add-deck-select');
+            const decks = await this.db.getAll('decks');
+            
+            deckSelect.innerHTML = '';
+            decks.forEach(deck => {
+                const option = document.createElement('option');
+                option.value = deck.id;
+                option.textContent = deck.name;
+                deckSelect.appendChild(option);
+            });
+        }
+
+        showAddDeckModal() {
             const name = prompt("Enter new deck name:");
-            if (name) {
-                await this.db.add('decks', { id: Date.now(), name: name });
-                this.renderDeckList();
+            if (name && name.trim()) {
+                this.addDeck(name.trim());
+            }
+        }
+
+        async addDeck(name) {
+            try {
+                await this.db.add('decks', { 
+                    id: Date.now(), 
+                    name: name,
+                    created: Date.now()
+                });
+                await this.renderDeckList();
+                await this.populateDeckSelect();
+                this.showToast('Deck created successfully', 'success');
+            } catch (error) {
+                console.error('Error adding deck:', error);
+                this.showToast('Failed to create deck', 'error');
             }
         }
 
         async deleteDeck(id) {
-            if (confirm("Delete deck and all its cards?")) {
-                // Delete deck
-                await this.db.delete('decks', id);
-                // Delete cards
-                const allCards = await this.db.getAll('cards');
-                const toDelete = allCards.filter(c => c.did === id);
-                for (const c of toDelete) {
-                    await this.db.delete('cards', c.id);
-                    // Also delete orphan notes? (Skip for simplicity, keep notes)
+            if (!confirm("Delete deck and all its cards?")) return;
+            
+            try {
+                // Get all cards in this deck
+                const deckCards = await this.db.getCardsByDeck(id);
+                
+                // Delete each card and its associated note if no other cards reference it
+                for (const card of deckCards) {
+                    await this.db.delete('cards', card.id);
+                    
+                    // Check if note has other cards
+                    const noteCards = await this.db.getCardsByNote(card.nid);
+                    if (noteCards.length === 0) {
+                        await this.db.delete('notes', card.nid);
+                    }
                 }
-                this.renderDeckList();
+                
+                // Delete the deck
+                await this.db.delete('decks', id);
+                
+                await this.renderDeckList();
+                await this.populateDeckSelect();
+                this.showToast('Deck deleted', 'success');
+            } catch (error) {
+                console.error('Error deleting deck:', error);
+                this.showToast('Failed to delete deck', 'error');
             }
         }
 
-        /* --- ADDING CARDS --- */
-        async toggleFields() {
+        toggleFields() {
             const type = document.getElementById('add-note-type').value;
             const container = document.getElementById('fields-container');
-            const front = document.getElementById('f-front').value;
-            const back = document.getElementById('f-back').value;
             
-            // Persist values simply
-            container.innerHTML = `
-                <label class="block text-sm text-gray-500 mb-1">Front ${type === 'cloze' ? '(Use {{c1::cloze::hint}} for multiple)' : ''}</label>
-                <textarea id="f-front" rows="3" class="w-full bg-gray-800 rounded p-2 text-white">${front}</textarea>
-                
-                <label class="block text-sm text-gray-500 mb-1">Back ${type === 'cloze' ? '(Extra info)' : ''}</label>
-                <textarea id="f-back" rows="3" class="w-full bg-gray-800 rounded p-2 text-white">${back}</textarea>
-            `;
+            let html = '';
             
-            // Populate deck select
-            const deckSelect = document.getElementById('add-deck-select');
-            if (deckSelect.options.length === 0) {
-                const decks = await this.db.getAll('decks');
-                decks.forEach(d => {
-                    const opt = document.createElement('option');
-                    opt.value = d.id;
-                    opt.text = d.name;
-                    deckSelect.appendChild(opt);
-                });
+            if (type === 'cloze' || type === 'cloze-plus') {
+                html = `
+                    <label class="block text-sm text-gray-500 mb-1">
+                        Text ${type === 'cloze-plus' ? '(Use {{c1::cloze}}, {{c2::another}})' : '(Use {{c1::cloze}})'}
+                    </label>
+                    <textarea id="f-text" rows="6" placeholder="Enter text with {{c1::cloze deletions}}..." class="w-full bg-gray-800 rounded p-2 text-white"></textarea>
+                    
+                    <label class="block text-sm text-gray-500 mb-1 mt-4">Extra Info (Optional)</label>
+                    <textarea id="f-extra" rows="3" placeholder="Additional information..." class="w-full bg-gray-800 rounded p-2 text-white"></textarea>
+                `;
+            } else {
+                html = `
+                    <label class="block text-sm text-gray-500 mb-1">Front</label>
+                    <textarea id="f-front" rows="3" placeholder="Front side" class="w-full bg-gray-800 rounded p-2 text-white"></textarea>
+                    
+                    <label class="block text-sm text-gray-500 mb-1">Back</label>
+                    <textarea id="f-back" rows="3" placeholder="Back side" class="w-full bg-gray-800 rounded p-2 text-white"></textarea>
+                `;
             }
+            
+            container.innerHTML = html;
         }
 
         async saveNote() {
-            const front = document.getElementById('f-front').value;
-            const back = document.getElementById('f-back').value;
-            const deckId = parseInt(document.getElementById('add-deck-select').value);
-            const type = document.getElementById('add-note-type').value;
-
-            if (!front) return alert("Front field required");
-
-            const noteId = Date.now();
-            
-            // Save Note
-            await this.db.add('notes', {
-                id: noteId,
-                mid: type,
-                flds: [front, back],
-                tags: []
-            });
-
-            // Create Card(s) based on type
-            // 1. Basic
-            await this.db.add('cards', {
-                id: Date.now(),
-                nid: noteId,
-                did: deckId,
-                ord: 0,
-                type: 0, // New
-                queue: 0,
-                due: 0,
-                ivl: 0,
-                factor: 2500,
-                reps: 0,
-                lapses: 0
-            });
-
-            // 2. Basic & Reversed
-            if (type === 'basic-rev') {
-                await this.db.add('cards', {
-                    id: Date.now() + 1, // ensure unique
-                    nid: noteId,
-                    did: deckId,
-                    ord: 1, // Reversed
-                    type: 0,
-                    queue: 0,
-                    due: 0,
-                    ivl: 0,
-                    factor: 2500,
-                    reps: 0,
-                    lapses: 0
-                });
-            }
-            
-            // 3. Cloze (Simplified: only finds c1, c2 etc)
-            if (type === 'cloze') {
-                // Regex to find cloze deletions {{c(\d+)::(.*?)(?:::(.*?))?}}
-                const regex = /{{c(\d+)::(.*?)(?:::(.*?))?}}/g;
-                const matches = [...front.matchAll(regex)];
-                const ords = new Set(matches.map(m => parseInt(m[1]) - 1)); // 0-indexed ords
+            try {
+                const type = document.getElementById('add-note-type').value;
+                const deckId = parseInt(document.getElementById('add-deck-select').value);
                 
-                // If no cloze found but type is cloze, treat as basic 1 card
-                if (ords.size === 0) ords.add(0);
+                if (!deckId) {
+                    this.showToast('Please select a deck', 'error');
+                    return;
+                }
 
-                for (let ord of ords) {
+                let noteData = {
+                    id: Date.now(),
+                    mid: type,
+                    flds: [],
+                    tags: [],
+                    created: Date.now()
+                };
+
+                // Basic and Basic-rev
+                if (type === 'basic' || type === 'basic-rev') {
+                    const front = document.getElementById('f-front').value.trim();
+                    const back = document.getElementById('f-back').value.trim();
+                    
+                    if (!front) {
+                        this.showToast('Front field is required', 'error');
+                        return;
+                    }
+                    
+                    noteData.flds = [front, back];
+                    await this.db.add('notes', noteData);
+                    
+                    // Create front card
                     await this.db.add('cards', {
-                        id: Date.now() + ord,
-                        nid: noteId,
+                        id: Date.now(),
+                        nid: noteData.id,
                         did: deckId,
-                        ord: ord,
+                        ord: 0,
                         type: 0,
                         queue: 0,
                         due: 0,
                         ivl: 0,
-                        factor: 2500,
+                        factor: SCHEDULER.STARTING_EASE,
                         reps: 0,
-                        lapses: 0
+                        lapses: 0,
+                        created: Date.now()
                     });
-                }
-            }
 
-            // Clear inputs
-            document.getElementById('f-front').value = '';
-            document.getElementById('f-back').value = '';
-            alert("Card added!");
+                    // Create reversed card if needed
+                    if (type === 'basic-rev') {
+                        await this.db.add('cards', {
+                            id: Date.now() + 1,
+                            nid: noteData.id,
+                            did: deckId,
+                            ord: 1,
+                            type: 0,
+                            queue: 0,
+                            due: 0,
+                            ivl: 0,
+                            factor: SCHEDULER.STARTING_EASE,
+                            reps: 0,
+                            lapses: 0,
+                            created: Date.now()
+                        });
+                    }
+                }
+                // Cloze and Cloze+++
+                else if (type === 'cloze' || type === 'cloze-plus') {
+                    const text = document.getElementById('f-text').value.trim();
+                    const extra = document.getElementById('f-extra').value.trim();
+                    
+                    if (!text) {
+                        this.showToast('Text field is required', 'error');
+                        return;
+                    }
+                    
+                    noteData.flds = [text, extra];
+                    await this.db.add('notes', noteData);
+                    
+                    // Extract cloze numbers
+                    const clozeRegex = /{{c(\d+)::(.*?)}}/g;
+                    const matches = [...text.matchAll(clozeRegex)];
+                    const clozeNumbers = [...new Set(matches.map(m => parseInt(m[1])))];
+                    
+                    if (clozeNumbers.length === 0) {
+                        // If no cloze found, create one card
+                        await this.db.add('cards', {
+                            id: Date.now(),
+                            nid: noteData.id,
+                            did: deckId,
+                            ord: 0,
+                            type: 0,
+                            queue: 0,
+                            due: 0,
+                            ivl: 0,
+                            factor: SCHEDULER.STARTING_EASE,
+                            reps: 0,
+                            lapses: 0,
+                            created: Date.now()
+                        });
+                    } else {
+                        // Create one card per cloze number
+                        for (const clozeNum of clozeNumbers) {
+                            await this.db.add('cards', {
+                                id: Date.now() + clozeNum,
+                                nid: noteData.id,
+                                did: deckId,
+                                ord: clozeNum - 1, // 0-indexed
+                                type: 0,
+                                queue: 0,
+                                due: 0,
+                                ivl: 0,
+                                factor: SCHEDULER.STARTING_EASE,
+                                reps: 0,
+                                lapses: 0,
+                                created: Date.now()
+                            });
+                        }
+                    }
+                }
+
+                // Clear form
+                document.getElementById('add-note-type').selectedIndex = 0;
+                this.toggleFields();
+                
+                this.showToast('Card added successfully', 'success');
+                
+                // Update deck list counts
+                this.renderDeckList();
+            } catch (error) {
+                console.error('Error saving note:', error);
+                this.showToast('Failed to add card', 'error');
+            }
         }
 
-        /* --- STUDY / REVIEW --- */
         async startStudy(deckId) {
-            this.currentDeck = deckId;
-            const allCards = await this.db.getAll('cards');
-            const now = Date.now() / 1000 | 0;
-            const today = (now / 86400) | 0;
-
-            // Filter cards for this deck
-            // Sort: Learning (due < now) -> Review (due <= today) -> New
-            const deckCards = allCards.filter(c => c.did === deckId);
-            
-            const learning = deckCards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).sort((a,b) => a.due - b.due);
-            const review = deckCards.filter(c => c.type === 2 && c.due <= today).sort((a,b) => a.due - b.due);
-            const newCards = deckCards.filter(c => c.type === 0).slice(0, 20); // Limit 20 new/day simplified
-
-            this.studyQueue = [...learning, ...review, ...newCards];
-            
-            if (this.studyQueue.length === 0) {
-                alert("No cards due today!");
-                return;
+            try {
+                this.currentDeck = deckId;
+                this.studyQueue = [];
+                this.isShowingAnswer = false;
+                
+                // Get deck name for display
+                const deck = await this.db.get('decks', deckId);
+                document.getElementById('header-title').textContent = `Studying: ${deck.name}`;
+                
+                // Build study queue
+                const now = Math.floor(Date.now() / 1000);
+                const today = Math.floor(now / 86400);
+                const allCards = await this.db.getCardsByDeck(deckId);
+                
+                // Separate cards by type
+                const learningCards = allCards.filter(card => 
+                    (card.type === 1 || card.type === 3) && card.due < now
+                ).sort((a, b) => a.due - b.due);
+                
+                const reviewCards = allCards.filter(card => 
+                    card.type === 2 && card.due <= today
+                ).sort((a, b) => a.due - b.due);
+                
+                const newCards = allCards.filter(card => card.type === 0);
+                
+                // Build queue: learning -> review -> new
+                this.studyQueue = [...learningCards, ...reviewCards, ...newCards];
+                
+                // Update counts display
+                document.getElementById('new-count').textContent = newCards.length;
+                document.getElementById('learn-count').textContent = learningCards.length;
+                document.getElementById('review-count').textContent = reviewCards.length;
+                
+                if (this.studyQueue.length === 0) {
+                    this.showToast('No cards to review!', 'info');
+                    this.nav('decks');
+                    return;
+                }
+                
+                this.nav('review');
+                this.nextCard();
+                this.startTimer();
+            } catch (error) {
+                console.error('Error starting study:', error);
+                this.showToast('Failed to start study session', 'error');
             }
-
-            // Update review counts
-            const newCount = newCards.length;
-            const learnCount = learning.length;
-            const reviewCount = review.length;
-            document.getElementById('review-counts').innerHTML = `
-                <span class="text-blue-400">${newCount}</span> 
-                <span class="text-red-400">${learnCount}</span> 
-                <span class="text-green-400">${reviewCount}</span>
-            `;
-
-            this.nav('review');
-            this.nextCard();
         }
 
         async nextCard() {
             if (this.studyQueue.length === 0) {
-                alert("Deck finished!");
+                this.showToast('Deck finished!', 'success');
                 this.nav('decks');
                 return;
             }
-
-            // Start timer
-            clearInterval(this.timerInterval);
-            this.startTime = Date.now();
-            document.getElementById('timer').textContent = '0s';
-            this.timerInterval = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-                document.getElementById('timer').textContent = elapsed + 's';
-            }, 1000);
-
-            this.currentCard = this.studyQueue[0];
+            
+            this.currentCard = this.studyQueue.shift();
             this.currentNote = await this.db.get('notes', this.currentCard.nid);
-            this.isShowingBack = false;
-
+            this.isShowingAnswer = false;
+            
             this.renderCardFront();
             document.getElementById('ans-controls').classList.add('hidden');
-            document.getElementById('show-ans-control').classList.remove('hidden');
+            document.getElementById('flip-control').classList.remove('hidden');
+            document.getElementById('show-ans-control').classList.add('hidden');
+            
+            // Reset timer
+            this.startTime = Date.now();
+            this.updateTimer();
         }
 
         renderCardFront() {
             const content = document.getElementById('card-content');
             
-            let frontText = this.currentNote.flds[0];
-            
-            // Handle Cloze
-            if (this.currentNote.mid === 'cloze') {
-                const ord = this.currentCard.ord + 1;
-                // Replace active cloze with [hint] or [...]
-                frontText = frontText.replace(new RegExp(`{{c${ord}::(.*?)(?:::(.*?))?}}`, 'g'), (m, content, hint) => {
-                    return hint ? `<span class="cloze">[${hint}]</span>` : '<span class="cloze">[...]</span>';
-                });
-                // Replace other clozes with their content
-                frontText = frontText.replace(new RegExp(`{{c(?!${ord}\\b)\\d+::(.*?)(?:::(.*?))?}}`, 'g'), '$1');
-            } else if (this.currentCard.ord === 1) {
-                // Reversed card: Front is Back field
-                frontText = this.currentNote.flds[1];
+            if (!this.currentNote || !this.currentCard) {
+                content.innerHTML = '<div class="text-gray-500">Error loading card</div>';
+                return;
             }
-
-            content.innerHTML = `<div class="front">${this.formatText(frontText)}</div>`;
+            
+            let displayText = '';
+            const noteType = this.currentNote.mid;
+            
+            if (noteType === 'basic' || noteType === 'basic-rev') {
+                if (this.currentCard.ord === 0) {
+                    // Front card
+                    displayText = this.formatText(this.currentNote.flds[0]);
+                } else {
+                    // Reversed card
+                    displayText = this.formatText(this.currentNote.flds[1]);
+                }
+            } else if (noteType === 'cloze' || noteType === 'cloze-plus') {
+                let text = this.currentNote.flds[0];
+                const ord = this.currentCard.ord + 1; // 0-indexed to 1-indexed
+                
+                // Replace the current cloze with [...]
+                const currentClozeRegex = new RegExp(`{{c${ord}::(.*?)}}`, 'g');
+                text = text.replace(currentClozeRegex, '<span class="cloze-blank">[...]</span>');
+                
+                // Replace other clozes with their content
+                text = text.replace(/{{c\d+::(.*?)}}/g, '$1');
+                
+                displayText = this.formatText(text);
+                
+                // Add extra info if exists
+                if (this.currentNote.flds[1]) {
+                    displayText += `<div class="mt-4 pt-4 border-t border-gray-700 text-sm text-gray-400">${this.formatText(this.currentNote.flds[1])}</div>`;
+                }
+            }
+            
+            content.innerHTML = displayText;
             this.refreshMath();
         }
 
-        showAnswer() {
-            this.isShowingBack = true;
+        renderCardBack() {
             const content = document.getElementById('card-content');
             
-            let frontText = this.currentNote.flds[0];
-            let backText = this.currentNote.flds[1];
-
-            // Handle Cloze Back
-            if (this.currentNote.mid === 'cloze') {
-                const ord = this.currentCard.ord + 1;
-                // Highlight active cloze
-                frontText = frontText.replace(new RegExp(`{{c${ord}::(.*?)(?:::(.*?))?}}`, 'g'), '<span class="cloze">$1</span>');
-                // Replace other clozes with content
-                frontText = frontText.replace(new RegExp(`{{c(?!${ord}\\b)\\d+::(.*?)(?:::(.*?))?}}`, 'g'), '$1');
-                backText = `<div class="mb-4 border-b border-gray-600 pb-4">${frontText}</div><div>${backText}</div>`;
-            } else if (this.currentCard.ord === 1) {
-                // Reversed: Back is Front field
-                const temp = frontText;
-                frontText = backText; // Front was actually field 1
-                backText = temp;      // Back is field 0
-                backText = `<div class="mb-4 border-b border-gray-600 pb-4">${frontText}</div><div>${backText}</div>`;
-            } else {
-                 // Standard Basic
-                 backText = `<div class="mb-4 border-b border-gray-600 pb-4">${frontText}</div><div>${backText}</div>`;
+            if (!this.currentNote || !this.currentCard) {
+                content.innerHTML = '<div class="text-gray-500">Error loading card</div>';
+                return;
             }
-
-            content.innerHTML = this.formatText(backText);
+            
+            let displayText = '';
+            const noteType = this.currentNote.mid;
+            
+            if (noteType === 'basic' || noteType === 'basic-rev') {
+                if (this.currentCard.ord === 0) {
+                    // Show back for front card
+                    displayText = `
+                        <div class="mb-4 pb-4 border-b border-gray-700">${this.formatText(this.currentNote.flds[0])}</div>
+                        <div>${this.formatText(this.currentNote.flds[1])}</div>
+                    `;
+                } else {
+                    // Show front for reversed card
+                    displayText = `
+                        <div class="mb-4 pb-4 border-b border-gray-700">${this.formatText(this.currentNote.flds[1])}</div>
+                        <div>${this.formatText(this.currentNote.flds[0])}</div>
+                    `;
+                }
+            } else if (noteType === 'cloze' || noteType === 'cloze-plus') {
+                let text = this.currentNote.flds[0];
+                const ord = this.currentCard.ord + 1;
+                
+                // Highlight the current cloze
+                const currentClozeRegex = new RegExp(`{{c${ord}::(.*?)}}`, 'g');
+                text = text.replace(currentClozeRegex, '<span class="cloze">$1</span>');
+                
+                // Replace other clozes with their content
+                text = text.replace(/{{c\d+::(.*?)}}/g, '$1');
+                
+                displayText = this.formatText(text);
+                
+                // Add extra info if exists
+                if (this.currentNote.flds[1]) {
+                    displayText += `<div class="mt-4 pt-4 border-t border-gray-700">${this.formatText(this.currentNote.flds[1])}</div>`;
+                }
+            }
+            
+            content.innerHTML = displayText;
             this.refreshMath();
+            
+            // Update button times
+            this.updateButtonTimes();
+        }
 
-            // Setup Buttons
-            document.getElementById('show-ans-control').classList.add('hidden');
-            document.getElementById('ans-controls').classList.remove('hidden');
-
-            // Calculate estimated times for UI
+        updateButtonTimes() {
             const ratings = [1, 2, 3, 4];
-            ratings.forEach(r => {
-                const pred = SCHEDULER.answerCard(this.currentCard, r);
-                const isReview = (pred.type === 2);
-                document.getElementById(`time-${r}`).textContent = SCHEDULER.formatTime(pred.ivl, isReview);
+            ratings.forEach(rating => {
+                const newCard = SCHEDULER.answerCard(this.currentCard, rating);
+                const isReview = newCard.type === 2;
+                const timeElement = document.getElementById(`time-${rating}`);
+                if (timeElement) {
+                    timeElement.textContent = SCHEDULER.formatTime(newCard.ivl, isReview);
+                }
             });
         }
 
-        async answerCard(rating) {
-            // Get elapsed time
-            const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-
-            // 1. Calculate new state
-            const newCardState = SCHEDULER.answerCard(this.currentCard, rating);
-            
-            // 2. Log review
-            const log = {
-                id: Date.now(),
-                cid: this.currentCard.id,
-                ease: newCardState.factor,
-                ivl: newCardState.ivl,
-                lastIvl: this.currentCard.ivl,
-                factor: this.currentCard.factor,
-                time: elapsed * 1000 // ms
-            };
-            await this.db.add('revlog', log);
-
-            // 3. Update Card in DB
-            await this.db.put('cards', newCardState);
-
-            // 4. Update Queue
-            this.studyQueue.shift(); // Remove current
-            
-            // If it's a learning card and due soon, re-queue it
-            const now = Date.now() / 1000 | 0;
-            if ((newCardState.type === 1 || newCardState.type === 3) && newCardState.due < now + 1200) { // If due within 20 mins
-                // Insert based on due time (simple insertion sort)
-                let inserted = false;
-                for(let i=0; i<this.studyQueue.length; i++) {
-                    if (this.studyQueue[i].due > newCardState.due) {
-                        this.studyQueue.splice(i, 0, newCardState);
-                        inserted = true;
-                        break;
-                    }
-                }
-                if (!inserted) this.studyQueue.push(newCardState);
+        flipCard() {
+            if (this.isShowingAnswer) {
+                this.renderCardFront();
+                this.isShowingAnswer = false;
+                document.getElementById('flip-control').classList.remove('hidden');
+                document.getElementById('ans-controls').classList.add('hidden');
+            } else {
+                this.showAnswer();
             }
+        }
 
-            // 5. Next
-            this.nextCard();
+        showAnswer() {
+            this.isShowingAnswer = true;
+            this.renderCardBack();
+            document.getElementById('flip-control').classList.add('hidden');
+            document.getElementById('ans-controls').classList.remove('hidden');
+        }
+
+        toggleCard() {
+            if (this.isShowingAnswer) {
+                this.renderCardFront();
+                this.isShowingAnswer = false;
+                document.getElementById('flip-control').classList.remove('hidden');
+                document.getElementById('ans-controls').classList.add('hidden');
+            } else {
+                this.showAnswer();
+            }
+        }
+
+        async answerCard(rating) {
+            try {
+                // Calculate new card state
+                const newCard = SCHEDULER.answerCard(this.currentCard, rating);
+                
+                // Update in database
+                await this.db.put('cards', newCard);
+                
+                // Log review
+                await this.db.add('revlog', {
+                    id: Date.now(),
+                    cid: this.currentCard.id,
+                    ease: rating,
+                    ivl: newCard.ivl,
+                    lastIvl: this.currentCard.ivl,
+                    factor: newCard.factor,
+                    time: Math.floor((Date.now() - this.startTime) / 1000),
+                    type: this.currentCard.type
+                });
+                
+                // Remove from queue
+                this.currentCard = null;
+                this.currentNote = null;
+                this.isShowingAnswer = false;
+                
+                // Update counts
+                const deckCards = await this.db.getCardsByDeck(this.currentDeck);
+                const now = Math.floor(Date.now() / 1000);
+                const today = Math.floor(now / 86400);
+                
+                const newCount = deckCards.filter(c => c.type === 0).length;
+                const learnCount = deckCards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).length;
+                const reviewCount = deckCards.filter(c => c.type === 2 && c.due <= today).length;
+                
+                document.getElementById('new-count').textContent = newCount;
+                document.getElementById('learn-count').textContent = learnCount;
+                document.getElementById('review-count').textContent = reviewCount;
+                
+                // Next card
+                this.nextCard();
+            } catch (error) {
+                console.error('Error answering card:', error);
+                this.showToast('Failed to save answer', 'error');
+            }
         }
 
         formatText(text) {
-            // Basic Markdown-ish
+            if (!text) return '';
+            
             return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
                 .replace(/\n/g, '<br>')
-                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                .replace(/\*(.*?)\*/g, '<i>$1</i>');
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/__(.*?)__/g, '<u>$1</u>')
+                .replace(/~~(.*?)~~/g, '<s>$1</s>')
+                .replace(/`(.*?)`/g, '<code class="bg-gray-800 px-1 rounded">$1</code>');
         }
 
         refreshMath() {
@@ -992,112 +1300,94 @@
             }
         }
 
-        /* --- BROWSER --- */
-        async renderBrowser() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const list = document.getElementById('browser-list');
-            list.innerHTML = '';
-            
-            const notes = await this.db.getAll('notes');
-            // Join with cards needed? Just searching notes for now
-            const filtered = notes.filter(n => n.flds.some(f => f.toLowerCase().includes(query))).slice(0, 50);
-
-            filtered.forEach(n => {
-                const el = document.createElement('div');
-                el.className = 'p-4 bg-gray-900 flex justify-between items-center';
-                el.innerHTML = `
-                    <div class="flex-1">
-                        <div class="font-bold truncate">${n.flds[0]}</div>
-                        <div class="text-sm text-gray-500 truncate">${n.flds[1]}</div>
-                    </div>
-                    <button class="text-red-500 ml-4" onclick="app.deleteNote(${n.id})"><i class="fa-solid fa-trash"></i></button>
-                `;
-                list.appendChild(el);
-            });
+        startTimer() {
+            this.startTime = Date.now();
+            this.stopTimer();
+            this.timerInterval = setInterval(() => this.updateTimer(), 1000);
         }
 
-        async deleteNote(noteId) {
-            if (confirm("Delete note and its cards?")) {
-                await this.db.delete('notes', noteId);
-                // Delete associated cards
-                const cards = await this.db.getAll('cards');
-                const toDelete = cards.filter(c => c.nid === noteId);
-                for (const c of toDelete) {
-                    await this.db.delete('cards', c.id);
-                }
-                this.renderBrowser();
+        stopTimer() {
+            if (this.timerInterval) {
+                clearInterval(this.timerInterval);
+                this.timerInterval = null;
             }
         }
 
-        /* --- STATISTICS --- */
-        async renderStats() {
-            const cards = await this.db.getAll('cards');
-            const now = Date.now() / 1000 | 0;
-            const today = (now / 86400) | 0;
-
-            document.getElementById('stat-total').innerText = cards.length;
+        updateTimer() {
+            if (!this.startTime) return;
             
-            const dueCount = cards.filter(c => 
-                (c.type === 2 && c.due <= today) || 
-                ((c.type === 1 || c.type === 3) && c.due < now) ||
-                (c.type === 0)
-            ).length;
-
-            document.getElementById('stat-due').innerText = dueCount;
+            const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        setupNavigation() {
-            // History API / Back button handling could go here
-            // For now, simple SPA
-        }
-
-        setupTouchGestures() {
-            const cardArea = document.getElementById('view-review');
-            let startX = 0;
-            let startY = 0;
-
-            cardArea.addEventListener('touchstart', e => {
-                startX = e.changedTouches[0].screenX;
-                startY = e.changedTouches[0].screenY;
-            }, {passive: true});
-
-            cardArea.addEventListener('touchend', e => {
-                const endX = e.changedTouches[0].screenX;
-                const endY = e.changedTouches[0].screenY;
-                const diffX = endX - startX;
-                const diffY = endY - startY;
-
-                // Swipe Detection
-                if (Math.abs(diffX) > 100 && Math.abs(diffY) < 50) {
-                    if (this.isShowingBack) {
-                        if (diffX < 0) this.answerCard(3); // Left swipe = Good
-                        else this.answerCard(1); // Right swipe = Again
-                    }
+        async renderBrowser() {
+            try {
+                const query = document.getElementById('search-input').value.toLowerCase();
+                const list = document.getElementById('browser-list');
+                list.innerHTML = '';
+                
+                const notes = await this.db.getAll('notes');
+                const filtered = notes.filter(note => 
+                    note.flds.some(field => field && field.toLowerCase().includes(query))
+                ).slice(0, 50);
+                
+                if (filtered.length === 0) {
+                    list.innerHTML = '<div class="text-center py-8 text-gray-500">No cards found</div>';
+                    return;
                 }
                 
-                // Tap Zones
-                if (Math.abs(diffX) < 10 && Math.abs(diffY) < 10) {
-                     // Check if target is not a button
-                     if (e.target.tagName !== 'BUTTON') {
-                         if (!this.isShowingBack) {
-                             this.showAnswer();
-                         } else {
-                             // Zone logic: Left=Again, Right=Good
-                             const width = window.innerWidth;
-                             if (startX < width / 2) {
-                                 this.answerCard(1); // Left = Again
-                             } else {
-                                 this.answerCard(3); // Right = Good
-                             }
-                         }
-                     }
+                for (const note of filtered) {
+                    const el = document.createElement('div');
+                    el.className = 'p-4 hover:bg-gray-800 cursor-pointer';
+                    el.innerHTML = `
+                        <div class="font-bold truncate">${this.formatText(note.flds[0]?.substring(0, 100) || 'No content')}</div>
+                        <div class="text-sm text-gray-500 truncate mt-1">${note.mid} • ${new Date(note.created).toLocaleDateString()}</div>
+                    `;
+                    list.appendChild(el);
                 }
-            }, {passive: true});
+            } catch (error) {
+                console.error('Error rendering browser:', error);
+                this.showToast('Failed to load browser', 'error');
+            }
+        }
+
+        async renderStats() {
+            try {
+                const cards = await this.db.getAll('cards');
+                const now = Math.floor(Date.now() / 1000);
+                const today = Math.floor(now / 86400);
+                
+                const totalCards = cards.length;
+                const dueCards = cards.filter(card => 
+                    (card.type === 2 && card.due <= today) || 
+                    ((card.type === 1 || card.type === 3) && card.due < now) ||
+                    (card.type === 0)
+                ).length;
+                
+                document.getElementById('stat-total').textContent = totalCards;
+                document.getElementById('stat-due').textContent = dueCards;
+            } catch (error) {
+                console.error('Error rendering stats:', error);
+                document.getElementById('stat-total').textContent = '0';
+                document.getElementById('stat-due').textContent = '0';
+            }
         }
     }
 
+    // Initialize the app
     const app = new AnkiApp();
-    app.init();
+    
+    // Start the app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        app.init();
+    });
+    
+    // Make app globally available for onclick handlers
+    window.app = app;
     </script>
 </body>
 </html>
