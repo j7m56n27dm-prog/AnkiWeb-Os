@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anki iOS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Anki iOS - Made by Muhammad Daler</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <style>
         :root {
             --bg-primary: #000000;
@@ -21,9 +24,9 @@
         }
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
@@ -32,51 +35,50 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             height: 100vh;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .view {
+        /* View Container */
+        .view-container {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            padding-top: 60px;
-            padding-bottom: 70px;
-            overflow-y: auto;
-            display: none;
+            overflow: hidden;
         }
 
-        .view.active {
-            display: block;
-        }
-
-        header {
+        /* Header */
+        .header {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 60px;
-            background: var(--bg-secondary);
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--separator);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
-            z-index: 100;
+            padding: 0 16px;
+            z-index: 1000;
         }
 
+        /* Tab Bar */
         .tab-bar {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 70px;
-            background: var(--bg-secondary);
+            height: 60px;
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: blur(10px);
             border-top: 1px solid var(--separator);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            z-index: 100;
+            z-index: 1000;
         }
 
         .tab-item {
@@ -87,8 +89,10 @@
             justify-content: center;
             color: var(--text-secondary);
             font-size: 10px;
-            padding: 10px 0;
+            gap: 4px;
+            height: 100%;
             cursor: pointer;
+            transition: color 0.2s;
         }
 
         .tab-item.active {
@@ -97,91 +101,186 @@
 
         .tab-item i {
             font-size: 20px;
-            margin-bottom: 4px;
+        }
+
+        /* Views */
+        .view {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 120px);
+            overflow-y: auto;
+            display: none;
+            padding-bottom: 20px;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Deck List */
+        .deck-list {
+            padding: 16px;
         }
 
         .deck-item {
-            background: var(--card-bg);
-            margin: 10px 16px;
+            background-color: var(--bg-secondary);
             padding: 16px;
+            margin-bottom: 12px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .deck-item:active {
+            transform: scale(0.98);
+            background-color: var(--card-bg);
+        }
+
+        .deck-counts {
+            display: flex;
+            gap: 12px;
+        }
+
+        .count-new { color: var(--accent); }
+        .count-learn { color: var(--warning); }
+        .count-review { color: var(--success); }
+
+        /* Flashcard */
+        .flashcard-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
         .flashcard {
             background: var(--card-bg);
             border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
             min-height: 300px;
-            padding: 30px;
+            padding: 32px 24px;
             font-size: 20px;
             line-height: 1.5;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
+            align-items: center;
             text-align: center;
-            margin: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             cursor: pointer;
+            user-select: none;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
+        .card-content {
+            width: 100%;
+        }
+
+        /* Review Controls */
         .review-controls {
             position: fixed;
-            bottom: 80px;
+            bottom: 70px;
             left: 0;
             width: 100%;
-            padding: 0 20px;
+            padding: 0 16px;
             display: flex;
-            gap: 10px;
-            z-index: 90;
+            gap: 8px;
+            z-index: 900;
         }
 
         .btn-answer {
             flex: 1;
-            padding: 14px 0;
-            border-radius: 10px;
+            padding: 12px 0;
+            border-radius: 8px;
             font-weight: 600;
             font-size: 14px;
             color: white;
-            border: none;
-            cursor: pointer;
+            text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
         }
 
-        .btn-again { background: var(--danger); }
-        .btn-hard { background: var(--warning); }
-        .btn-good { background: var(--success); }
-        .btn-easy { background: var(--accent); }
-
-        .btn-answer span.time {
-            font-size: 10px;
+        .btn-answer:active {
             opacity: 0.8;
+        }
+
+        .btn-again { background-color: var(--danger); }
+        .btn-hard { background-color: var(--warning); }
+        .btn-good { background-color: var(--success); }
+        .btn-easy { background-color: var(--accent); }
+
+        .btn-answer small {
+            font-size: 10px;
+            opacity: 0.9;
             font-weight: normal;
             margin-top: 2px;
         }
 
-        .hidden {
-            display: none !important;
+        /* Form Elements */
+        .form-container {
+            padding: 16px;
         }
 
-        input, textarea, select {
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 12px;
             background: var(--bg-secondary);
             border: 1px solid var(--separator);
-            color: var(--text-primary);
             border-radius: 8px;
-            padding: 12px;
-            width: 100%;
-            margin-bottom: 12px;
+            color: var(--text-primary);
             font-size: 16px;
+            font-family: inherit;
         }
 
-        textarea {
+        .form-textarea {
             min-height: 100px;
+            resize: vertical;
         }
 
+        .form-button {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .form-button:active {
+            opacity: 0.8;
+        }
+
+        /* Cloze Styles */
         .cloze {
             color: var(--accent);
             font-weight: bold;
@@ -195,16 +294,31 @@
             font-weight: bold;
             border-bottom: 2px dashed var(--accent);
             padding: 0 4px;
+            cursor: pointer;
         }
 
+        /* Browser */
+        .browser-list {
+            padding: 16px;
+        }
+
+        .browser-item {
+            background: var(--bg-secondary);
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+        }
+
+        /* Stats */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin: 16px;
+            gap: 16px;
+            padding: 16px;
         }
 
-        .stat-box {
+        .stat-card {
             background: var(--card-bg);
             padding: 20px;
             border-radius: 12px;
@@ -212,7 +326,7 @@
         }
 
         .stat-value {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: bold;
             margin-bottom: 4px;
         }
@@ -222,50 +336,10 @@
             color: var(--text-secondary);
         }
 
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
-            color: var(--text-secondary);
-        }
-
-        .loading i {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .card-content {
-            width: 100%;
-        }
-
-        .count {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .count-new { background: rgba(10, 132, 255, 0.2); color: var(--accent); }
-        .count-learn { background: rgba(255, 159, 10, 0.2); color: var(--warning); }
-        .count-review { background: rgba(50, 215, 75, 0.2); color: var(--success); }
-
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 16px;
-            width: 100%;
-            cursor: pointer;
-        }
-
+        /* FAB */
         .fab {
             position: fixed;
-            bottom: 80px;
+            bottom: 70px;
             right: 20px;
             width: 56px;
             height: 56px;
@@ -276,211 +350,181 @@
             align-items: center;
             justify-content: center;
             font-size: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            z-index: 900;
             cursor: pointer;
             border: none;
-            z-index: 99;
+            transition: transform 0.2s;
         }
 
-        .review-info {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 20px;
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .error {
+            color: var(--danger);
+            background: rgba(255, 69, 58, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 16px;
+            text-align: center;
+        }
+
+        .success {
+            color: var(--success);
+            background: rgba(50, 215, 75, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 16px;
+            text-align: center;
+        }
+
+        /* Cloze Examples */
+        .cloze-examples {
+            background: var(--bg-secondary);
+            padding: 16px;
+            margin: 16px;
+            border-radius: 12px;
             font-size: 14px;
             color: var(--text-secondary);
         }
 
-        .deck-counts {
-            display: flex;
-            gap: 10px;
+        .cloze-examples h4 {
+            color: var(--accent);
+            margin-bottom: 8px;
         }
 
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 400px;
-            width: 100%;
-        }
-
-        .modal h3 {
-            margin-bottom: 16px;
-            font-size: 18px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .modal-buttons button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .modal-cancel {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .modal-confirm {
-            background: var(--accent);
-            color: white;
+        .cloze-examples code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
     <!-- Header -->
-    <header>
-        <h1 id="header-title">Anki iOS</h1>
-    </header>
-
-    <!-- Deck List View -->
-    <div id="view-decks" class="view active">
-        <div style="padding: 16px;">
-            <h2 style="font-size: 11px; color: #8e8e93; text-transform: uppercase; font-weight: 600; margin-bottom: 12px;">My Decks</h2>
-            <div id="deck-list-container">
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <div>Loading decks...</div>
-                </div>
-            </div>
-        </div>
-        <button class="fab" id="fab-add-deck">
-            <i class="fas fa-plus"></i>
-        </button>
+    <div class="header">
+        <h1 id="header-title" class="text-lg font-bold">Anki iOS</h1>
+        <div id="header-actions"></div>
     </div>
 
-    <!-- Review View -->
-    <div id="view-review" class="view">
-        <div class="review-info">
-            <div class="deck-counts">
-                <span class="count count-new" id="count-new">0</span>
-                <span class="count count-learn" id="count-learn">0</span>
-                <span class="count count-review" id="count-review">0</span>
+    <!-- View Container -->
+    <div class="view-container">
+        <!-- Deck List View -->
+        <div id="view-decks" class="view active">
+            <div class="deck-list">
+                <h2 class="text-lg font-bold mb-4">My Decks</h2>
+                <div id="deck-list"></div>
             </div>
-            <div id="timer">0s</div>
+            <button class="fab" id="add-deck-fab">
+                <i class="fa-solid fa-plus"></i>
+            </button>
         </div>
-        
-        <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-            <div class="flashcard" id="card-content">
-                <div class="card-content" id="card-text">
-                    <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <div>Loading card...</div>
+
+        <!-- Review View -->
+        <div id="view-review" class="view">
+            <div class="flashcard-container">
+                <div class="flashcard" id="card-content">
+                    <div class="text-gray-500">Tap to start studying...</div>
+                </div>
+            </div>
+            
+            <div id="answer-controls" class="review-controls hidden">
+                <button class="btn-answer btn-again" data-rating="1">Again<small>1m</small></button>
+                <button class="btn-answer btn-hard" data-rating="2">Hard<small>10m</small></button>
+                <button class="btn-answer btn-good" data-rating="3">Good<small>1d</small></button>
+                <button class="btn-answer btn-easy" data-rating="4">Easy<small>4d</small></button>
+            </div>
+            
+            <div id="show-answer-control" class="review-controls">
+                <button class="btn-answer" style="background: var(--card-bg);" id="show-answer-btn">
+                    Show Answer
+                </button>
+            </div>
+        </div>
+
+        <!-- Add Card View -->
+        <div id="view-add" class="view">
+            <div class="form-container">
+                <h2 class="text-lg font-bold mb-6">Add New Card</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Deck</label>
+                    <select class="form-select" id="deck-select">
+                        <option value="">Loading decks...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Card Type</label>
+                    <select class="form-select" id="card-type">
+                        <option value="basic">Basic</option>
+                        <option value="basic-rev">Basic (and Reversed Card)</option>
+                        <option value="cloze">Cloze</option>
+                        <option value="cloze+">Cloze+ (Multiple deletions)</option>
+                    </select>
+                </div>
+
+                <div id="fields-container">
+                    <div class="form-group">
+                        <label class="form-label" id="front-label">Front</label>
+                        <textarea class="form-textarea" id="front-field" placeholder="Enter question or text..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" id="back-label">Back</label>
+                        <textarea class="form-textarea" id="back-field" placeholder="Enter answer or additional information..."></textarea>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Show Answer Button -->
-        <div id="show-answer-controls" class="review-controls">
-            <button class="btn-primary" id="btn-show-answer">
-                Show Answer
-            </button>
-        </div>
-
-        <!-- Answer Buttons -->
-        <div id="answer-controls" class="review-controls hidden">
-            <button class="btn-answer btn-again" id="btn-again">
-                Again
-                <span class="time" id="time-again">1m</span>
-            </button>
-            <button class="btn-answer btn-hard" id="btn-hard">
-                Hard
-                <span class="time" id="time-hard">10m</span>
-            </button>
-            <button class="btn-answer btn-good" id="btn-good">
-                Good
-                <span class="time" id="time-good">1d</span>
-            </button>
-            <button class="btn-answer btn-easy" id="btn-easy">
-                Easy
-                <span class="time" id="time-easy">4d</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Add Card View -->
-    <div id="view-add" class="view">
-        <div style="padding: 16px;">
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Deck</label>
-                <select id="deck-select" style="width: 100%;">
-                    <option value="">Select a deck</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Card Type</label>
-                <select id="card-type" style="width: 100%;">
-                    <option value="basic">Basic</option>
-                    <option value="basic-reversed">Basic (and reversed card)</option>
-                    <option value="cloze">Cloze</option>
-                </select>
-            </div>
-
-            <div id="fields-container">
-                <!-- Dynamic fields will be inserted here -->
-            </div>
-
-            <button id="btn-add-card" class="btn-primary" style="margin-top: 24px;">
-                Add Card
-            </button>
-        </div>
-    </div>
-
-    <!-- Browse View -->
-    <div id="view-browse" class="view">
-        <div style="padding: 16px;">
-            <input type="text" id="search-box" style="width: 100%; margin-bottom: 16px;" placeholder="Search cards...">
-            <div id="browser-container">
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <div>Loading cards...</div>
+                <div class="cloze-examples hidden" id="cloze-examples">
+                    <h4>Cloze Syntax Examples:</h4>
+                    <p>• Basic cloze: <code>{{c1::capital}} of France</code></p>
+                    <p>• Multiple clozes: <code>{{c1::Paris}} is the {{c2::capital}} of {{c3::France}}</code></p>
+                    <p>• Cloze with hint: <code>{{c1::Paris::capital city}}</code></p>
                 </div>
+
+                <button class="form-button" id="save-card-btn">Add Card</button>
             </div>
         </div>
-    </div>
 
-    <!-- Stats View -->
-    <div id="view-stats" class="view">
-        <div style="padding: 16px;">
-            <h2 style="text-align: center; font-size: 20px; font-weight: 600; margin-bottom: 20px;">Statistics</h2>
-            
+        <!-- Browser View -->
+        <div id="view-browse" class="view">
+            <div class="form-container">
+                <input type="text" class="form-input mb-4" id="search-input" placeholder="Search cards...">
+                <div id="browser-content"></div>
+            </div>
+        </div>
+
+        <!-- Stats View -->
+        <div id="view-stats" class="view">
             <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-value" style="color: #0a84ff;" id="stat-total">0</div>
+                <div class="stat-card">
+                    <div class="stat-value text-blue-500" id="stat-total">0</div>
                     <div class="stat-label">Total Cards</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-value" style="color: #32d74b;" id="stat-due">0</div>
+                <div class="stat-card">
+                    <div class="stat-value text-green-500" id="stat-due">0</div>
                     <div class="stat-label">Due Today</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-value" style="color: #ff9f0a;" id="stat-new">0</div>
-                    <div class="stat-label">New Cards</div>
+                <div class="stat-card">
+                    <div class="stat-value text-yellow-500" id="stat-learn">0</div>
+                    <div class="stat-label">Learning</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-value" style="color: #bf5af2;" id="stat-learn">0</div>
-                    <div class="stat-label">In Learning</div>
+                <div class="stat-card">
+                    <div class="stat-value text-purple-500" id="stat-review">0</div>
+                    <div class="stat-label">To Review</div>
                 </div>
             </div>
         </div>
@@ -489,133 +533,136 @@
     <!-- Tab Bar -->
     <div class="tab-bar">
         <div class="tab-item active" data-view="decks">
-            <i class="fas fa-layer-group"></i>
+            <i class="fa-solid fa-layer-group"></i>
             <span>Decks</span>
         </div>
-        <div class="tab-item" data-view="add">
-            <i class="fas fa-plus-circle"></i>
-            <span>Add</span>
-        </div>
         <div class="tab-item" data-view="review">
-            <i class="fas fa-book-open"></i>
+            <i class="fa-solid fa-graduation-cap"></i>
             <span>Study</span>
         </div>
+        <div class="tab-item" data-view="add">
+            <i class="fa-solid fa-plus-circle"></i>
+            <span>Add</span>
+        </div>
         <div class="tab-item" data-view="browse">
-            <i class="fas fa-search"></i>
+            <i class="fa-solid fa-magnifying-glass"></i>
             <span>Browse</span>
         </div>
         <div class="tab-item" data-view="stats">
-            <i class="fas fa-chart-bar"></i>
+            <i class="fa-solid fa-chart-simple"></i>
             <span>Stats</span>
         </div>
     </div>
 
-    <!-- Modal for adding deck -->
-    <div id="modal-add-deck" class="modal hidden">
-        <div class="modal-content">
-            <h3>New Deck</h3>
-            <input type="text" id="deck-name-input" placeholder="Enter deck name">
-            <div class="modal-buttons">
-                <button class="modal-cancel" id="modal-cancel">Cancel</button>
-                <button class="modal-confirm" id="modal-confirm">Create</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-    // ============================================================================
-    // ANKI APP - Made by © Muhammad Daler
-    // ============================================================================
-
+    // Anki iOS App - Made by Muhammad Daler
     class AnkiApp {
         constructor() {
             this.db = null;
             this.currentDeck = null;
+            this.studyQueue = [];
             this.currentCard = null;
             this.currentNote = null;
-            this.studyQueue = [];
-            this.isAnswerShown = false;
-            this.studyStartTime = null;
+            this.isShowingAnswer = false;
+            this.timerStart = null;
             this.timerInterval = null;
-            this.decks = [];
-            this.cards = [];
-            this.notes = [];
             
             this.init();
         }
 
         async init() {
-            await this.initDatabase();
-            await this.loadInitialData();
-            this.setupEventListeners();
-            this.updateFields();
-            this.loadDecks();
+            try {
+                await this.initDatabase();
+                await this.loadInitialData();
+                this.setupEventListeners();
+                this.setupTabs();
+                this.updateCardTypeUI();
+                this.renderDeckList();
+                this.updateDeckSelect();
+                this.updateStats();
+                
+                console.log('Anki iOS App initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                this.showError('Failed to initialize app. Please refresh.');
+            }
         }
 
-        // ============================================================================
-        // DATABASE
-        // ============================================================================
-
-        async initDatabase() {
+        initDatabase() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('AnkiDB', 1);
+                const request = indexedDB.open('AnkiiOSDB', 3);
                 
-                request.onerror = () => {
-                    console.error('Database error:', request.error);
-                    reject(request.error);
-                };
+                request.onerror = () => reject(request.error);
                 
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
                     
                     // Create decks store
                     if (!db.objectStoreNames.contains('decks')) {
-                        const decksStore = db.createObjectStore('decks', { keyPath: 'id' });
-                        decksStore.createIndex('name', 'name', { unique: true });
+                        const deckStore = db.createObjectStore('decks', { keyPath: 'id' });
+                        deckStore.createIndex('name', 'name', { unique: true });
                     }
                     
                     // Create notes store
                     if (!db.objectStoreNames.contains('notes')) {
-                        const notesStore = db.createObjectStore('notes', { keyPath: 'id' });
-                        notesStore.createIndex('deckId', 'deckId');
-                        notesStore.createIndex('type', 'type');
+                        const noteStore = db.createObjectStore('notes', { keyPath: 'id' });
+                        noteStore.createIndex('deckId', 'deckId', { unique: false });
+                        noteStore.createIndex('type', 'type', { unique: false });
                     }
                     
                     // Create cards store
                     if (!db.objectStoreNames.contains('cards')) {
-                        const cardsStore = db.createObjectStore('cards', { keyPath: 'id' });
-                        cardsStore.createIndex('noteId', 'noteId');
-                        cardsStore.createIndex('deckId', 'deckId');
-                        cardsStore.createIndex('due', 'due');
-                        cardsStore.createIndex('type', 'type');
+                        const cardStore = db.createObjectStore('cards', { keyPath: 'id' });
+                        cardStore.createIndex('deckId', 'deckId', { unique: false });
+                        cardStore.createIndex('noteId', 'noteId', { unique: false });
+                        cardStore.createIndex('due', 'due', { unique: false });
+                        cardStore.createIndex('type', 'type', { unique: false });
+                    }
+                    
+                    // Create revlog store
+                    if (!db.objectStoreNames.contains('revlog')) {
+                        const revlogStore = db.createObjectStore('revlog', { keyPath: 'id' });
+                        revlogStore.createIndex('cardId', 'cardId', { unique: false });
                     }
                 };
                 
                 request.onsuccess = (event) => {
                     this.db = event.target.result;
-                    console.log('Database initialized successfully');
                     resolve();
                 };
             });
         }
 
-        // Database helper methods
+        async loadInitialData() {
+            // Create default deck if none exists
+            const decks = await this.getAll('decks');
+            if (decks.length === 0) {
+                await this.add('decks', {
+                    id: Date.now(),
+                    name: 'Default',
+                    created: Date.now(),
+                    desc: 'Default deck'
+                });
+            }
+        }
+
+        // Database operations
         async getAll(storeName) {
             return new Promise((resolve, reject) => {
                 const transaction = this.db.transaction([storeName], 'readonly');
                 const store = transaction.objectStore(storeName);
                 const request = store.getAll();
                 
-                request.onsuccess = () => resolve(request.result || []);
+                request.onsuccess = () => resolve(request.result);
                 request.onerror = () => reject(request.error);
             });
         }
 
-        async get(storeName, id) {
+        async get(storeName, key) {
             return new Promise((resolve, reject) => {
                 const transaction = this.db.transaction([storeName], 'readonly');
                 const store = transaction.objectStore(storeName);
-                const request = store.get(id);
+                const request = store.get(key);
                 
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = () => reject(request.error);
@@ -644,892 +691,766 @@
             });
         }
 
-        async delete(storeName, id) {
+        async delete(storeName, key) {
             return new Promise((resolve, reject) => {
                 const transaction = this.db.transaction([storeName], 'readwrite');
                 const store = transaction.objectStore(storeName);
-                const request = store.delete(id);
+                const request = store.delete(key);
                 
                 request.onsuccess = () => resolve();
                 request.onerror = () => reject(request.error);
             });
         }
 
-        async getByIndex(storeName, indexName, value) {
-            return new Promise((resolve, reject) => {
-                const transaction = this.db.transaction([storeName], 'readonly');
-                const store = transaction.objectStore(storeName);
-                const index = store.index(indexName);
-                const request = index.getAll(value);
-                
-                request.onsuccess = () => resolve(request.result || []);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        // ============================================================================
-        // DATA LOADING
-        // ============================================================================
-
-        async loadInitialData() {
-            try {
-                // Load all data
-                this.decks = await this.getAll('decks');
-                this.notes = await this.getAll('notes');
-                this.cards = await this.getAll('cards');
-                
-                // If no decks, create default
-                if (this.decks.length === 0) {
-                    const defaultDeck = {
-                        id: Date.now(),
-                        name: 'Default',
-                        created: Date.now()
-                    };
-                    
-                    await this.add('decks', defaultDeck);
-                    this.decks = [defaultDeck];
-                }
-                
-                console.log('Initial data loaded:', {
-                    decks: this.decks.length,
-                    notes: this.notes.length,
-                    cards: this.cards.length
+        // Navigation
+        setupTabs() {
+            document.querySelectorAll('.tab-item').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const view = e.currentTarget.dataset.view;
+                    this.switchView(view);
                 });
-                
-            } catch (error) {
-                console.error('Error loading initial data:', error);
-            }
-        }
-
-        // ============================================================================
-        // UI UPDATES
-        // ============================================================================
-
-        updateFields() {
-            const container = document.getElementById('fields-container');
-            const type = document.getElementById('card-type').value;
-            
-            if (type === 'cloze') {
-                container.innerHTML = `
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Text (Use {{c1::cloze}} syntax)</label>
-                        <textarea id="field-front" rows="4" placeholder="Example: The {{c1::capital}} of France is {{c2::Paris}}."></textarea>
-                        <div style="background: rgba(10, 132, 255, 0.1); padding: 12px; border-radius: 8px; margin-top: 8px; font-size: 12px; color: #0a84ff;">
-                            <strong>Example:</strong> The {{c1::capital}} of France is {{c2::Paris}}.
-                        </div>
-                    </div>
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Extra Information (Optional)</label>
-                        <textarea id="field-back" rows="3" placeholder="Additional notes or context"></textarea>
-                    </div>
-                `;
-            } else {
-                container.innerHTML = `
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Front</label>
-                        <textarea id="field-front" rows="3" placeholder="Question or term"></textarea>
-                    </div>
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Back</label>
-                        <textarea id="field-back" rows="3" placeholder="Answer or definition"></textarea>
-                    </div>
-                `;
-            }
-            
-            this.updateDeckSelect();
-        }
-
-        updateDeckSelect() {
-            const select = document.getElementById('deck-select');
-            select.innerHTML = '<option value="">Select a deck</option>';
-            
-            this.decks.forEach(deck => {
-                const option = document.createElement('option');
-                option.value = deck.id;
-                option.textContent = deck.name;
-                select.appendChild(option);
             });
         }
 
-        // ============================================================================
-        // NAVIGATION
-        // ============================================================================
-
-        navigate(view) {
+        switchView(viewName) {
             // Hide all views
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
             
             // Show selected view
-            document.getElementById(`view-${view}`).classList.add('active');
+            const targetView = document.getElementById(`view-${viewName}`);
+            if (targetView) {
+                targetView.classList.add('active');
+            }
             
-            // Activate corresponding tab
-            document.querySelector(`.tab-item[data-view="${view}"]`).classList.add('active');
+            // Update tabs
+            document.querySelectorAll('.tab-item').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.view === viewName) {
+                    tab.classList.add('active');
+                }
+            });
             
             // Update header title
             const titles = {
-                decks: 'My Decks',
-                add: 'Add Card',
-                review: 'Study',
-                browse: 'Browse Cards',
-                stats: 'Statistics'
+                'decks': 'My Decks',
+                'review': 'Study',
+                'add': 'Add Card',
+                'browse': 'Browse Cards',
+                'stats': 'Statistics'
             };
-            document.getElementById('header-title').textContent = titles[view] || 'Anki iOS';
+            document.getElementById('header-title').textContent = titles[viewName] || 'Anki iOS';
             
-            // Load data for the view
-            switch(view) {
+            // Refresh data for the view
+            switch(viewName) {
                 case 'decks':
-                    this.loadDecks();
-                    break;
-                case 'stats':
-                    this.loadStats();
+                    this.renderDeckList();
                     break;
                 case 'browse':
-                    this.loadBrowse();
+                    this.renderBrowser();
+                    break;
+                case 'stats':
+                    this.updateStats();
                     break;
             }
         }
 
-        // ============================================================================
-        // DECK MANAGEMENT
-        // ============================================================================
-
-        async loadDecks() {
-            const container = document.getElementById('deck-list-container');
+        // Deck Management
+        async renderDeckList() {
+            const container = document.getElementById('deck-list');
+            container.innerHTML = '';
             
             try {
-                // Reload decks from database
-                this.decks = await this.getAll('decks');
-                this.cards = await this.getAll('cards');
+                const decks = await this.getAll('decks');
+                const cards = await this.getAll('cards');
                 
-                container.innerHTML = '';
-                
-                if (this.decks.length === 0) {
-                    container.innerHTML = '<div style="text-align: center; color: #8e8e93; padding: 40px 0;">No decks yet. Create your first deck!</div>';
+                if (decks.length === 0) {
+                    container.innerHTML = '<div class="error">No decks found. Create your first deck!</div>';
                     return;
                 }
                 
-                const now = Date.now() / 1000;
-                const today = Math.floor(now / 86400);
+                const now = Date.now();
+                const today = Math.floor(now / 86400000);
                 
-                for (const deck of this.decks) {
-                    const deckCards = this.cards.filter(card => card.deckId === deck.id);
+                for (const deck of decks) {
+                    const deckCards = cards.filter(card => card.deckId === deck.id);
                     
-                    const newCards = deckCards.filter(card => card.type === 0).length;
-                    const learnCards = deckCards.filter(card => (card.type === 1 || card.type === 3) && card.due < now).length;
-                    const reviewCards = deckCards.filter(card => card.type === 2 && card.due <= today).length;
+                    // Calculate counts
+                    const newCount = deckCards.filter(c => c.type === 0).length;
+                    const learnCount = deckCards.filter(c => 
+                        (c.type === 1 || c.type === 3) && c.due < now / 1000
+                    ).length;
+                    const reviewCount = deckCards.filter(c => 
+                        c.type === 2 && c.due <= today
+                    ).length;
                     
                     const deckElement = document.createElement('div');
                     deckElement.className = 'deck-item';
                     deckElement.innerHTML = `
                         <div>
-                            <div style="font-weight: 600; font-size: 16px;">${deck.name}</div>
-                            <div style="font-size: 12px; color: #8e8e93;">${deckCards.length} cards</div>
+                            <div class="font-semibold text-lg">${deck.name}</div>
+                            <div class="text-sm text-gray-500 mt-1">${deckCards.length} cards</div>
                         </div>
-                        <div style="display: flex; gap: 8px;">
-                            <span class="count count-new">${newCards}</span>
-                            <span class="count count-learn">${learnCards}</span>
-                            <span class="count count-review">${reviewCards}</span>
+                        <div class="deck-counts">
+                            <div class="count-new">${newCount}</div>
+                            <div class="count-learn">${learnCount}</div>
+                            <div class="count-review">${reviewCount}</div>
                         </div>
                     `;
                     
-                    deckElement.addEventListener('click', () => this.startStudy(deck.id));
+                    deckElement.addEventListener('click', () => this.startStudySession(deck.id));
                     container.appendChild(deckElement);
                 }
-                
             } catch (error) {
-                console.error('Error loading decks:', error);
-                container.innerHTML = '<div style="text-align: center; color: #ff453a; padding: 40px 0;">Error loading decks</div>';
+                console.error('Error rendering deck list:', error);
+                container.innerHTML = '<div class="error">Error loading decks</div>';
             }
         }
 
-        showAddDeckModal() {
-            document.getElementById('modal-add-deck').classList.remove('hidden');
-            document.getElementById('deck-name-input').focus();
-        }
-
-        hideAddDeckModal() {
-            document.getElementById('modal-add-deck').classList.add('hidden');
-            document.getElementById('deck-name-input').value = '';
-        }
-
-        async createDeck() {
-            const name = document.getElementById('deck-name-input').value.trim();
-            
-            if (!name) {
-                alert('Please enter a deck name');
-                return;
-            }
-            
+        async startStudySession(deckId) {
             try {
-                const deck = {
-                    id: Date.now(),
-                    name: name,
-                    created: Date.now()
-                };
+                this.currentDeck = deckId;
+                const deck = await this.get('decks', deckId);
+                if (!deck) {
+                    this.showError('Deck not found');
+                    return;
+                }
                 
-                await this.add('decks', deck);
-                this.decks.push(deck);
+                // Build study queue
+                await this.buildStudyQueue(deckId);
                 
-                this.updateDeckSelect();
-                this.loadDecks();
-                this.hideAddDeckModal();
+                if (this.studyQueue.length === 0) {
+                    this.showMessage('No cards to study right now!');
+                    return;
+                }
                 
-                console.log('Deck created:', deck);
-                
+                this.switchView('review');
+                this.startTimer();
+                this.showNextCard();
             } catch (error) {
-                console.error('Error creating deck:', error);
-                if (error.name === 'ConstraintError') {
-                    alert('A deck with this name already exists');
-                } else {
-                    alert('Failed to create deck');
-                }
+                console.error('Error starting study session:', error);
+                this.showError('Failed to start study session');
             }
-        }
-
-        // ============================================================================
-        // CARD MANAGEMENT
-        // ============================================================================
-
-        async addCard() {
-            const deckId = parseInt(document.getElementById('deck-select').value);
-            const type = document.getElementById('card-type').value;
-            const front = document.getElementById('field-front').value.trim();
-            const back = document.getElementById('field-back').value.trim();
-            
-            if (!deckId) {
-                alert('Please select a deck');
-                return;
-            }
-            
-            if (!front) {
-                alert('Front field cannot be empty');
-                return;
-            }
-            
-            try {
-                const noteId = Date.now();
-                
-                // Create note
-                const note = {
-                    id: noteId,
-                    deckId: deckId,
-                    type: type,
-                    front: front,
-                    back: back,
-                    created: Date.now()
-                };
-                
-                await this.add('notes', note);
-                this.notes.push(note);
-                
-                // Create cards based on type
-                if (type === 'basic') {
-                    const card = {
-                        id: noteId * 10,
-                        noteId: noteId,
-                        deckId: deckId,
-                        order: 0,
-                        type: 0, // new
-                        due: 0,
-                        interval: 0,
-                        ease: 2.5,
-                        reps: 0,
-                        lapses: 0
-                    };
-                    await this.add('cards', card);
-                    this.cards.push(card);
-                } 
-                else if (type === 'basic-reversed') {
-                    // Front card
-                    const card1 = {
-                        id: noteId * 10,
-                        noteId: noteId,
-                        deckId: deckId,
-                        order: 0,
-                        type: 0,
-                        due: 0,
-                        interval: 0,
-                        ease: 2.5,
-                        reps: 0,
-                        lapses: 0
-                    };
-                    
-                    // Reversed card
-                    const card2 = {
-                        id: noteId * 10 + 1,
-                        noteId: noteId,
-                        deckId: deckId,
-                        order: 1,
-                        type: 0,
-                        due: 0,
-                        interval: 0,
-                        ease: 2.5,
-                        reps: 0,
-                        lapses: 0
-                    };
-                    
-                    await this.add('cards', card1);
-                    await this.add('cards', card2);
-                    this.cards.push(card1, card2);
-                }
-                else if (type === 'cloze') {
-                    // Extract cloze numbers from front text
-                    const clozeRegex = /{{c(\d+)::(.*?)}}/g;
-                    const matches = [...front.matchAll(clozeRegex)];
-                    const clozeNumbers = [...new Set(matches.map(m => parseInt(m[1])))];
-                    
-                    // If no cloze found, create one card
-                    if (clozeNumbers.length === 0) {
-                        const card = {
-                            id: noteId * 10,
-                            noteId: noteId,
-                            deckId: deckId,
-                            order: 0,
-                            type: 0,
-                            due: 0,
-                            interval: 0,
-                            ease: 2.5,
-                            reps: 0,
-                            lapses: 0
-                        };
-                        await this.add('cards', card);
-                        this.cards.push(card);
-                    } else {
-                        // Create a card for each cloze
-                        for (let i = 0; i < clozeNumbers.length; i++) {
-                            const card = {
-                                id: noteId * 10 + i,
-                                noteId: noteId,
-                                deckId: deckId,
-                                order: i,
-                                type: 0,
-                                due: 0,
-                                interval: 0,
-                                ease: 2.5,
-                                reps: 0,
-                                lapses: 0
-                            };
-                            await this.add('cards', card);
-                            this.cards.push(card);
-                        }
-                    }
-                }
-                
-                // Clear form
-                document.getElementById('field-front').value = '';
-                document.getElementById('field-back').value = '';
-                
-                alert('Card added successfully!');
-                this.navigate('decks');
-                
-            } catch (error) {
-                console.error('Error adding card:', error);
-                alert('Failed to add card');
-            }
-        }
-
-        // ============================================================================
-        // STUDY SYSTEM
-        // ============================================================================
-
-        async startStudy(deckId) {
-            this.currentDeck = deckId;
-            
-            // Reload cards from database
-            this.cards = await this.getAll('cards');
-            this.notes = await this.getAll('notes');
-            
-            // Build study queue
-            await this.buildStudyQueue(deckId);
-            
-            if (this.studyQueue.length === 0) {
-                alert('No cards to study in this deck');
-                return;
-            }
-            
-            // Start study session
-            this.isAnswerShown = false;
-            this.studyStartTime = Date.now();
-            this.startTimer();
-            
-            // Update UI counts
-            document.getElementById('count-new').textContent = this.reviewCounts.new;
-            document.getElementById('count-learn').textContent = this.reviewCounts.learn;
-            document.getElementById('count-review').textContent = this.reviewCounts.review;
-            
-            // Navigate to review view
-            this.navigate('review');
-            
-            // Show first card
-            this.showNextCard();
         }
 
         async buildStudyQueue(deckId) {
-            const now = Date.now() / 1000;
-            const today = Math.floor(now / 86400);
-            
-            // Filter cards for current deck
-            const deckCards = this.cards.filter(card => card.deckId === deckId);
-            
-            // Categorize cards
-            const learningCards = deckCards.filter(card => 
-                (card.type === 1 || card.type === 3) && card.due < now
-            ).sort((a, b) => a.due - b.due);
-            
-            const reviewCards = deckCards.filter(card => 
-                card.type === 2 && card.due <= today
-            ).sort((a, b) => a.due - b.due);
-            
-            const newCards = deckCards.filter(card => card.type === 0);
-            
-            // Update review counts
-            this.reviewCounts = {
-                new: newCards.length,
-                learn: learningCards.length,
-                review: reviewCards.length
-            };
-            
-            // Build queue
-            this.studyQueue = [...learningCards, ...reviewCards, ...newCards];
-            
-            console.log('Study queue built:', {
-                total: this.studyQueue.length,
-                new: newCards.length,
-                learning: learningCards.length,
-                review: reviewCards.length
-            });
+            try {
+                const cards = await this.getAll('cards');
+                const deckCards = cards.filter(card => card.deckId === deckId);
+                
+                const now = Date.now();
+                const today = Math.floor(now / 86400000);
+                
+                // Sort cards by priority
+                const learningCards = deckCards.filter(card => 
+                    (card.type === 1 || card.type === 3) && card.due < now / 1000
+                ).sort((a, b) => a.due - b.due);
+                
+                const reviewCards = deckCards.filter(card => 
+                    card.type === 2 && card.due <= today
+                ).sort((a, b) => a.due - b.due);
+                
+                const newCards = deckCards.filter(card => card.type === 0).slice(0, 20);
+                
+                this.studyQueue = [...learningCards, ...reviewCards, ...newCards];
+            } catch (error) {
+                console.error('Error building study queue:', error);
+                this.studyQueue = [];
+            }
         }
 
+        // Card Study
         async showNextCard() {
             if (this.studyQueue.length === 0) {
                 this.endStudySession();
                 return;
             }
             
-            this.currentCard = this.studyQueue[0];
-            this.isAnswerShown = false;
+            this.currentCard = this.studyQueue.shift();
+            this.currentNote = await this.get('notes', this.currentCard.noteId);
+            this.isShowingAnswer = false;
             
-            // Find the note for this card
-            this.currentNote = this.notes.find(note => note.id === this.currentCard.noteId);
+            this.renderCardFront();
             
-            if (!this.currentNote) {
-                console.error('Note not found for card:', this.currentCard);
-                // Skip this card
-                this.studyQueue.shift();
-                this.showNextCard();
-                return;
-            }
-            
-            // Show card front
-            this.showCardFront();
-            
-            // Update UI
-            document.getElementById('show-answer-controls').classList.remove('hidden');
+            // Show answer button, hide rating buttons
+            document.getElementById('show-answer-control').classList.remove('hidden');
             document.getElementById('answer-controls').classList.add('hidden');
         }
 
-        showCardFront() {
-            const container = document.getElementById('card-text');
-            let content = '';
+        renderCardFront() {
+            const container = document.getElementById('card-content');
             
-            if (this.currentNote.type === 'cloze') {
-                const clozeNumber = this.currentCard.order + 1;
-                let text = this.currentNote.front;
-                
-                // Replace the current cloze with blank
-                const currentClozeRegex = new RegExp(`{{c${clozeNumber}::(.*?)}}`, 'g');
-                text = text.replace(currentClozeRegex, '<span class="cloze-blank">[...]</span>');
-                
-                // Replace other clozes with their content
-                text = text.replace(/{{c\d+::(.*?)}}/g, '$1');
-                
-                content = text;
-            } else if (this.currentCard.order === 1) {
-                // Reversed card
-                content = this.currentNote.back || 'No content';
-            } else {
-                // Normal card
-                content = this.currentNote.front;
+            if (!this.currentNote) {
+                container.innerHTML = '<div class="error">Error loading card</div>';
+                return;
             }
             
-            container.innerHTML = content;
+            let content = '';
+            
+            switch(this.currentNote.type) {
+                case 'cloze':
+                case 'cloze+':
+                    content = this.renderClozeFront();
+                    break;
+                case 'basic-rev':
+                    if (this.currentCard.ord === 1) {
+                        // Reversed card
+                        content = this.formatText(this.currentNote.back);
+                    } else {
+                        // Normal card
+                        content = this.formatText(this.currentNote.front);
+                    }
+                    break;
+                default:
+                    content = this.formatText(this.currentNote.front);
+            }
+            
+            container.innerHTML = `<div class="card-content">${content}</div>`;
+        }
+
+        renderClozeFront() {
+            let text = this.currentNote.front;
+            const clozeNumber = this.currentCard.clozeNumber || 1;
+            
+            // Replace the current cloze with blanks, show others
+            const regex = new RegExp(`{{c${clozeNumber}::(.*?)}}`, 'g');
+            text = text.replace(regex, '<span class="cloze-blank">[...]</span>');
+            
+            // Remove other cloze markers
+            text = text.replace(/{{c\d+::(.*?)}}/g, '$1');
+            
+            return this.formatText(text);
         }
 
         showAnswer() {
-            this.isAnswerShown = true;
+            if (!this.currentNote || this.isShowingAnswer) return;
             
-            const container = document.getElementById('card-text');
+            this.isShowingAnswer = true;
+            const container = document.getElementById('card-content');
+            
             let content = '';
             
-            if (this.currentNote.type === 'cloze') {
-                const clozeNumber = this.currentCard.order + 1;
-                let text = this.currentNote.front;
-                
-                // Highlight the current cloze
-                const currentClozeRegex = new RegExp(`{{c${clozeNumber}::(.*?)}}`, 'g');
-                text = text.replace(currentClozeRegex, '<span class="cloze">$1</span>');
-                
-                // Replace other clozes with their content
-                text = text.replace(/{{c\d+::(.*?)}}/g, '$1');
-                
-                content = text;
-                
-                // Add back content if exists
-                if (this.currentNote.back) {
-                    content += `<div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #38383a; color: #8e8e93;">${this.currentNote.back}</div>`;
-                }
-            } else if (this.currentCard.order === 1) {
-                // Reversed card answer
-                content = `
-                    <div>${this.currentNote.back || 'No content'}</div>
-                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #38383a; color: #8e8e93;">${this.currentNote.front}</div>
-                `;
-            } else {
-                // Normal card answer
-                content = `
-                    <div>${this.currentNote.front}</div>
-                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #38383a; color: #8e8e93;">${this.currentNote.back || 'No answer provided'}</div>
-                `;
+            switch(this.currentNote.type) {
+                case 'cloze':
+                case 'cloze+':
+                    content = this.renderClozeAnswer();
+                    break;
+                case 'basic-rev':
+                    if (this.currentCard.ord === 1) {
+                        content = `
+                            <div class="mb-6">${this.formatText(this.currentNote.back)}</div>
+                            <div class="border-t border-gray-600 pt-6">${this.formatText(this.currentNote.front)}</div>
+                        `;
+                    } else {
+                        content = `
+                            <div class="mb-6">${this.formatText(this.currentNote.front)}</div>
+                            <div class="border-t border-gray-600 pt-6">${this.formatText(this.currentNote.back)}</div>
+                        `;
+                    }
+                    break;
+                default:
+                    content = `
+                        <div class="mb-6">${this.formatText(this.currentNote.front)}</div>
+                        <div class="border-t border-gray-600 pt-6">${this.formatText(this.currentNote.back)}</div>
+                    `;
             }
             
-            container.innerHTML = content;
+            container.innerHTML = `<div class="card-content">${content}</div>`;
             
-            // Update UI
-            document.getElementById('show-answer-controls').classList.add('hidden');
+            // Show rating buttons, hide answer button
+            document.getElementById('show-answer-control').classList.add('hidden');
             document.getElementById('answer-controls').classList.remove('hidden');
-            
-            // Calculate next intervals for buttons
-            this.updateAnswerButtons();
         }
 
-        updateAnswerButtons() {
-            // Simple interval calculation
-            const intervals = {
-                1: '1m',  // Again
-                2: '10m', // Hard
-                3: '1d',  // Good
-                4: '4d'   // Easy
-            };
+        renderClozeAnswer() {
+            let text = this.currentNote.front;
+            const clozeNumber = this.currentCard.clozeNumber || 1;
             
-            document.getElementById('time-again').textContent = intervals[1];
-            document.getElementById('time-hard').textContent = intervals[2];
-            document.getElementById('time-good').textContent = intervals[3];
-            document.getElementById('time-easy').textContent = intervals[4];
+            // Highlight the current cloze
+            const regex = new RegExp(`{{c${clozeNumber}::(.*?)}}`, 'g');
+            text = text.replace(regex, '<span class="cloze">$1</span>');
+            
+            // Remove other cloze markers
+            text = text.replace(/{{c\d+::(.*?)}}/g, '$1');
+            
+            let content = `<div class="mb-6">${this.formatText(text)}</div>`;
+            
+            // Add back content if exists
+            if (this.currentNote.back) {
+                content += `<div class="border-t border-gray-600 pt-6">${this.formatText(this.currentNote.back)}</div>`;
+            }
+            
+            return content;
         }
 
         async answerCard(rating) {
-            // 1 = Again, 2 = Hard, 3 = Good, 4 = Easy
-            const timeSpent = Math.floor((Date.now() - this.studyStartTime) / 1000);
-            
-            // Update card
-            const updatedCard = this.sm2Algorithm(this.currentCard, rating);
-            
-            // Save updated card
-            await this.put('cards', updatedCard);
-            
-            // Update local cards array
-            const cardIndex = this.cards.findIndex(c => c.id === updatedCard.id);
-            if (cardIndex !== -1) {
-                this.cards[cardIndex] = updatedCard;
+            try {
+                if (!this.currentCard) return;
+                
+                // Update card using SM-2 algorithm
+                const updatedCard = this.applySM2(this.currentCard, rating);
+                
+                // Save updated card
+                await this.put('cards', updatedCard);
+                
+                // Log review
+                await this.add('revlog', {
+                    id: Date.now(),
+                    cardId: this.currentCard.id,
+                    rating: rating,
+                    time: Math.floor((Date.now() - this.timerStart) / 1000),
+                    date: Date.now()
+                });
+                
+                // Show next card
+                this.startTimer();
+                this.showNextCard();
+            } catch (error) {
+                console.error('Error answering card:', error);
+                this.showError('Failed to save answer');
             }
-            
-            // Remove from queue
-            this.studyQueue.shift();
-            
-            // Update counts
-            if (this.currentCard.type === 0) {
-                this.reviewCounts.new--;
-            } else if (this.currentCard.type === 1 || this.currentCard.type === 3) {
-                this.reviewCounts.learn--;
-            } else {
-                this.reviewCounts.review--;
-            }
-            
-            // Update UI counts
-            document.getElementById('count-new').textContent = Math.max(0, this.reviewCounts.new);
-            document.getElementById('count-learn').textContent = Math.max(0, this.reviewCounts.learn);
-            document.getElementById('count-review').textContent = Math.max(0, this.reviewCounts.review);
-            
-            // Reset timer for next card
-            this.studyStartTime = Date.now();
-            
-            // Show next card
-            this.showNextCard();
         }
 
-        sm2Algorithm(card, rating) {
-            const now = Date.now() / 1000;
-            const today = Math.floor(now / 86400);
+        applySM2(card, rating) {
+            const now = Date.now();
+            const today = Math.floor(now / 86400000);
             
-            let updatedCard = { ...card };
+            let newType = card.type;
+            let newInterval = card.interval || 0;
+            let newDue = card.due;
+            let newEase = card.ease || 2.5;
+            let newReviews = card.reviews + 1;
+            let newLapses = card.lapses;
             
+            // SM-2 Algorithm
             if (card.type === 0) { // New card
-                if (rating === 1) { // Again
-                    updatedCard.type = 1; // Learning
-                    updatedCard.due = now + 60; // 1 minute
-                    updatedCard.interval = 60;
-                } else if (rating === 2) { // Hard
-                    updatedCard.type = 1;
-                    updatedCard.due = now + 600; // 10 minutes
-                    updatedCard.interval = 600;
-                } else if (rating === 3) { // Good
-                    updatedCard.type = 2; // Review
-                    updatedCard.due = today + 1; // 1 day
-                    updatedCard.interval = 1;
-                } else if (rating === 4) { // Easy
-                    updatedCard.type = 2;
-                    updatedCard.due = today + 4; // 4 days
-                    updatedCard.interval = 4;
+                if (rating >= 3) {
+                    newType = 2; // Review
+                    newInterval = 1; // 1 day
+                    newDue = today + newInterval;
+                } else {
+                    newType = 1; // Learning
+                    newInterval = 1; // 1 minute
+                    newDue = now / 1000 + newInterval;
                 }
-            } else if (card.type === 1 || card.type === 3) { // Learning or relearning
-                if (rating === 1) { // Again
-                    updatedCard.due = now + 60;
-                    updatedCard.interval = 60;
-                } else if (rating === 2) { // Hard
-                    updatedCard.due = now + 600;
-                    updatedCard.interval = 600;
-                } else if (rating >= 3) { // Good or Easy
-                    updatedCard.type = 2; // Graduate to review
-                    if (rating === 3) {
-                        updatedCard.due = today + 1;
-                        updatedCard.interval = 1;
-                    } else {
-                        updatedCard.due = today + 4;
-                        updatedCard.interval = 4;
-                    }
+            } else if (card.type === 1 || card.type === 3) { // Learning or Relearning
+                if (rating >= 3) {
+                    newType = 2;
+                    newInterval = 1;
+                    newDue = today + newInterval;
+                } else {
+                    newInterval = 1;
+                    newDue = now / 1000 + newInterval;
                 }
             } else if (card.type === 2) { // Review
                 if (rating === 1) { // Again
-                    updatedCard.type = 3; // Relearning
-                    updatedCard.due = now + 60;
-                    updatedCard.interval = 60;
-                    updatedCard.lapses++;
+                    newType = 3; // Relearning
+                    newEase = Math.max(1.3, newEase - 0.2);
+                    newLapses++;
+                    newInterval = 1;
+                    newDue = now / 1000 + newInterval;
                 } else {
-                    // Calculate new interval
-                    let interval = card.interval;
+                    newEase = newEase + (rating - 3) * 0.15;
+                    newEase = Math.max(1.3, Math.min(newEase, 5.0));
+                    
                     if (rating === 2) { // Hard
-                        interval = Math.max(1, Math.floor(interval * 1.2));
+                        newInterval = Math.max(1, Math.floor(newInterval * 1.2));
                     } else if (rating === 3) { // Good
-                        interval = Math.floor(interval * 2.5);
+                        newInterval = Math.floor(newInterval * newEase);
                     } else if (rating === 4) { // Easy
-                        interval = Math.floor(interval * 2.5 * 1.3);
+                        newInterval = Math.floor(newInterval * newEase * 1.3);
                     }
                     
-                    updatedCard.due = today + interval;
-                    updatedCard.interval = interval;
+                    newDue = today + newInterval;
                 }
             }
             
-            updatedCard.reps++;
-            updatedCard.lastReview = now;
+            return {
+                ...card,
+                type: newType,
+                interval: newInterval,
+                due: newDue,
+                ease: newEase,
+                reviews: newReviews,
+                lapses: newLapses,
+                lastReviewed: now
+            };
+        }
+
+        // Card Creation
+        updateCardTypeUI() {
+            const cardType = document.getElementById('card-type');
+            const clozeExamples = document.getElementById('cloze-examples');
+            const frontLabel = document.getElementById('front-label');
+            const backLabel = document.getElementById('back-label');
             
-            return updatedCard;
+            cardType.addEventListener('change', () => {
+                const type = cardType.value;
+                
+                if (type === 'cloze' || type === 'cloze+') {
+                    clozeExamples.classList.remove('hidden');
+                    frontLabel.textContent = 'Text (use {{c1::cloze}} syntax)';
+                    backLabel.textContent = 'Extra Information (optional)';
+                } else {
+                    clozeExamples.classList.add('hidden');
+                    frontLabel.textContent = 'Front';
+                    backLabel.textContent = 'Back';
+                }
+            });
         }
 
-        endStudySession() {
-            this.stopTimer();
-            alert('Study session complete!');
-            this.navigate('decks');
-        }
-
-        // ============================================================================
-        // TIMER
-        // ============================================================================
-
-        startTimer() {
-            this.stopTimer();
-            this.timerInterval = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - this.studyStartTime) / 1000);
-                document.getElementById('timer').textContent = `${elapsed}s`;
-            }, 1000);
-        }
-
-        stopTimer() {
-            if (this.timerInterval) {
-                clearInterval(this.timerInterval);
-                this.timerInterval = null;
+        async updateDeckSelect() {
+            const select = document.getElementById('deck-select');
+            
+            try {
+                const decks = await this.getAll('decks');
+                select.innerHTML = '';
+                
+                if (decks.length === 0) {
+                    select.innerHTML = '<option value="">No decks available</option>';
+                    return;
+                }
+                
+                decks.forEach(deck => {
+                    const option = document.createElement('option');
+                    option.value = deck.id;
+                    option.textContent = deck.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading decks:', error);
+                select.innerHTML = '<option value="">Error loading decks</option>';
             }
         }
 
-        // ============================================================================
-        // STATISTICS
-        // ============================================================================
-
-        async loadStats() {
+        async saveCard() {
             try {
-                // Reload data
-                this.cards = await this.getAll('cards');
+                const deckId = document.getElementById('deck-select').value;
+                const cardType = document.getElementById('card-type').value;
+                const front = document.getElementById('front-field').value.trim();
+                const back = document.getElementById('back-field').value.trim();
                 
-                const now = Date.now() / 1000;
-                const today = Math.floor(now / 86400);
+                // Validation
+                if (!deckId) {
+                    this.showError('Please select a deck');
+                    return;
+                }
                 
-                // Calculate statistics
-                const totalCards = this.cards.length;
+                if (!front) {
+                    this.showError('Front field cannot be empty');
+                    return;
+                }
                 
-                const newCards = this.cards.filter(c => c.type === 0).length;
-                const learningCards = this.cards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).length;
-                const reviewCards = this.cards.filter(c => c.type === 2 && c.due <= today).length;
+                if ((cardType === 'basic' || cardType === 'basic-rev') && !back) {
+                    this.showError('Back field cannot be empty for basic cards');
+                    return;
+                }
                 
-                const dueToday = newCards + learningCards + reviewCards;
+                // Create note
+                const noteId = Date.now();
+                const note = {
+                    id: noteId,
+                    deckId: parseInt(deckId),
+                    type: cardType,
+                    front: front,
+                    back: back,
+                    created: Date.now()
+                };
+                
+                await this.add('notes', note);
+                
+                // Create cards based on type
+                if (cardType === 'basic') {
+                    await this.createBasicCard(noteId, deckId, 0);
+                } 
+                else if (cardType === 'basic-rev') {
+                    // Front card
+                    await this.createBasicCard(noteId, deckId, 0);
+                    // Back card (reversed)
+                    await this.createBasicCard(noteId, deckId, 1);
+                }
+                else if (cardType === 'cloze' || cardType === 'cloze+') {
+                    await this.createClozeCards(noteId, deckId, front);
+                }
+                
+                // Clear form
+                document.getElementById('front-field').value = '';
+                document.getElementById('back-field').value = '';
+                
+                this.showMessage('Card added successfully!');
+                
+                // Update stats
+                this.updateStats();
+                
+            } catch (error) {
+                console.error('Error saving card:', error);
+                this.showError('Failed to save card: ' + error.message);
+            }
+        }
+
+        async createBasicCard(noteId, deckId, ord) {
+            const cardId = Date.now() + ord;
+            const card = {
+                id: cardId,
+                noteId: noteId,
+                deckId: parseInt(deckId),
+                ord: ord,
+                type: 0, // New
+                interval: 0,
+                ease: 2.5,
+                due: 0,
+                reviews: 0,
+                lapses: 0,
+                created: Date.now()
+            };
+            
+            await this.add('cards', card);
+        }
+
+        async createClozeCards(noteId, deckId, text) {
+            // Extract all cloze numbers from text
+            const clozeRegex = /{{c(\d+)::(.*?)}}/g;
+            const matches = [...text.matchAll(clozeRegex)];
+            const clozeNumbers = [...new Set(matches.map(m => parseInt(m[1])))];
+            
+            // If no cloze found, create one card
+            if (clozeNumbers.length === 0) {
+                clozeNumbers.push(1);
+            }
+            
+            // Create a card for each cloze
+            for (let i = 0; i < clozeNumbers.length; i++) {
+                const cardId = Date.now() + i;
+                const card = {
+                    id: cardId,
+                    noteId: noteId,
+                    deckId: parseInt(deckId),
+                    clozeNumber: clozeNumbers[i],
+                    type: 0, // New
+                    interval: 0,
+                    ease: 2.5,
+                    due: 0,
+                    reviews: 0,
+                    lapses: 0,
+                    created: Date.now()
+                };
+                
+                await this.add('cards', card);
+            }
+        }
+
+        // Browser
+        async renderBrowser(query = '') {
+            const container = document.getElementById('browser-content');
+            container.innerHTML = '';
+            
+            try {
+                const notes = await this.getAll('notes');
+                const decks = await this.getAll('decks');
+                
+                let filteredNotes = notes;
+                if (query) {
+                    const searchTerm = query.toLowerCase();
+                    filteredNotes = notes.filter(note => 
+                        note.front.toLowerCase().includes(searchTerm) ||
+                        note.back.toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                if (filteredNotes.length === 0) {
+                    container.innerHTML = '<div class="error">No cards found</div>';
+                    return;
+                }
+                
+                for (const note of filteredNotes.slice(0, 50)) {
+                    const deck = decks.find(d => d.id === note.deckId);
+                    const cards = (await this.getAll('cards')).filter(c => c.noteId === note.id);
+                    
+                    const noteElement = document.createElement('div');
+                    noteElement.className = 'browser-item';
+                    noteElement.innerHTML = `
+                        <div class="font-semibold mb-2">${this.formatText(note.front.substring(0, 200))}</div>
+                        <div class="text-sm text-gray-500">
+                            ${deck ? deck.name : 'Unknown'} • ${cards.length} card(s) • ${note.type}
+                        </div>
+                    `;
+                    
+                    container.appendChild(noteElement);
+                }
+            } catch (error) {
+                console.error('Error rendering browser:', error);
+                container.innerHTML = '<div class="error">Error loading cards</div>';
+            }
+        }
+
+        // Stats
+        async updateStats() {
+            try {
+                const cards = await this.getAll('cards');
+                const now = Date.now();
+                const today = Math.floor(now / 86400000);
+                
+                // Calculate stats
+                const totalCards = cards.length;
+                
+                const dueToday = cards.filter(card => {
+                    if (card.type === 0) return true; // New cards
+                    if (card.type === 1 || card.type === 3) return card.due < now / 1000;
+                    if (card.type === 2) return card.due <= today;
+                    return false;
+                }).length;
+                
+                const learningCards = cards.filter(card => 
+                    (card.type === 1 || card.type === 3) && card.due < now / 1000
+                ).length;
+                
+                const reviewCards = cards.filter(card => 
+                    card.type === 2 && card.due <= today
+                ).length;
                 
                 // Update UI
                 document.getElementById('stat-total').textContent = totalCards;
                 document.getElementById('stat-due').textContent = dueToday;
-                document.getElementById('stat-new').textContent = newCards;
                 document.getElementById('stat-learn').textContent = learningCards;
-                
+                document.getElementById('stat-review').textContent = reviewCards;
             } catch (error) {
-                console.error('Error loading stats:', error);
+                console.error('Error updating stats:', error);
             }
         }
 
-        // ============================================================================
-        // BROWSE
-        // ============================================================================
-
-        async loadBrowse() {
-            const container = document.getElementById('browser-container');
-            
-            try {
-                // Reload data
-                this.notes = await this.getAll('notes');
-                this.decks = await this.getAll('decks');
-                
-                const searchTerm = document.getElementById('search-box').value.toLowerCase();
-                
-                // Filter notes
-                const filteredNotes = this.notes.filter(note => {
-                    if (!searchTerm) return true;
-                    
-                    return note.front.toLowerCase().includes(searchTerm) ||
-                           (note.back && note.back.toLowerCase().includes(searchTerm));
-                });
-                
-                container.innerHTML = '';
-                
-                if (filteredNotes.length === 0) {
-                    container.innerHTML = '<div style="text-align: center; color: #8e8e93; padding: 40px 0;">No cards found</div>';
-                    return;
-                }
-                
-                // Display notes
-                for (const note of filteredNotes.slice(0, 50)) {
-                    const deck = this.decks.find(d => d.id === note.deckId);
-                    
-                    const item = document.createElement('div');
-                    item.style.padding = '16px';
-                    item.style.borderBottom = '1px solid #38383a';
-                    
-                    item.innerHTML = `
-                        <div style="font-size: 16px; margin-bottom: 8px;">${this.truncateText(note.front, 100)}</div>
-                        <div style="font-size: 14px; color: #8e8e93; margin-bottom: 8px;">${this.truncateText(note.back || 'No back content', 80)}</div>
-                        <div style="font-size: 12px; color: #8e8e93;">
-                            <span>${deck ? deck.name : 'Unknown deck'}</span>
-                            <span style="margin-left: 10px;">${note.type}</span>
-                        </div>
-                    `;
-                    
-                    container.appendChild(item);
-                }
-                
-            } catch (error) {
-                console.error('Error loading browse:', error);
-                container.innerHTML = '<div style="text-align: center; color: #ff453a; padding: 40px 0;">Error loading cards</div>';
-            }
-        }
-
-        // ============================================================================
-        // UTILITY METHODS
-        // ============================================================================
-
-        truncateText(text, maxLength) {
+        // Utility Methods
+        formatText(text) {
             if (!text) return '';
-            if (text.length <= maxLength) return text;
-            return text.substring(0, maxLength) + '...';
+            
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code>$1</code>');
         }
 
-        // ============================================================================
-        // EVENT LISTENERS
-        // ============================================================================
+        startTimer() {
+            this.timerStart = Date.now();
+        }
 
+        endStudySession() {
+            this.showMessage('Study session complete!');
+            this.switchView('decks');
+        }
+
+        showError(message) {
+            alert('Error: ' + message);
+        }
+
+        showMessage(message) {
+            alert(message);
+        }
+
+        // Event Listeners
         setupEventListeners() {
-            // Tab navigation
-            document.querySelectorAll('.tab-item').forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    const view = e.currentTarget.dataset.view;
-                    this.navigate(view);
-                });
-            });
-
             // Add deck FAB
-            document.getElementById('fab-add-deck').addEventListener('click', () => {
-                this.showAddDeckModal();
+            document.getElementById('add-deck-fab').addEventListener('click', () => {
+                this.createNewDeck();
             });
-
-            // Card type change
-            document.getElementById('card-type').addEventListener('change', () => {
-                this.updateFields();
+            
+            // Save card button
+            document.getElementById('save-card-btn').addEventListener('click', () => {
+                this.saveCard();
             });
-
-            // Add card button
-            document.getElementById('btn-add-card').addEventListener('click', () => {
-                this.addCard();
-            });
-
+            
             // Show answer button
-            document.getElementById('btn-show-answer').addEventListener('click', () => {
+            document.getElementById('show-answer-btn').addEventListener('click', () => {
                 this.showAnswer();
             });
-
-            // Answer buttons
-            document.getElementById('btn-again').addEventListener('click', () => this.answerCard(1));
-            document.getElementById('btn-hard').addEventListener('click', () => this.answerCard(2));
-            document.getElementById('btn-good').addEventListener('click', () => this.answerCard(3));
-            document.getElementById('btn-easy').addEventListener('click', () => this.answerCard(4));
-
-            // Modal buttons
-            document.getElementById('modal-cancel').addEventListener('click', () => this.hideAddDeckModal());
-            document.getElementById('modal-confirm').addEventListener('click', () => this.createDeck());
-
-            // Search in browse
-            document.getElementById('search-box').addEventListener('input', () => {
-                this.loadBrowse();
-            });
-
-            // Card click to show answer
+            
+            // Card flip on click
             document.getElementById('card-content').addEventListener('click', () => {
-                if (this.currentCard && !this.isAnswerShown) {
+                if (!this.isShowingAnswer) {
                     this.showAnswer();
                 }
             });
-
+            
+            // Answer buttons
+            document.querySelectorAll('.btn-answer').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const rating = parseInt(e.currentTarget.dataset.rating);
+                    this.answerCard(rating);
+                });
+            });
+            
+            // Search input
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                this.renderBrowser(e.target.value);
+            });
+            
             // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
-                // Don't trigger shortcuts when typing in inputs
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
                     return;
                 }
                 
-                if (e.code === 'Space' && this.currentCard && !this.isAnswerShown) {
+                if (!this.isShowingAnswer && e.code === 'Space') {
                     this.showAnswer();
                     e.preventDefault();
-                } else if (this.isAnswerShown) {
+                } else if (this.isShowingAnswer) {
                     switch(e.code) {
-                        case 'Digit1': this.answerCard(1); break;
-                        case 'Digit2': this.answerCard(2); break;
-                        case 'Digit3': this.answerCard(3); break;
-                        case 'Digit4': this.answerCard(4); break;
+                        case 'Digit1':
+                        case 'Numpad1':
+                            this.answerCard(1);
+                            e.preventDefault();
+                            break;
+                        case 'Digit2':
+                        case 'Numpad2':
+                            this.answerCard(2);
+                            e.preventDefault();
+                            break;
+                        case 'Digit3':
+                        case 'Numpad3':
+                            this.answerCard(3);
+                            e.preventDefault();
+                            break;
+                        case 'Digit4':
+                        case 'Numpad4':
+                            this.answerCard(4);
+                            e.preventDefault();
+                            break;
                     }
                 }
             });
         }
+
+        async createNewDeck() {
+            const name = prompt('Enter deck name:');
+            if (!name || !name.trim()) return;
+            
+            try {
+                const deck = {
+                    id: Date.now(),
+                    name: name.trim(),
+                    created: Date.now(),
+                    desc: ''
+                };
+                
+                await this.add('decks', deck);
+                this.showMessage('Deck created successfully!');
+                
+                // Update UI
+                this.renderDeckList();
+                this.updateDeckSelect();
+                this.updateStats();
+            } catch (error) {
+                console.error('Error creating deck:', error);
+                this.showError('Failed to create deck');
+            }
+        }
     }
 
-    // Initialize the app
-    window.addEventListener('DOMContentLoaded', () => {
+    // Initialize app when page loads
+    document.addEventListener('DOMContentLoaded', () => {
         window.ankiApp = new AnkiApp();
     });
     </script>
