@@ -44,13 +44,10 @@
             padding-bottom: 70px;
             overflow-y: auto;
             display: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
         }
 
         .view.active {
             display: block;
-            opacity: 1;
         }
 
         header {
@@ -89,10 +86,9 @@
             align-items: center;
             justify-content: center;
             color: var(--text-secondary);
-            font-size: 11px;
+            font-size: 10px;
             padding: 10px 0;
             cursor: pointer;
-            transition: color 0.2s;
         }
 
         .tab-item.active {
@@ -100,25 +96,19 @@
         }
 
         .tab-item i {
-            font-size: 22px;
+            font-size: 20px;
             margin-bottom: 4px;
         }
 
         .deck-item {
             background: var(--card-bg);
-            margin: 12px 16px;
+            margin: 10px 16px;
             padding: 16px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
-        }
-
-        .deck-item:hover {
-            background: #3c3c3e;
-            transform: scale(1.01);
         }
 
         .flashcard {
@@ -126,17 +116,14 @@
             border-radius: 16px;
             min-height: 300px;
             padding: 30px;
-            font-size: 22px;
-            line-height: 1.6;
+            font-size: 20px;
+            line-height: 1.5;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             margin: 20px;
             cursor: pointer;
-            user-select: none;
-            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .review-controls {
@@ -146,33 +133,22 @@
             width: 100%;
             padding: 0 20px;
             display: flex;
-            gap: 12px;
+            gap: 10px;
             z-index: 90;
         }
 
         .btn-answer {
             flex: 1;
-            padding: 16px 0;
-            border-radius: 12px;
+            padding: 14px 0;
+            border-radius: 10px;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 14px;
             color: white;
             border: none;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            transition: opacity 0.2s, transform 0.1s;
-        }
-
-        .btn-answer:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .btn-answer:active {
-            transform: translateY(0);
         }
 
         .btn-again { background: var(--danger); }
@@ -181,17 +157,144 @@
         .btn-easy { background: var(--accent); }
 
         .btn-answer span.time {
-            font-size: 11px;
+            font-size: 10px;
             opacity: 0.8;
             font-weight: normal;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .hidden {
             display: none !important;
         }
 
-        .modal-overlay {
+        input, textarea, select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--separator);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 12px;
+            width: 100%;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        .cloze {
+            color: var(--accent);
+            font-weight: bold;
+            background: rgba(10, 132, 255, 0.1);
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .cloze-blank {
+            color: var(--accent);
+            font-weight: bold;
+            border-bottom: 2px dashed var(--accent);
+            padding: 0 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 16px;
+        }
+
+        .stat-box {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: var(--text-secondary);
+        }
+
+        .loading i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .card-content {
+            width: 100%;
+        }
+
+        .count {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .count-new { background: rgba(10, 132, 255, 0.2); color: var(--accent); }
+        .count-learn { background: rgba(255, 159, 10, 0.2); color: var(--warning); }
+        .count-review { background: rgba(50, 215, 75, 0.2); color: var(--success); }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            border: none;
+            z-index: 99;
+        }
+
+        .review-info {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .deck-counts {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -205,241 +308,56 @@
             padding: 20px;
         }
 
-        .modal {
+        .modal-content {
             background: var(--card-bg);
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 24px;
             max-width: 400px;
             width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
         }
 
-        input, textarea, select {
-            background: var(--bg-secondary);
-            border: 1px solid var(--separator);
-            color: var(--text-primary);
-            border-radius: 10px;
-            padding: 14px;
-            width: 100%;
+        .modal h3 {
             margin-bottom: 16px;
-            font-size: 16px;
-            font-family: inherit;
-        }
-
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .cloze-highlight {
-            color: var(--accent);
-            font-weight: bold;
-            background: rgba(10, 132, 255, 0.15);
-            padding: 2px 6px;
-            border-radius: 6px;
-            border: 1px solid rgba(10, 132, 255, 0.3);
-        }
-
-        .cloze-blank {
-            color: var(--accent);
-            font-weight: bold;
-            border-bottom: 3px dashed var(--accent);
-            padding: 0 8px;
-            margin: 0 2px;
-            display: inline-block;
-            min-width: 40px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin: 20px;
-        }
-
-        .stat-box {
-            background: var(--card-bg);
-            padding: 24px;
-            border-radius: 16px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .card-content {
-            width: 100%;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
-        .review-info {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px 20px;
-            font-size: 14px;
-            color: var(--text-secondary);
-            background: rgba(44, 44, 46, 0.5);
-            border-bottom: 1px solid var(--separator);
-        }
-
-        .deck-counts {
-            display: flex;
-            gap: 15px;
-        }
-
-        .count {
-            padding: 4px 8px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        .count-new { background: rgba(10, 132, 255, 0.2); color: var(--accent); }
-        .count-learn { background: rgba(255, 159, 10, 0.2); color: var(--warning); }
-        .count-review { background: rgba(50, 215, 75, 0.2); color: var(--success); }
-
-        .cloze-example {
-            background: rgba(10, 132, 255, 0.1);
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-size: 14px;
-            color: var(--accent);
-            border-left: 3px solid var(--accent);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 16px;
-            width: 100%;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
-
-        .fab {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 30px;
-            background: var(--accent);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 6px 20px rgba(10, 132, 255, 0.3);
-            cursor: pointer;
-            border: none;
-            z-index: 99;
-        }
-
-        .card-divider {
-            height: 1px;
-            background: var(--separator);
-            margin: 30px 0;
-        }
-
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: var(--text-secondary);
             font-size: 18px;
         }
 
-        .loading i {
-            font-size: 32px;
-            margin-bottom: 16px;
-            color: var(--accent);
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
         }
 
-        .browser-item {
-            padding: 20px;
-            border-bottom: 1px solid var(--separator);
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
-        .browser-item:hover {
+        .modal-cancel {
             background: var(--bg-secondary);
-        }
-
-        .browser-item-front {
-            font-size: 16px;
-            margin-bottom: 8px;
             color: var(--text-primary);
         }
 
-        .browser-item-back {
-            font-size: 14px;
-            color: var(--text-secondary);
-            opacity: 0.8;
-        }
-
-        .browser-item-meta {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 8px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .answer-shown .flashcard {
-            cursor: default;
-        }
-
-        .cloze-hint {
-            font-size: 14px;
-            color: var(--accent);
-            margin-top: 20px;
-            padding: 10px;
-            background: rgba(10, 132, 255, 0.1);
-            border-radius: 8px;
-            display: none;
-        }
-
-        .answer-shown .cloze-hint {
-            display: block;
+        .modal-confirm {
+            background: var(--accent);
+            color: white;
         }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header>
-        <h1 id="header-title" class="text-lg font-semibold">Anki iOS</h1>
-        <div id="header-actions"></div>
+        <h1 id="header-title">Anki iOS</h1>
     </header>
 
     <!-- Deck List View -->
     <div id="view-decks" class="view active">
-        <div class="px-4 py-2">
-            <h2 class="text-sm text-gray-500 uppercase font-bold mb-4 mt-2">My Decks</h2>
+        <div style="padding: 16px;">
+            <h2 style="font-size: 11px; color: #8e8e93; text-transform: uppercase; font-weight: 600; margin-bottom: 12px;">My Decks</h2>
             <div id="deck-list-container">
-                <!-- Decks will be loaded here -->
-                <div class="loading" id="decks-loading">
+                <div class="loading">
                     <i class="fas fa-spinner fa-spin"></i>
                     <div>Loading decks...</div>
                 </div>
@@ -461,7 +379,7 @@
             <div id="timer">0s</div>
         </div>
         
-        <div class="flex-1 flex items-center justify-center">
+        <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
             <div class="flashcard" id="card-content">
                 <div class="card-content" id="card-text">
                     <div class="loading">
@@ -498,25 +416,21 @@
                 <span class="time" id="time-easy">4d</span>
             </button>
         </div>
-
-        <div class="cloze-hint" id="cloze-hint">
-            <i class="fas fa-lightbulb"></i> This is a cloze card. The highlighted text was hidden.
-        </div>
     </div>
 
     <!-- Add Card View -->
     <div id="view-add" class="view">
-        <div class="p-4">
-            <div class="mb-6">
-                <label class="block text-sm text-gray-400 mb-2">Deck</label>
-                <select id="deck-select" class="w-full p-3 bg-gray-800 rounded-lg border border-gray-700">
+        <div style="padding: 16px;">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Deck</label>
+                <select id="deck-select" style="width: 100%;">
                     <option value="">Select a deck</option>
                 </select>
             </div>
 
-            <div class="mb-6">
-                <label class="block text-sm text-gray-400 mb-2">Card Type</label>
-                <select id="card-type" class="w-full p-3 bg-gray-800 rounded-lg border border-gray-700">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Card Type</label>
+                <select id="card-type" style="width: 100%;">
                     <option value="basic">Basic</option>
                     <option value="basic-reversed">Basic (and reversed card)</option>
                     <option value="cloze">Cloze</option>
@@ -527,7 +441,7 @@
                 <!-- Dynamic fields will be inserted here -->
             </div>
 
-            <button id="btn-add-card" class="btn-primary mt-6">
+            <button id="btn-add-card" class="btn-primary" style="margin-top: 24px;">
                 Add Card
             </button>
         </div>
@@ -535,13 +449,10 @@
 
     <!-- Browse View -->
     <div id="view-browse" class="view">
-        <div class="p-4">
-            <input type="text" id="search-box" 
-                   class="w-full p-3 bg-gray-800 rounded-lg border border-gray-700 mb-4"
-                   placeholder="Search cards...">
+        <div style="padding: 16px;">
+            <input type="text" id="search-box" style="width: 100%; margin-bottom: 16px;" placeholder="Search cards...">
             <div id="browser-container">
-                <!-- Cards will be loaded here -->
-                <div class="loading" id="browse-loading">
+                <div class="loading">
                     <i class="fas fa-spinner fa-spin"></i>
                     <div>Loading cards...</div>
                 </div>
@@ -551,46 +462,25 @@
 
     <!-- Stats View -->
     <div id="view-stats" class="view">
-        <div class="p-4">
-            <h2 class="text-xl font-bold mb-6 text-center">Statistics</h2>
+        <div style="padding: 16px;">
+            <h2 style="text-align: center; font-size: 20px; font-weight: 600; margin-bottom: 20px;">Statistics</h2>
             
             <div class="stats-grid">
                 <div class="stat-box">
-                    <div class="stat-value text-blue-500" id="stat-total">0</div>
+                    <div class="stat-value" style="color: #0a84ff;" id="stat-total">0</div>
                     <div class="stat-label">Total Cards</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-value text-green-500" id="stat-due">0</div>
+                    <div class="stat-value" style="color: #32d74b;" id="stat-due">0</div>
                     <div class="stat-label">Due Today</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-value text-yellow-500" id="stat-new">0</div>
+                    <div class="stat-value" style="color: #ff9f0a;" id="stat-new">0</div>
                     <div class="stat-label">New Cards</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-value text-purple-500" id="stat-learn">0</div>
+                    <div class="stat-value" style="color: #bf5af2;" id="stat-learn">0</div>
                     <div class="stat-label">In Learning</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value text-red-500" id="stat-overdue">0</div>
-                    <div class="stat-label">Overdue</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value text-teal-500" id="stat-reviews">0</div>
-                    <div class="stat-label">Reviews Today</div>
-                </div>
-            </div>
-
-            <div class="mt-8">
-                <h3 class="text-lg font-bold mb-4">Study Progress</h3>
-                <div class="bg-gray-800 rounded-lg p-4">
-                    <div class="flex justify-between mb-2">
-                        <span>Today's Progress</span>
-                        <span id="progress-percent">0%</span>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-3">
-                        <div id="progress-bar" class="bg-blue-500 h-3 rounded-full" style="width: 0%"></div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -620,23 +510,21 @@
         </div>
     </div>
 
-    <!-- Modals -->
-    <div id="modal-overlay" class="modal-overlay hidden">
-        <div class="modal">
-            <h3 class="text-xl font-bold mb-4" id="modal-title">New Deck</h3>
-            <input type="text" id="deck-name-input" 
-                   class="w-full p-3 bg-gray-800 rounded-lg border border-gray-700 mb-4"
-                   placeholder="Enter deck name">
-            <div class="flex gap-3">
-                <button id="modal-cancel" class="flex-1 p-3 bg-gray-700 rounded-lg">Cancel</button>
-                <button id="modal-confirm" class="flex-1 p-3 bg-blue-500 rounded-lg">Create</button>
+    <!-- Modal for adding deck -->
+    <div id="modal-add-deck" class="modal hidden">
+        <div class="modal-content">
+            <h3>New Deck</h3>
+            <input type="text" id="deck-name-input" placeholder="Enter deck name">
+            <div class="modal-buttons">
+                <button class="modal-cancel" id="modal-cancel">Cancel</button>
+                <button class="modal-confirm" id="modal-confirm">Create</button>
             </div>
         </div>
     </div>
 
     <script>
     // ============================================================================
-    // ANKI CLONE APP - FULL FUNCTIONALITY
+    // ANKI APP - Made by © Muhammad Daler
     // ============================================================================
 
     class AnkiApp {
@@ -649,22 +537,19 @@
             this.isAnswerShown = false;
             this.studyStartTime = null;
             this.timerInterval = null;
-            this.reviewCounts = { new: 0, learn: 0, review: 0 };
+            this.decks = [];
+            this.cards = [];
+            this.notes = [];
             
             this.init();
         }
 
         async init() {
-            try {
-                await this.initDatabase();
-                await this.loadInitialData();
-                this.setupEventListeners();
-                this.updateUI();
-                console.log('Anki app initialized successfully');
-            } catch (error) {
-                console.error('Failed to initialize app:', error);
-                this.showError('Failed to initialize app. Please refresh the page.');
-            }
+            await this.initDatabase();
+            await this.loadInitialData();
+            this.setupEventListeners();
+            this.updateFields();
+            this.loadDecks();
         }
 
         // ============================================================================
@@ -673,27 +558,30 @@
 
         async initDatabase() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('AnkiCloneDB', 3);
+                const request = indexedDB.open('AnkiDB', 1);
                 
-                request.onerror = () => reject(request.error);
+                request.onerror = () => {
+                    console.error('Database error:', request.error);
+                    reject(request.error);
+                };
                 
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
                     
-                    // Decks store
+                    // Create decks store
                     if (!db.objectStoreNames.contains('decks')) {
                         const decksStore = db.createObjectStore('decks', { keyPath: 'id' });
                         decksStore.createIndex('name', 'name', { unique: true });
                     }
                     
-                    // Notes store
+                    // Create notes store
                     if (!db.objectStoreNames.contains('notes')) {
                         const notesStore = db.createObjectStore('notes', { keyPath: 'id' });
                         notesStore.createIndex('deckId', 'deckId');
                         notesStore.createIndex('type', 'type');
                     }
                     
-                    // Cards store
+                    // Create cards store
                     if (!db.objectStoreNames.contains('cards')) {
                         const cardsStore = db.createObjectStore('cards', { keyPath: 'id' });
                         cardsStore.createIndex('noteId', 'noteId');
@@ -701,52 +589,80 @@
                         cardsStore.createIndex('due', 'due');
                         cardsStore.createIndex('type', 'type');
                     }
-                    
-                    // Revlog store
-                    if (!db.objectStoreNames.contains('revlog')) {
-                        const revlogStore = db.createObjectStore('revlog', { keyPath: 'id' });
-                        revlogStore.createIndex('cardId', 'cardId');
-                        revlogStore.createIndex('time', 'time');
-                    }
                 };
                 
                 request.onsuccess = (event) => {
                     this.db = event.target.result;
+                    console.log('Database initialized successfully');
                     resolve();
                 };
             });
         }
 
         // Database helper methods
-        async dbOperation(storeName, operation, data = null) {
+        async getAll(storeName) {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.getAll();
+                
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async get(storeName, id) {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.get(id);
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async add(storeName, data) {
             return new Promise((resolve, reject) => {
                 const transaction = this.db.transaction([storeName], 'readwrite');
                 const store = transaction.objectStore(storeName);
-                let request;
-                
-                switch(operation) {
-                    case 'add':
-                        request = store.add(data);
-                        break;
-                    case 'put':
-                        request = store.put(data);
-                        break;
-                    case 'get':
-                        request = store.get(data);
-                        break;
-                    case 'getAll':
-                        request = store.getAll();
-                        break;
-                    case 'delete':
-                        request = store.delete(data);
-                        break;
-                    case 'getByIndex':
-                        const index = store.index(data.index);
-                        request = index.getAll(data.value);
-                        break;
-                }
+                const request = store.add(data);
                 
                 request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async put(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.put(data);
+                
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async delete(storeName, id) {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.delete(id);
+                
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async getByIndex(storeName, indexName, value) {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const index = store.index(indexName);
+                const request = index.getAll(value);
+                
+                request.onsuccess = () => resolve(request.result || []);
                 request.onerror = () => reject(request.error);
             });
         }
@@ -756,34 +672,72 @@
         // ============================================================================
 
         async loadInitialData() {
-            // Load decks
-            let decks = await this.dbOperation('decks', 'getAll');
-            if (!decks || decks.length === 0) {
-                // Create default deck
-                const defaultDeck = {
-                    id: Date.now(),
-                    name: 'Default',
-                    description: 'Default deck',
-                    created: Date.now(),
-                    cardCount: 0
-                };
-                await this.dbOperation('decks', 'add', defaultDeck);
-                decks = [defaultDeck];
+            try {
+                // Load all data
+                this.decks = await this.getAll('decks');
+                this.notes = await this.getAll('notes');
+                this.cards = await this.getAll('cards');
+                
+                // If no decks, create default
+                if (this.decks.length === 0) {
+                    const defaultDeck = {
+                        id: Date.now(),
+                        name: 'Default',
+                        created: Date.now()
+                    };
+                    
+                    await this.add('decks', defaultDeck);
+                    this.decks = [defaultDeck];
+                }
+                
+                console.log('Initial data loaded:', {
+                    decks: this.decks.length,
+                    notes: this.notes.length,
+                    cards: this.cards.length
+                });
+                
+            } catch (error) {
+                console.error('Error loading initial data:', error);
             }
-            
-            // Store decks in memory for quick access
-            this.decks = decks;
-            
-            // Update deck select
-            this.updateDeckSelect();
-            
-            // Update fields based on card type
-            this.updateFields();
         }
 
         // ============================================================================
         // UI UPDATES
         // ============================================================================
+
+        updateFields() {
+            const container = document.getElementById('fields-container');
+            const type = document.getElementById('card-type').value;
+            
+            if (type === 'cloze') {
+                container.innerHTML = `
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Text (Use {{c1::cloze}} syntax)</label>
+                        <textarea id="field-front" rows="4" placeholder="Example: The {{c1::capital}} of France is {{c2::Paris}}."></textarea>
+                        <div style="background: rgba(10, 132, 255, 0.1); padding: 12px; border-radius: 8px; margin-top: 8px; font-size: 12px; color: #0a84ff;">
+                            <strong>Example:</strong> The {{c1::capital}} of France is {{c2::Paris}}.
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Extra Information (Optional)</label>
+                        <textarea id="field-back" rows="3" placeholder="Additional notes or context"></textarea>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Front</label>
+                        <textarea id="field-front" rows="3" placeholder="Question or term"></textarea>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 12px; color: #8e8e93; margin-bottom: 8px;">Back</label>
+                        <textarea id="field-back" rows="3" placeholder="Answer or definition"></textarea>
+                    </div>
+                `;
+            }
+            
+            this.updateDeckSelect();
+        }
 
         updateDeckSelect() {
             const select = document.getElementById('deck-select');
@@ -795,42 +749,6 @@
                 option.textContent = deck.name;
                 select.appendChild(option);
             });
-        }
-
-        updateFields() {
-            const container = document.getElementById('fields-container');
-            const type = document.getElementById('card-type').value;
-            
-            if (type === 'cloze') {
-                container.innerHTML = `
-                    <div class="mb-4">
-                        <label class="block text-sm text-gray-400 mb-2">Text</label>
-                        <textarea id="field-front" class="w-full p-3 bg-gray-800 rounded-lg border border-gray-700" 
-                                  rows="4" placeholder="Enter text with {{c1::cloze deletions}}"></textarea>
-                        <div class="cloze-example mt-2">
-                            <strong>Example:</strong> The {{c1::capital}} of France is {{c2::Paris}}. Paris is known for the {{c3::Eiffel Tower}}.
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm text-gray-400 mb-2">Extra Information (Optional)</label>
-                        <textarea id="field-back" class="w-full p-3 bg-gray-800 rounded-lg border border-gray-700" 
-                                  rows="3" placeholder="Additional notes or context"></textarea>
-                    </div>
-                `;
-            } else {
-                container.innerHTML = `
-                    <div class="mb-4">
-                        <label class="block text-sm text-gray-400 mb-2">Front</label>
-                        <textarea id="field-front" class="w-full p-3 bg-gray-800 rounded-lg border border-gray-700" 
-                                  rows="3" placeholder="Question or term"></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm text-gray-400 mb-2">Back</label>
-                        <textarea id="field-back" class="w-full p-3 bg-gray-800 rounded-lg border border-gray-700" 
-                                  rows="3" placeholder="Answer or definition"></textarea>
-                    </div>
-                `;
-            }
         }
 
         // ============================================================================
@@ -880,91 +798,93 @@
 
         async loadDecks() {
             const container = document.getElementById('deck-list-container');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><div>Loading decks...</div></div>';
             
             try {
-                const decks = await this.dbOperation('decks', 'getAll');
-                
-                // Get card counts for each deck
-                const decksWithCounts = await Promise.all(decks.map(async deck => {
-                    const cards = await this.dbOperation('cards', 'getByIndex', {
-                        index: 'deckId',
-                        value: deck.id
-                    });
-                    
-                    const now = Date.now() / 1000;
-                    const today = Math.floor(now / 86400);
-                    
-                    const newCards = cards.filter(c => c.type === 0).length;
-                    const learnCards = cards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).length;
-                    const reviewCards = cards.filter(c => c.type === 2 && c.due <= today).length;
-                    
-                    return {
-                        ...deck,
-                        newCount: newCards,
-                        learnCount: learnCards,
-                        reviewCount: reviewCards,
-                        totalCards: cards.length
-                    };
-                }));
+                // Reload decks from database
+                this.decks = await this.getAll('decks');
+                this.cards = await this.getAll('cards');
                 
                 container.innerHTML = '';
                 
-                decksWithCounts.forEach(deck => {
+                if (this.decks.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: #8e8e93; padding: 40px 0;">No decks yet. Create your first deck!</div>';
+                    return;
+                }
+                
+                const now = Date.now() / 1000;
+                const today = Math.floor(now / 86400);
+                
+                for (const deck of this.decks) {
+                    const deckCards = this.cards.filter(card => card.deckId === deck.id);
+                    
+                    const newCards = deckCards.filter(card => card.type === 0).length;
+                    const learnCards = deckCards.filter(card => (card.type === 1 || card.type === 3) && card.due < now).length;
+                    const reviewCards = deckCards.filter(card => card.type === 2 && card.due <= today).length;
+                    
                     const deckElement = document.createElement('div');
                     deckElement.className = 'deck-item';
                     deckElement.innerHTML = `
                         <div>
-                            <div class="font-semibold text-lg">${deck.name}</div>
-                            <div class="text-sm text-gray-400">${deck.totalCards} cards</div>
+                            <div style="font-weight: 600; font-size: 16px;">${deck.name}</div>
+                            <div style="font-size: 12px; color: #8e8e93;">${deckCards.length} cards</div>
                         </div>
-                        <div class="flex gap-3">
-                            <span class="count count-new">${deck.newCount}</span>
-                            <span class="count count-learn">${deck.learnCount}</span>
-                            <span class="count count-review">${deck.reviewCount}</span>
+                        <div style="display: flex; gap: 8px;">
+                            <span class="count count-new">${newCards}</span>
+                            <span class="count count-learn">${learnCards}</span>
+                            <span class="count count-review">${reviewCards}</span>
                         </div>
                     `;
                     
                     deckElement.addEventListener('click', () => this.startStudy(deck.id));
                     container.appendChild(deckElement);
-                });
-                
-                if (decksWithCounts.length === 0) {
-                    container.innerHTML = '<div class="text-center text-gray-500 py-10">No decks yet. Create your first deck!</div>';
                 }
                 
             } catch (error) {
                 console.error('Error loading decks:', error);
-                container.innerHTML = '<div class="text-center text-red-500 py-10">Error loading decks</div>';
+                container.innerHTML = '<div style="text-align: center; color: #ff453a; padding: 40px 0;">Error loading decks</div>';
             }
         }
 
-        async createDeck(name) {
-            if (!name || name.trim() === '') {
-                this.showError('Please enter a deck name');
+        showAddDeckModal() {
+            document.getElementById('modal-add-deck').classList.remove('hidden');
+            document.getElementById('deck-name-input').focus();
+        }
+
+        hideAddDeckModal() {
+            document.getElementById('modal-add-deck').classList.add('hidden');
+            document.getElementById('deck-name-input').value = '';
+        }
+
+        async createDeck() {
+            const name = document.getElementById('deck-name-input').value.trim();
+            
+            if (!name) {
+                alert('Please enter a deck name');
                 return;
             }
             
             try {
                 const deck = {
                     id: Date.now(),
-                    name: name.trim(),
-                    description: '',
-                    created: Date.now(),
-                    cardCount: 0
+                    name: name,
+                    created: Date.now()
                 };
                 
-                await this.dbOperation('decks', 'add', deck);
+                await this.add('decks', deck);
                 this.decks.push(deck);
+                
                 this.updateDeckSelect();
                 this.loadDecks();
-                this.hideModal();
+                this.hideAddDeckModal();
+                
+                console.log('Deck created:', deck);
                 
             } catch (error) {
+                console.error('Error creating deck:', error);
                 if (error.name === 'ConstraintError') {
-                    this.showError('A deck with this name already exists');
+                    alert('A deck with this name already exists');
                 } else {
-                    this.showError('Failed to create deck');
+                    alert('Failed to create deck');
                 }
             }
         }
@@ -980,12 +900,12 @@
             const back = document.getElementById('field-back').value.trim();
             
             if (!deckId) {
-                this.showError('Please select a deck');
+                alert('Please select a deck');
                 return;
             }
             
             if (!front) {
-                this.showError('Front field cannot be empty');
+                alert('Front field cannot be empty');
                 return;
             }
             
@@ -999,73 +919,116 @@
                     type: type,
                     front: front,
                     back: back,
-                    created: Date.now(),
-                    tags: []
+                    created: Date.now()
                 };
                 
-                await this.dbOperation('notes', 'add', note);
+                await this.add('notes', note);
+                this.notes.push(note);
                 
                 // Create cards based on type
                 if (type === 'basic') {
-                    await this.createCard(noteId, deckId, 0, 0);
+                    const card = {
+                        id: noteId * 10,
+                        noteId: noteId,
+                        deckId: deckId,
+                        order: 0,
+                        type: 0, // new
+                        due: 0,
+                        interval: 0,
+                        ease: 2.5,
+                        reps: 0,
+                        lapses: 0
+                    };
+                    await this.add('cards', card);
+                    this.cards.push(card);
                 } 
                 else if (type === 'basic-reversed') {
-                    await this.createCard(noteId, deckId, 0, 0);
-                    await this.createCard(noteId, deckId, 1, 0);
+                    // Front card
+                    const card1 = {
+                        id: noteId * 10,
+                        noteId: noteId,
+                        deckId: deckId,
+                        order: 0,
+                        type: 0,
+                        due: 0,
+                        interval: 0,
+                        ease: 2.5,
+                        reps: 0,
+                        lapses: 0
+                    };
+                    
+                    // Reversed card
+                    const card2 = {
+                        id: noteId * 10 + 1,
+                        noteId: noteId,
+                        deckId: deckId,
+                        order: 1,
+                        type: 0,
+                        due: 0,
+                        interval: 0,
+                        ease: 2.5,
+                        reps: 0,
+                        lapses: 0
+                    };
+                    
+                    await this.add('cards', card1);
+                    await this.add('cards', card2);
+                    this.cards.push(card1, card2);
                 }
                 else if (type === 'cloze') {
-                    // Extract cloze numbers
+                    // Extract cloze numbers from front text
                     const clozeRegex = /{{c(\d+)::(.*?)}}/g;
                     const matches = [...front.matchAll(clozeRegex)];
                     const clozeNumbers = [...new Set(matches.map(m => parseInt(m[1])))];
                     
                     // If no cloze found, create one card
                     if (clozeNumbers.length === 0) {
-                        await this.createCard(noteId, deckId, 0, 0);
+                        const card = {
+                            id: noteId * 10,
+                            noteId: noteId,
+                            deckId: deckId,
+                            order: 0,
+                            type: 0,
+                            due: 0,
+                            interval: 0,
+                            ease: 2.5,
+                            reps: 0,
+                            lapses: 0
+                        };
+                        await this.add('cards', card);
+                        this.cards.push(card);
                     } else {
-                        // Create a card for each cloze number
-                        for (const clozeNumber of clozeNumbers) {
-                            await this.createCard(noteId, deckId, clozeNumber - 1, 0);
+                        // Create a card for each cloze
+                        for (let i = 0; i < clozeNumbers.length; i++) {
+                            const card = {
+                                id: noteId * 10 + i,
+                                noteId: noteId,
+                                deckId: deckId,
+                                order: i,
+                                type: 0,
+                                due: 0,
+                                interval: 0,
+                                ease: 2.5,
+                                reps: 0,
+                                lapses: 0
+                            };
+                            await this.add('cards', card);
+                            this.cards.push(card);
                         }
                     }
                 }
-                
-                // Update deck card count
-                await this.updateDeckCardCount(deckId);
                 
                 // Clear form
                 document.getElementById('field-front').value = '';
                 document.getElementById('field-back').value = '';
                 
-                this.showSuccess('Card added successfully!');
+                alert('Card added successfully!');
                 this.navigate('decks');
                 
             } catch (error) {
                 console.error('Error adding card:', error);
-                this.showError('Failed to add card');
+                alert('Failed to add card');
             }
-        }
-
-        async createCard(noteId, deckId, order, type) {
-            const card = {
-                id: Date.now() + order,
-                noteId: noteId,
-                deckId: deckId,
-                order: order,
-                type: type, // 0 = new, 1 = learning, 2 = review, 3 = relearning
-                queue: 0,
-                due: 0,
-                interval: 0,
-                ease: 2.5,
-                reps: 0,
-                lapses: 0,
-                remainingSteps: 0,
-                lastReview: 0,
-                created: Date.now()
-            };
-            
-            await this.dbOperation('cards', 'add', card);
-            return card;
         }
 
         // ============================================================================
@@ -1075,11 +1038,15 @@
         async startStudy(deckId) {
             this.currentDeck = deckId;
             
+            // Reload cards from database
+            this.cards = await this.getAll('cards');
+            this.notes = await this.getAll('notes');
+            
             // Build study queue
             await this.buildStudyQueue(deckId);
             
             if (this.studyQueue.length === 0) {
-                this.showError('No cards to study in this deck');
+                alert('No cards to study in this deck');
                 return;
             }
             
@@ -1088,46 +1055,52 @@
             this.studyStartTime = Date.now();
             this.startTimer();
             
-            // Update UI
+            // Update UI counts
             document.getElementById('count-new').textContent = this.reviewCounts.new;
             document.getElementById('count-learn').textContent = this.reviewCounts.learn;
             document.getElementById('count-review').textContent = this.reviewCounts.review;
             
-            // Show first card
+            // Navigate to review view
             this.navigate('review');
+            
+            // Show first card
             this.showNextCard();
         }
 
         async buildStudyQueue(deckId) {
-            const now = Date.now() / 1000; // Current time in seconds
-            const today = Math.floor(now / 86400); // Days since epoch
+            const now = Date.now() / 1000;
+            const today = Math.floor(now / 86400);
             
-            // Get all cards for the deck
-            const cards = await this.dbOperation('cards', 'getByIndex', {
-                index: 'deckId',
-                value: deckId
-            });
+            // Filter cards for current deck
+            const deckCards = this.cards.filter(card => card.deckId === deckId);
             
             // Categorize cards
-            const learningCards = cards.filter(card => 
+            const learningCards = deckCards.filter(card => 
                 (card.type === 1 || card.type === 3) && card.due < now
             ).sort((a, b) => a.due - b.due);
             
-            const reviewCards = cards.filter(card => 
+            const reviewCards = deckCards.filter(card => 
                 card.type === 2 && card.due <= today
             ).sort((a, b) => a.due - b.due);
             
-            const newCards = cards.filter(card => card.type === 0);
+            const newCards = deckCards.filter(card => card.type === 0);
             
-            // Update counts
+            // Update review counts
             this.reviewCounts = {
                 new: newCards.length,
                 learn: learningCards.length,
                 review: reviewCards.length
             };
             
-            // Build queue: learning first, then review, then new
+            // Build queue
             this.studyQueue = [...learningCards, ...reviewCards, ...newCards];
+            
+            console.log('Study queue built:', {
+                total: this.studyQueue.length,
+                new: newCards.length,
+                learning: learningCards.length,
+                review: reviewCards.length
+            });
         }
 
         async showNextCard() {
@@ -1139,11 +1112,12 @@
             this.currentCard = this.studyQueue[0];
             this.isAnswerShown = false;
             
-            // Get note
-            this.currentNote = await this.dbOperation('notes', 'get', this.currentCard.noteId);
+            // Find the note for this card
+            this.currentNote = this.notes.find(note => note.id === this.currentCard.noteId);
             
             if (!this.currentNote) {
-                // Skip this card if note not found
+                console.error('Note not found for card:', this.currentCard);
+                // Skip this card
                 this.studyQueue.shift();
                 this.showNextCard();
                 return;
@@ -1155,7 +1129,6 @@
             // Update UI
             document.getElementById('show-answer-controls').classList.remove('hidden');
             document.getElementById('answer-controls').classList.add('hidden');
-            document.getElementById('cloze-hint').classList.add('hidden');
         }
 
         showCardFront() {
@@ -1197,7 +1170,7 @@
                 
                 // Highlight the current cloze
                 const currentClozeRegex = new RegExp(`{{c${clozeNumber}::(.*?)}}`, 'g');
-                text = text.replace(currentClozeRegex, '<span class="cloze-highlight">$1</span>');
+                text = text.replace(currentClozeRegex, '<span class="cloze">$1</span>');
                 
                 // Replace other clozes with their content
                 text = text.replace(/{{c\d+::(.*?)}}/g, '$1');
@@ -1206,24 +1179,19 @@
                 
                 // Add back content if exists
                 if (this.currentNote.back) {
-                    content += `<div class="card-divider"></div><div class="text-gray-300">${this.currentNote.back}</div>`;
+                    content += `<div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #38383a; color: #8e8e93;">${this.currentNote.back}</div>`;
                 }
-                
-                // Show cloze hint
-                document.getElementById('cloze-hint').classList.remove('hidden');
             } else if (this.currentCard.order === 1) {
                 // Reversed card answer
                 content = `
                     <div>${this.currentNote.back || 'No content'}</div>
-                    <div class="card-divider"></div>
-                    <div class="text-gray-300">${this.currentNote.front}</div>
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #38383a; color: #8e8e93;">${this.currentNote.front}</div>
                 `;
             } else {
                 // Normal card answer
                 content = `
                     <div>${this.currentNote.front}</div>
-                    <div class="card-divider"></div>
-                    <div class="text-gray-300">${this.currentNote.back || 'No answer provided'}</div>
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #38383a; color: #8e8e93;">${this.currentNote.back || 'No answer provided'}</div>
                 `;
             }
             
@@ -1233,43 +1201,40 @@
             document.getElementById('show-answer-controls').classList.add('hidden');
             document.getElementById('answer-controls').classList.remove('hidden');
             
-            // Calculate next intervals
+            // Calculate next intervals for buttons
             this.updateAnswerButtons();
         }
 
         updateAnswerButtons() {
-            // Calculate intervals for each rating
-            const intervals = [1, 10, 1, 4]; // minutes for learning, days for review
-            const labels = ['1m', '10m', '1d', '4d'];
+            // Simple interval calculation
+            const intervals = {
+                1: '1m',  // Again
+                2: '10m', // Hard
+                3: '1d',  // Good
+                4: '4d'   // Easy
+            };
             
-            // Update button labels
-            document.getElementById('time-again').textContent = labels[0];
-            document.getElementById('time-hard').textContent = labels[1];
-            document.getElementById('time-good').textContent = labels[2];
-            document.getElementById('time-easy').textContent = labels[3];
+            document.getElementById('time-again').textContent = intervals[1];
+            document.getElementById('time-hard').textContent = intervals[2];
+            document.getElementById('time-good').textContent = intervals[3];
+            document.getElementById('time-easy').textContent = intervals[4];
         }
 
         async answerCard(rating) {
             // 1 = Again, 2 = Hard, 3 = Good, 4 = Easy
             const timeSpent = Math.floor((Date.now() - this.studyStartTime) / 1000);
             
-            // Update card using SM-2 algorithm
-            const updatedCard = this.sm2Algorithm(this.currentCard, rating, timeSpent);
+            // Update card
+            const updatedCard = this.sm2Algorithm(this.currentCard, rating);
             
             // Save updated card
-            await this.dbOperation('cards', 'put', updatedCard);
+            await this.put('cards', updatedCard);
             
-            // Log review
-            const reviewLog = {
-                id: Date.now(),
-                cardId: this.currentCard.id,
-                time: Date.now(),
-                rating: rating,
-                interval: updatedCard.interval,
-                ease: updatedCard.ease,
-                timeSpent: timeSpent
-            };
-            await this.dbOperation('revlog', 'add', reviewLog);
+            // Update local cards array
+            const cardIndex = this.cards.findIndex(c => c.id === updatedCard.id);
+            if (cardIndex !== -1) {
+                this.cards[cardIndex] = updatedCard;
+            }
             
             // Remove from queue
             this.studyQueue.shift();
@@ -1295,7 +1260,7 @@
             this.showNextCard();
         }
 
-        sm2Algorithm(card, rating, timeSpent) {
+        sm2Algorithm(card, rating) {
             const now = Date.now() / 1000;
             const today = Math.floor(now / 86400);
             
@@ -1306,32 +1271,26 @@
                     updatedCard.type = 1; // Learning
                     updatedCard.due = now + 60; // 1 minute
                     updatedCard.interval = 60;
-                    updatedCard.remainingSteps = 2;
                 } else if (rating === 2) { // Hard
                     updatedCard.type = 1;
                     updatedCard.due = now + 600; // 10 minutes
                     updatedCard.interval = 600;
-                    updatedCard.remainingSteps = 1;
                 } else if (rating === 3) { // Good
                     updatedCard.type = 2; // Review
                     updatedCard.due = today + 1; // 1 day
                     updatedCard.interval = 1;
-                    updatedCard.ease = 2.5;
                 } else if (rating === 4) { // Easy
                     updatedCard.type = 2;
                     updatedCard.due = today + 4; // 4 days
                     updatedCard.interval = 4;
-                    updatedCard.ease = 2.6;
                 }
             } else if (card.type === 1 || card.type === 3) { // Learning or relearning
                 if (rating === 1) { // Again
                     updatedCard.due = now + 60;
                     updatedCard.interval = 60;
-                    updatedCard.remainingSteps = 2;
                 } else if (rating === 2) { // Hard
                     updatedCard.due = now + 600;
                     updatedCard.interval = 600;
-                    updatedCard.remainingSteps = 1;
                 } else if (rating >= 3) { // Good or Easy
                     updatedCard.type = 2; // Graduate to review
                     if (rating === 3) {
@@ -1340,7 +1299,6 @@
                     } else {
                         updatedCard.due = today + 4;
                         updatedCard.interval = 4;
-                        updatedCard.ease = Math.min(updatedCard.ease + 0.1, 5.0);
                     }
                 }
             } else if (card.type === 2) { // Review
@@ -1348,19 +1306,16 @@
                     updatedCard.type = 3; // Relearning
                     updatedCard.due = now + 60;
                     updatedCard.interval = 60;
-                    updatedCard.ease = Math.max(1.3, updatedCard.ease - 0.2);
                     updatedCard.lapses++;
                 } else {
                     // Calculate new interval
                     let interval = card.interval;
                     if (rating === 2) { // Hard
                         interval = Math.max(1, Math.floor(interval * 1.2));
-                        updatedCard.ease = Math.max(1.3, updatedCard.ease - 0.15);
                     } else if (rating === 3) { // Good
-                        interval = Math.floor(interval * updatedCard.ease);
+                        interval = Math.floor(interval * 2.5);
                     } else if (rating === 4) { // Easy
-                        interval = Math.floor(interval * updatedCard.ease * 1.3);
-                        updatedCard.ease = Math.min(updatedCard.ease + 0.1, 5.0);
+                        interval = Math.floor(interval * 2.5 * 1.3);
                     }
                     
                     updatedCard.due = today + interval;
@@ -1376,7 +1331,7 @@
 
         endStudySession() {
             this.stopTimer();
-            this.showSuccess('Study session complete!');
+            alert('Study session complete!');
             this.navigate('decks');
         }
 
@@ -1405,42 +1360,26 @@
 
         async loadStats() {
             try {
-                const cards = await this.dbOperation('cards', 'getAll');
+                // Reload data
+                this.cards = await this.getAll('cards');
+                
                 const now = Date.now() / 1000;
                 const today = Math.floor(now / 86400);
                 
                 // Calculate statistics
-                const totalCards = cards.length;
+                const totalCards = this.cards.length;
                 
-                const newCards = cards.filter(c => c.type === 0).length;
-                const learningCards = cards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).length;
-                const reviewCards = cards.filter(c => c.type === 2 && c.due <= today).length;
-                const overdueCards = cards.filter(c => c.type === 2 && c.due < today).length;
+                const newCards = this.cards.filter(c => c.type === 0).length;
+                const learningCards = this.cards.filter(c => (c.type === 1 || c.type === 3) && c.due < now).length;
+                const reviewCards = this.cards.filter(c => c.type === 2 && c.due <= today).length;
                 
                 const dueToday = newCards + learningCards + reviewCards;
-                
-                // Get today's reviews
-                const todayStart = today * 86400;
-                const reviews = await this.dbOperation('revlog', 'getByIndex', {
-                    index: 'time',
-                    value: IDBKeyRange.lowerBound(todayStart)
-                });
-                const reviewsToday = reviews ? reviews.length : 0;
                 
                 // Update UI
                 document.getElementById('stat-total').textContent = totalCards;
                 document.getElementById('stat-due').textContent = dueToday;
                 document.getElementById('stat-new').textContent = newCards;
                 document.getElementById('stat-learn').textContent = learningCards;
-                document.getElementById('stat-overdue').textContent = overdueCards;
-                document.getElementById('stat-reviews').textContent = reviewsToday;
-                
-                // Update progress
-                if (dueToday > 0) {
-                    const progressPercent = Math.min(100, Math.floor((reviewsToday / dueToday) * 100));
-                    document.getElementById('progress-percent').textContent = `${progressPercent}%`;
-                    document.getElementById('progress-bar').style.width = `${progressPercent}%`;
-                }
                 
             } catch (error) {
                 console.error('Error loading stats:', error);
@@ -1451,46 +1390,45 @@
         // BROWSE
         // ============================================================================
 
-        async loadBrowse(searchTerm = '') {
+        async loadBrowse() {
             const container = document.getElementById('browser-container');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><div>Loading cards...</div></div>';
             
             try {
-                const notes = await this.dbOperation('notes', 'getAll');
-                const decks = await this.dbOperation('decks', 'getAll');
+                // Reload data
+                this.notes = await this.getAll('notes');
+                this.decks = await this.getAll('decks');
                 
-                // Filter notes by search term
-                const filteredNotes = notes.filter(note => {
+                const searchTerm = document.getElementById('search-box').value.toLowerCase();
+                
+                // Filter notes
+                const filteredNotes = this.notes.filter(note => {
                     if (!searchTerm) return true;
-                    const searchLower = searchTerm.toLowerCase();
-                    return note.front.toLowerCase().includes(searchLower) ||
-                           note.back.toLowerCase().includes(searchLower);
+                    
+                    return note.front.toLowerCase().includes(searchTerm) ||
+                           (note.back && note.back.toLowerCase().includes(searchTerm));
                 });
                 
                 container.innerHTML = '';
                 
                 if (filteredNotes.length === 0) {
-                    container.innerHTML = '<div class="text-center text-gray-500 py-10">No cards found</div>';
+                    container.innerHTML = '<div style="text-align: center; color: #8e8e93; padding: 40px 0;">No cards found</div>';
                     return;
                 }
                 
                 // Display notes
-                for (const note of filteredNotes.slice(0, 50)) { // Limit to 50
-                    const deck = decks.find(d => d.id === note.deckId);
-                    const cards = await this.dbOperation('cards', 'getByIndex', {
-                        index: 'noteId',
-                        value: note.id
-                    });
+                for (const note of filteredNotes.slice(0, 50)) {
+                    const deck = this.decks.find(d => d.id === note.deckId);
                     
                     const item = document.createElement('div');
-                    item.className = 'browser-item';
+                    item.style.padding = '16px';
+                    item.style.borderBottom = '1px solid #38383a';
+                    
                     item.innerHTML = `
-                        <div class="browser-item-front">${this.truncateText(note.front, 100)}</div>
-                        <div class="browser-item-back">${this.truncateText(note.back || 'No back content', 80)}</div>
-                        <div class="browser-item-meta">
+                        <div style="font-size: 16px; margin-bottom: 8px;">${this.truncateText(note.front, 100)}</div>
+                        <div style="font-size: 14px; color: #8e8e93; margin-bottom: 8px;">${this.truncateText(note.back || 'No back content', 80)}</div>
+                        <div style="font-size: 12px; color: #8e8e93;">
                             <span>${deck ? deck.name : 'Unknown deck'}</span>
-                            <span>${cards ? cards.length : 0} cards</span>
-                            <span>${note.type}</span>
+                            <span style="margin-left: 10px;">${note.type}</span>
                         </div>
                     `;
                     
@@ -1499,7 +1437,7 @@
                 
             } catch (error) {
                 console.error('Error loading browse:', error);
-                container.innerHTML = '<div class="text-center text-red-500 py-10">Error loading cards</div>';
+                container.innerHTML = '<div style="text-align: center; color: #ff453a; padding: 40px 0;">Error loading cards</div>';
             }
         }
 
@@ -1511,39 +1449,6 @@
             if (!text) return '';
             if (text.length <= maxLength) return text;
             return text.substring(0, maxLength) + '...';
-        }
-
-        async updateDeckCardCount(deckId) {
-            const cards = await this.dbOperation('cards', 'getByIndex', {
-                index: 'deckId',
-                value: deckId
-            });
-            
-            const deck = await this.dbOperation('decks', 'get', deckId);
-            if (deck) {
-                deck.cardCount = cards.length;
-                await this.dbOperation('decks', 'put', deck);
-            }
-        }
-
-        showError(message) {
-            alert(`Error: ${message}`);
-        }
-
-        showSuccess(message) {
-            alert(`Success: ${message}`);
-        }
-
-        showModal(title, confirmText) {
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-confirm').textContent = confirmText;
-            document.getElementById('modal-overlay').classList.remove('hidden');
-            document.getElementById('deck-name-input').focus();
-        }
-
-        hideModal() {
-            document.getElementById('modal-overlay').classList.add('hidden');
-            document.getElementById('deck-name-input').value = '';
         }
 
         // ============================================================================
@@ -1561,7 +1466,7 @@
 
             // Add deck FAB
             document.getElementById('fab-add-deck').addEventListener('click', () => {
-                this.showModal('New Deck', 'Create');
+                this.showAddDeckModal();
             });
 
             // Card type change
@@ -1586,22 +1491,29 @@
             document.getElementById('btn-easy').addEventListener('click', () => this.answerCard(4));
 
             // Modal buttons
-            document.getElementById('modal-cancel').addEventListener('click', () => this.hideModal());
-            document.getElementById('modal-confirm').addEventListener('click', () => {
-                const deckName = document.getElementById('deck-name-input').value;
-                this.createDeck(deckName);
-            });
+            document.getElementById('modal-cancel').addEventListener('click', () => this.hideAddDeckModal());
+            document.getElementById('modal-confirm').addEventListener('click', () => this.createDeck());
 
             // Search in browse
-            document.getElementById('search-box').addEventListener('input', (e) => {
-                this.loadBrowse(e.target.value);
+            document.getElementById('search-box').addEventListener('input', () => {
+                this.loadBrowse();
+            });
+
+            // Card click to show answer
+            document.getElementById('card-content').addEventListener('click', () => {
+                if (this.currentCard && !this.isAnswerShown) {
+                    this.showAnswer();
+                }
             });
 
             // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                // Don't trigger shortcuts when typing in inputs
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                    return;
+                }
                 
-                if (e.code === 'Space' && !this.isAnswerShown) {
+                if (e.code === 'Space' && this.currentCard && !this.isAnswerShown) {
                     this.showAnswer();
                     e.preventDefault();
                 } else if (this.isAnswerShown) {
@@ -1613,22 +1525,10 @@
                     }
                 }
             });
-
-            // Close modal on overlay click
-            document.getElementById('modal-overlay').addEventListener('click', (e) => {
-                if (e.target.id === 'modal-overlay') {
-                    this.hideModal();
-                }
-            });
-        }
-
-        updateUI() {
-            // Initial UI updates
-            this.loadDecks();
         }
     }
 
-    // Initialize the app when the page loads
+    // Initialize the app
     window.addEventListener('DOMContentLoaded', () => {
         window.ankiApp = new AnkiApp();
     });
