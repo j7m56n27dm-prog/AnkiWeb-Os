@@ -1,2200 +1,797 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anki iOS - Made by ©️Muhammad Daler</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Anki macOS - Made by ©️Muhammad Daler</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (to compile JSX/TS in browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Tailwind CSS - Lightweight version
-        if (!window.tailwind) {
-            const style = document.createElement('style');
-            style.textContent = `
-                .hidden { display: none !important; }
-                .flex { display: flex; }
-                .grid { display: grid; }
-                .block { display: block; }
-                .inline-block { display: inline-block; }
-                .flex-col { flex-direction: column; }
-                .flex-row { flex-direction: row; }
-                .items-center { align-items: center; }
-                .justify-center { justify-content: center; }
-                .justify-between { justify-content: space-between; }
-                .justify-around { justify-content: space-around; }
-                .flex-1 { flex: 1; }
-                .flex-wrap { flex-wrap: wrap; }
-                .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-                .gap-2 { gap: 0.5rem; }
-                .gap-3 { gap: 0.75rem; }
-                .gap-4 { gap: 1rem; }
-                .gap-6 { gap: 1.5rem; }
-                .w-full { width: 100%; }
-                .h-full { height: 100%; }
-                .h-screen { height: 100vh; }
-                .p-2 { padding: 0.5rem; }
-                .p-3 { padding: 0.75rem; }
-                .p-4 { padding: 1rem; }
-                .p-6 { padding: 1.5rem; }
-                .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-                .px-4 { padding-left: 1rem; padding-right: 1rem; }
-                .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-                .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-                .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
-                .m-2 { margin: 0.5rem; }
-                .m-4 { margin: 1rem; }
-                .mt-2 { margin-top: 0.5rem; }
-                .mt-4 { margin-top: 1rem; }
-                .mt-6 { margin-top: 1.5rem; }
-                .mb-2 { margin-bottom: 0.5rem; }
-                .mb-4 { margin-bottom: 1rem; }
-                .mb-6 { margin-bottom: 1.5rem; }
-                .ml-2 { margin-left: 0.5rem; }
-                .mr-2 { margin-right: 0.5rem; }
-                .mx-2 { margin-left: 0.5rem; margin-right: 0.5rem; }
-                .mx-4 { margin-left: 1rem; margin-right: 1rem; }
-                .text-center { text-align: center; }
-                .text-left { text-align: left; }
-                .text-right { text-align: right; }
-                .text-xs { font-size: 0.75rem; }
-                .text-sm { font-size: 0.875rem; }
-                .text-base { font-size: 1rem; }
-                .text-lg { font-size: 1.125rem; }
-                .text-xl { font-size: 1.25rem; }
-                .text-2xl { font-size: 1.5rem; }
-                .text-3xl { font-size: 1.875rem; }
-                .font-bold { font-weight: 700; }
-                .font-semibold { font-weight: 600; }
-                .font-medium { font-weight: 500; }
-                .font-normal { font-weight: 400; }
-                .font-mono { font-family: monospace; }
-                .rounded { border-radius: 0.25rem; }
-                .rounded-lg { border-radius: 0.5rem; }
-                .rounded-xl { border-radius: 0.75rem; }
-                .rounded-full { border-radius: 9999px; }
-                .border { border-width: 1px; }
-                .border-t { border-top-width: 1px; }
-                .border-b { border-bottom-width: 1px; }
-                .bg-gray-800 { background-color: #1f2937; }
-                .bg-gray-900 { background-color: #111827; }
-                .bg-blue-600 { background-color: #2563eb; }
-                .bg-red-600 { background-color: #dc2626; }
-                .bg-green-600 { background-color: #16a34a; }
-                .bg-yellow-600 { background-color: #ca8a04; }
-                .bg-purple-600 { background-color: #9333ea; }
-                .text-white { color: white; }
-                .text-gray-400 { color: #9ca3af; }
-                .text-gray-500 { color: #6b7280; }
-                .text-blue-400 { color: #60a5fa; }
-                .text-red-400 { color: #f87171; }
-                .text-green-400 { color: #4ade80; }
-                .text-yellow-400 { color: #fbbf24; }
-                .text-purple-400 { color: #c084fc; }
-                .opacity-50 { opacity: 0.5; }
-                .opacity-80 { opacity: 0.8; }
-                .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-                .divide-y > * + * { border-top-width: 1px; }
-                .shadow { box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); }
-                .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-                .transition { transition: all 0.2s; }
-                .scale-95 { transform: scale(0.95); }
-                .uppercase { text-transform: uppercase; }
-            `;
-            document.head.appendChild(style);
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              ios: {
+                blue: '#007AFF',
+                green: '#34C759',
+                red: '#FF3B30',
+                yellow: '#FF9500',
+                gray: '#8E8E93',
+                bg: '#F2F2F7',
+                darkBg: '#000000',
+                card: '#FFFFFF',
+                darkCard: '#1C1C1E'
+              }
+            }
+          }
         }
+      }
     </script>
+    
+    <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        /* Anki macOS Style */
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f5f5f7;
-            --bg-tertiary: #e8e8ed;
-            --text-primary: #000000;
-            --text-secondary: #6d6d72;
-            --accent: #007aff;
-            --accent-hover: #0056cc;
-            --danger: #ff3b30;
-            --success: #34c759;
-            --warning: #ff9500;
-            --card-bg: #ffffff;
-            --border-color: #c7c7cc;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            --radius: 12px;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-primary: #000000;
-                --bg-secondary: #1c1c1e;
-                --bg-tertiary: #2c2c2e;
-                --text-primary: #ffffff;
-                --text-secondary: #8e8e93;
-                --accent: #0a84ff;
-                --accent-hover: #409cff;
-                --danger: #ff453a;
-                --success: #32d74b;
-                --warning: #ff9f0a;
-                --card-bg: #2c2c2e;
-                --border-color: #38383a;
-                --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            height: 100vh;
-            overflow: hidden;
-            font-size: 16px;
-            line-height: 1.5;
-        }
-
-        /* Container */
-        .container {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header */
-        .header {
-            height: 60px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-        }
-
-        /* Navigation */
-        .nav {
-            display: flex;
-            gap: 2px;
-            background: var(--bg-tertiary);
-            padding: 4px;
-            border-radius: 9px;
-            margin: 0 20px;
-        }
-
-        .nav-item {
-            padding: 8px 16px;
-            border-radius: 7px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .nav-item.active {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            box-shadow: var(--shadow);
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* Views */
-        .view {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow-y: auto;
-            padding: 20px;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .view.active {
-            display: block;
-            opacity: 1;
-        }
-
-        /* Deck Grid */
-        .deck-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-            padding: 4px;
-        }
-
-        .deck-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid var(--border-color);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .deck-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
-            border-color: var(--accent);
-        }
-
-        .deck-card:active {
-            transform: translateY(0);
-        }
-
-        .deck-name {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-
-        .deck-stats {
-            display: flex;
-            gap: 12px;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* Flashcard */
-        .flashcard-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .flashcard {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 40px;
-            width: 100%;
-            min-height: 400px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            position: relative;
-            overflow-wrap: break-word;
-            word-break: break-word;
-        }
-
-        .flashcard-content {
-            font-size: 20px;
-            line-height: 1.6;
-            width: 100%;
-        }
-
-        /* Answer Buttons */
-        .answer-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 30px;
-            width: 100%;
-            max-width: 600px;
-        }
-
-        .answer-btn {
-            flex: 1;
-            padding: 16px;
-            border-radius: var(--radius);
-            border: none;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: white;
-        }
-
-        .answer-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .answer-btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-again { background: var(--danger); }
-        .btn-hard { background: var(--warning); }
-        .btn-good { background: var(--success); }
-        .btn-easy { background: var(--accent); }
-
-        .answer-time {
-            font-size: 11px;
-            opacity: 0.9;
-            margin-top: 4px;
-            font-weight: normal;
-        }
-
-        /* Add Card Form */
-        .form-container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .form-input,
-        .form-textarea,
-        .form-select {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            color: var(--text-primary);
-            font-size: 16px;
-            font-family: inherit;
-            transition: border-color 0.2s;
-        }
-
-        .form-input:focus,
-        .form-textarea:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .form-textarea {
-            min-height: 120px;
-            resize: vertical;
-            line-height: 1.5;
-        }
-
-        .form-button {
-            width: 100%;
-            padding: 16px;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .form-button:hover {
-            background: var(--accent-hover);
-        }
-
-        /* Cloze Styles */
-        .cloze {
-            color: var(--accent);
-            font-weight: 600;
-            background: rgba(10, 132, 255, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid rgba(10, 132, 255, 0.3);
-        }
-
-        .cloze-blank {
-            color: var(--accent);
-            font-weight: 600;
-            background: rgba(10, 132, 255, 0.05);
-            padding: 2px 8px;
-            border-radius: 4px;
-            border: 2px dashed var(--accent);
-            display: inline-block;
-            min-width: 60px;
-            cursor: pointer;
-        }
-
-        /* Progress */
-        .progress-bar {
-            height: 4px;
-            background: var(--bg-tertiary);
-            border-radius: 2px;
-            overflow: hidden;
-            margin: 20px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--accent);
-            transition: width 0.3s ease;
-            border-radius: 2px;
-        }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 24px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-        }
-
-        .stat-value {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        /* Utility */
-        .hidden {
-            display: none !important;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .mb-3 {
-            margin-bottom: 12px;
-        }
-
-        .mb-4 {
-            margin-bottom: 16px;
-        }
-
-        .mt-3 {
-            margin-top: 12px;
-        }
-
-        .mt-4 {
-            margin-top: 16px;
-        }
-
-        .ml-2 {
-            margin-left: 8px;
-        }
-
-        .mr-2 {
-            margin-right: 8px;
-        }
-
-        .space-y-4 > * + * {
-            margin-top: 16px;
-        }
-
-        /* FAB */
-        .fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            background: var(--accent);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            transition: all 0.2s;
-            z-index: 1000;
-        }
-
-        .fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Loading */
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--bg-tertiary);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-        }
-
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        /* Card Actions */
-        .card-actions {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            display: flex;
-            gap: 8px;
-        }
-
-        .card-action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 16px;
-            background: rgba(0,0,0,0.1);
-            border: none;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .card-action-btn:hover {
-            background: rgba(0,0,0,0.2);
-        }
-
-        /* Study Info */
-        .study-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 0 4px;
-        }
-
-        .study-counts {
-            display: flex;
-            gap: 16px;
-        }
-
-        .study-count {
-            font-size: 14px;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 6px;
-            background: var(--bg-tertiary);
-        }
-
-        .study-timer {
-            font-size: 14px;
-            font-family: monospace;
-            color: var(--text-secondary);
-        }
-
-        /* Browser */
-        .browser-item {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border-color);
-            transition: border-color 0.2s;
-        }
-
-        .browser-item:hover {
-            border-color: var(--accent);
-        }
-
-        /* Cloze Hint */
-        .cloze-hint {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 8px;
-            padding: 8px 12px;
-            background: var(--bg-tertiary);
-            border-radius: 6px;
-            border-left: 3px solid var(--accent);
-        }
-
-        .cloze-hint i {
-            margin-right: 6px;
-        }
-
-        /* Alert */
-        .alert {
-            padding: 12px 16px;
-            border-radius: var(--radius);
-            margin-bottom: 20px;
-            border: 1px solid transparent;
-        }
-
-        .alert-error {
-            background: rgba(255, 69, 58, 0.1);
-            border-color: rgba(255, 69, 58, 0.3);
-            color: var(--danger);
-        }
-
-        .alert-success {
-            background: rgba(50, 215, 75, 0.1);
-            border-color: rgba(50, 215, 75, 0.3);
-            color: var(--success);
-        }
-
-        /* Tooltip */
-        [data-tooltip] {
-            position: relative;
-        }
-
-        [data-tooltip]:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 6px 12px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            font-size: 12px;
-            border-radius: 4px;
-            white-space: nowrap;
-            margin-bottom: 8px;
-            pointer-events: none;
-        }
+      /* Force San Francisco / System Fonts */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+        background-color: #F2F2F7;
+        -webkit-font-smoothing: antialiased;
+        overscroll-behavior-y: none; /* Prevent bounce */
+        transition: background-color 0.3s ease;
+      }
+
+      /* Dark Mode Body Override */
+      html.dark body {
+        background-color: #000000;
+      }
+      
+      /* Hide Scrollbar but keep functionality */
+      ::-webkit-scrollbar {
+        display: none;
+      }
+      
+      /* Cloze Styles */
+      .cloze-hidden {
+        color: #007AFF;
+        font-weight: 700;
+        background: rgba(0, 122, 255, 0.12);
+        padding: 2px 6px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px dashed rgba(0, 122, 255, 0.3);
+      }
+
+      html.dark .cloze-hidden {
+        color: #409CFF;
+        background: rgba(10, 132, 255, 0.25);
+        border-color: rgba(64, 156, 255, 0.4);
+      }
+
+      .cloze-revealed {
+        color: #34C759;
+        font-weight: 700;
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+      }
+
+      html.dark .cloze-revealed {
+        color: #30D158;
+      }
+
+      /* Card Flip Animation */
+      .card-container {
+        perspective: 1000px;
+      }
+      
+      .card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        transform-style: preserve-3d;
+      }
+      
+      .card-flipped .card-inner {
+        transform: rotateY(180deg);
+      }
+      
+      .card-front, .card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden; /* Safari */
+      }
+      
+      .card-back {
+        transform: rotateY(180deg);
+      }
+
+      /* Native-like tap highlight removal */
+      * {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+
+      /* Animations */
+      @keyframes fade-in-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+      
+      @keyframes scale-up {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      .animate-scale-up { animation: scale-up 0.2s ease-out forwards; }
+      
+      @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
     </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div class="loading" id="loading">
-        <div class="loading-spinner"></div>
-        <div>Loading Anki...</div>
-    </div>
+    <div id="root"></div>
 
-    <!-- Main Container -->
-    <div class="container hidden" id="app">
-        <!-- Header -->
-        <div class="header">
-            <h1 class="text-xl font-bold">Anki</h1>
-            <div class="nav">
-                <div class="nav-item active" data-view="decks">Decks</div>
-                <div class="nav-item" data-view="add">Add</div>
-                <div class="nav-item" data-view="browse">Browse</div>
-                <div class="nav-item" data-view="stats">Stats</div>
-            </div>
-            <div></div> <!-- Spacer for balance -->
-        </div>
+    <!-- Application Code -->
+    <script type="text/babel" data-presets="typescript,react">
+        const { useState, useEffect, useRef } = React;
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Decks View -->
-            <div class="view active" id="view-decks">
-                <div class="deck-grid" id="deck-list"></div>
-                <button class="fab" id="add-deck-btn" data-tooltip="Add Deck">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
-            </div>
-
-            <!-- Study View -->
-            <div class="view" id="view-study">
-                <div class="study-info">
-                    <div class="study-counts">
-                        <span class="study-count text-blue-400" id="count-new">0</span>
-                        <span class="study-count text-yellow-400" id="count-learn">0</span>
-                        <span class="study-count text-green-400" id="count-review">0</span>
-                    </div>
-                    <div class="study-timer" id="timer">00:00</div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
-                </div>
-                <div class="flashcard-container">
-                    <div class="flashcard" id="flashcard">
-                        <div class="card-actions">
-                            <button class="card-action-btn" onclick="ankiApp.editCard()" data-tooltip="Edit">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button class="card-action-btn" onclick="ankiApp.deleteCard()" data-tooltip="Delete">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                        <div class="flashcard-content" id="card-content">
-                            Tap the card to begin studying...
-                        </div>
-                    </div>
-                </div>
-                <div class="answer-buttons hidden" id="answer-buttons">
-                    <button class="answer-btn btn-again" onclick="ankiApp.answer(1)">
-                        Again
-                        <span class="answer-time" id="time-again">1m</span>
-                    </button>
-                    <button class="answer-btn btn-hard" onclick="ankiApp.answer(2)">
-                        Hard
-                        <span class="answer-time" id="time-hard">10m</span>
-                    </button>
-                    <button class="answer-btn btn-good" onclick="ankiApp.answer(3)">
-                        Good
-                        <span class="answer-time" id="time-good">1d</span>
-                    </button>
-                    <button class="answer-btn btn-easy" onclick="ankiApp.answer(4)">
-                        Easy
-                        <span class="answer-time" id="time-easy">4d</span>
-                    </button>
-                </div>
-                <button class="form-button mt-4 hidden" id="show-answer-btn" onclick="ankiApp.showAnswer()">
-                    Show Answer
-                </button>
-            </div>
-
-            <!-- Add Card View -->
-            <div class="view" id="view-add">
-                <div class="form-container">
-                    <h2 class="text-2xl font-bold mb-6">Add New Card</h2>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Deck</label>
-                        <select class="form-select" id="deck-select">
-                            <option value="">Select deck...</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Card Type</label>
-                        <select class="form-select" id="card-type" onchange="ankiApp.updateCardType()">
-                            <option value="basic">Basic</option>
-                            <option value="basic-rev">Basic (and reversed card)</option>
-                            <option value="cloze">Cloze</option>
-                            <option value="cloze+">Cloze+ (Multiple deletions)</option>
-                        </select>
-                    </div>
-
-                    <div id="fields-container">
-                        <div class="form-group">
-                            <label class="form-label" id="front-label">Front</label>
-                            <textarea class="form-textarea" id="front-field" rows="4" 
-                                      placeholder="Enter question or text..."></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" id="back-label">Back</label>
-                            <textarea class="form-textarea" id="back-field" rows="4" 
-                                      placeholder="Enter answer or additional information..."></textarea>
-                        </div>
-                    </div>
-
-                    <div class="cloze-hint hidden" id="cloze-hint">
-                        <i class="fa-solid fa-lightbulb"></i>
-                        Use {{c1::cloze}} syntax for deletions. Example: "The {{c1::capital}} of France is {{c2::Paris}}."
-                    </div>
-
-                    <button class="form-button" onclick="ankiApp.saveCard()">
-                        <i class="fa-solid fa-plus mr-2"></i>Add Card
-                    </button>
-                </div>
-            </div>
-
-            <!-- Browse View -->
-            <div class="view" id="view-browse">
-                <div class="form-container">
-                    <input type="text" class="form-input mb-4" id="search-input" 
-                           placeholder="Search cards..." oninput="ankiApp.searchCards()">
-                    <div id="browse-list"></div>
-                </div>
-            </div>
-
-            <!-- Stats View -->
-            <div class="view" id="view-stats">
-                <div class="form-container">
-                    <h2 class="text-2xl font-bold mb-6">Statistics</h2>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value text-blue-400" id="stat-total">0</div>
-                            <div class="stat-label">Total Cards</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value text-green-400" id="stat-due">0</div>
-                            <div class="stat-label">Due Today</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value text-yellow-400" id="stat-learn">0</div>
-                            <div class="stat-label">Learning</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value text-purple-400" id="stat-review">0</div>
-                            <div class="stat-label">To Review</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-    // ============================================================================
-    // ANKI iOS - Complete Implementation
-    // Made by ©️Muhammad Daler
-    // ============================================================================
-
-    class AnkiDB {
-        constructor() {
-            this.db = null;
-            this.DB_NAME = 'AnkiIOSDB';
-            this.DB_VERSION = 5; // Increased version for schema updates
-        }
-
-        async init() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
-                
-                request.onerror = () => reject(request.error);
-                
-                request.onupgradeneeded = (event) => {
-                    console.log('Database upgrade needed:', event.oldVersion, '→', event.newVersion);
-                    const db = event.target.result;
-                    
-                    // Create object stores if they don't exist
-                    const storeNames = ['decks', 'notes', 'cards', 'revlog'];
-                    
-                    storeNames.forEach(storeName => {
-                        if (!db.objectStoreNames.contains(storeName)) {
-                            console.log('Creating store:', storeName);
-                            const store = db.createObjectStore(storeName, { keyPath: 'id' });
-                            
-                            // Create indexes
-                            switch(storeName) {
-                                case 'decks':
-                                    store.createIndex('name', 'name', { unique: true });
-                                    break;
-                                case 'notes':
-                                    store.createIndex('deckId', 'deckId');
-                                    store.createIndex('type', 'type');
-                                    break;
-                                case 'cards':
-                                    store.createIndex('deckId', 'deckId');
-                                    store.createIndex('noteId', 'noteId');
-                                    store.createIndex('due', 'due');
-                                    store.createIndex('type', 'type');
-                                    store.createIndex('clozeNumber', 'clozeNumber');
-                                    store.createIndex('queue', 'queue');
-                                    break;
-                                case 'revlog':
-                                    store.createIndex('cardId', 'cardId');
-                                    store.createIndex('time', 'time');
-                                    break;
-                            }
-                        }
-                    });
-                };
-                
-                request.onsuccess = (event) => {
-                    this.db = event.target.result;
-                    console.log('Database initialized successfully');
-                    resolve(this);
-                };
-            });
-        }
-
-        // CRUD operations
-        async add(storeName, data) {
-            return new Promise((resolve, reject) => {
-                const tx = this.db.transaction([storeName], 'readwrite');
-                const store = tx.objectStore(storeName);
-                const request = store.add(data);
-                
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        async get(storeName, id) {
-            return new Promise((resolve, reject) => {
-                const tx = this.db.transaction([storeName], 'readonly');
-                const store = tx.objectStore(storeName);
-                const request = store.get(id);
-                
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        async getAll(storeName) {
-            return new Promise((resolve, reject) => {
-                const tx = this.db.transaction([storeName], 'readonly');
-                const store = tx.objectStore(storeName);
-                const request = store.getAll();
-                
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        async put(storeName, data) {
-            return new Promise((resolve, reject) => {
-                const tx = this.db.transaction([storeName], 'readwrite');
-                const store = tx.objectStore(storeName);
-                const request = store.put(data);
-                
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        async delete(storeName, id) {
-            return new Promise((resolve, reject) => {
-                const tx = this.db.transaction([storeName], 'readwrite');
-                const store = tx.objectStore(storeName);
-                const request = store.delete(id);
-                
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        async getCardsByDeck(deckId) {
-            return new Promise((resolve, reject) => {
-                const tx = this.db.transaction(['cards'], 'readonly');
-                const store = tx.objectStore('cards');
-                const index = store.index('deckId');
-                const request = index.getAll(deckId);
-                
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        async getNotesByDeck(deckId) {
-            return new Promise((resolve, reject) => {
-                const tx = this.db.transaction(['notes'], 'readonly');
-                const store = tx.objectStore('notes');
-                const index = store.index('deckId');
-                const request = index.getAll(deckId);
-                
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-    }
-
-    // ============================================================================
-    // SM-2 Scheduler (Anki's Algorithm)
-    // ============================================================================
-
-    class Scheduler {
-        static MINUTE = 60;
-        static HOUR = 3600;
-        static DAY = 86400;
-
-        // SM-2 algorithm implementation
-        static calculate(card, ease, rating) {
-            const now = Math.floor(Date.now() / 1000);
-            const today = Math.floor(now / this.DAY);
-            
-            let newEase = ease;
-            let newInterval = card.interval || 0;
-            let newDue = card.due || 0;
-            let newType = card.type || 0;
-            let newQueue = card.queue || 0;
-            
-            // Learning phase
-            if (card.type === 0) { // New card
-                if (rating >= 3) {
-                    newType = 2; // Review card
-                    newInterval = 1; // 1 day
-                    newDue = today + newInterval;
-                    newQueue = 2; // Review queue
-                } else {
-                    newType = 1; // Learning card
-                    newInterval = 1; // 1 minute
-                    newDue = now + (newInterval * this.MINUTE);
-                    newQueue = 1; // Learning queue
-                }
+        // ==========================================
+        // UTILS: Cloze Parser
+        // ==========================================
+        const getClozeIndices = (text) => {
+            const regex = /{{c(\d+)::(.*?)}}/gs;
+            const indices = new Set();
+            let match;
+            regex.lastIndex = 0;
+            while ((match = regex.exec(text)) !== null) {
+                const num = parseInt(match[1], 10);
+                if (!isNaN(num)) indices.add(num);
             }
-            // Review phase
-            else if (card.type === 2) {
+            return Array.from(indices).sort((a, b) => a - b);
+        };
+
+        const generateClozeContent = (text, ord) => {
+            const regex = /{{c(\d+)::(.*?)}}/gs;
+            
+            const processText = (isFront) => {
+                return text.replace(regex, (match, numStr, inside) => {
+                    const index = parseInt(numStr, 10);
+                    let answer = inside;
+                    let hint = "";
+                    const separatorIdx = inside.indexOf("::");
+                    
+                    if (separatorIdx !== -1) {
+                        answer = inside.substring(0, separatorIdx);
+                        hint = inside.substring(separatorIdx + 2);
+                    }
+
+                    if (index === ord) {
+                        if (isFront) {
+                            const display = hint ? `[${hint}]` : '[...]';
+                            return `<span class="cloze-hidden" title="Show Answer">${display}</span>`;
+                        } else {
+                            return `<span class="cloze-revealed">${answer}</span>`;
+                        }
+                    } else {
+                        return answer;
+                    }
+                });
+            };
+
+            return { front: processText(true), back: processText(false) };
+        };
+
+        // ==========================================
+        // UTILS: Scheduler
+        // ==========================================
+        const LEARN_STEPS = [1 * 60 * 1000, 10 * 60 * 1000]; // 1 min, 10 min
+        const GRADUATING_INTERVAL = 1; // 1 day
+        const EASY_INTERVAL = 4; // 4 days
+        const STARTING_EASE = 2.5;
+
+        const scheduleCard = (card, rating) => {
+            const now = Date.now();
+            const newCard = { ...card };
+            
+            if (newCard.queue === 'new' || newCard.queue === 'learning') {
                 if (rating === 1) { // Again
-                    newType = 1; // Relearning
-                    newEase = Math.max(1300, ease - 200);
-                    newInterval = 1; // 1 minute
-                    newDue = now + (newInterval * this.MINUTE);
-                    newQueue = 1;
-                } else {
-                    // Calculate new interval
-                    if (rating === 2) { // Hard
-                        newEase = Math.max(1300, ease - 150);
-                        newInterval = Math.max(1, Math.floor(card.interval * 1.2));
-                    } else if (rating === 3) { // Good
-                        newInterval = Math.max(1, Math.floor(card.interval * (ease / 1000)));
-                    } else if (rating === 4) { // Easy
-                        newEase = Math.min(5000, ease + 150);
-                        newInterval = Math.max(1, Math.floor(card.interval * (ease / 1000) * 1.3));
+                    newCard.queue = 'learning';
+                    newCard.due = now + LEARN_STEPS[0];
+                    newCard.interval = 0;
+                } else if (rating === 2) { // Hard
+                    newCard.due = now + (LEARN_STEPS[0] * 1.5);
+                } else if (rating === 3) { // Good
+                    if (newCard.interval === 0) {
+                        newCard.interval = 1; 
+                        newCard.due = now + LEARN_STEPS[1];
+                        newCard.queue = 'learning';
+                    } else {
+                        newCard.queue = 'review';
+                        newCard.interval = GRADUATING_INTERVAL;
+                        newCard.due = now + (GRADUATING_INTERVAL * 24 * 60 * 60 * 1000);
+                        newCard.ease = STARTING_EASE;
                     }
-                    
-                    newDue = today + newInterval;
-                    newQueue = 2;
+                } else if (rating === 4) { // Easy
+                    newCard.queue = 'review';
+                    newCard.interval = EASY_INTERVAL;
+                    newCard.due = now + (EASY_INTERVAL * 24 * 60 * 60 * 1000);
+                    newCard.ease = STARTING_EASE;
                 }
-            }
-            // Relearning phase
-            else if (card.type === 1) {
-                if (rating >= 3) {
-                    newType = 2; // Back to review
-                    newInterval = 1; // 1 day
-                    newDue = today + newInterval;
-                    newQueue = 2;
+            } else {
+                if (rating === 1) { // Lapse
+                    newCard.queue = 'learning';
+                    newCard.due = now + LEARN_STEPS[0];
+                    newCard.interval = 1;
+                    newCard.ease = Math.max(1.3, newCard.ease - 0.2);
+                    newCard.lapses += 1;
                 } else {
-                    newInterval = 1; // 1 minute
-                    newDue = now + (newInterval * this.MINUTE);
-                    newQueue = 1;
+                    if (rating === 2) {
+                        newCard.ease = Math.max(1.3, newCard.ease - 0.15);
+                        newCard.interval = newCard.interval * 1.2;
+                    } else if (rating === 3) {
+                        newCard.interval = newCard.interval * newCard.ease;
+                    } else if (rating === 4) {
+                        newCard.ease += 0.15;
+                        newCard.interval = newCard.interval * newCard.ease * 1.3;
+                    }
+                    newCard.due = now + (newCard.interval * 24 * 60 * 60 * 1000);
                 }
             }
+            newCard.reps += 1;
             
-            return {
-                ease: newEase,
-                interval: newInterval,
-                due: newDue,
-                type: newType,
-                queue: newQueue,
-                reviews: (card.reviews || 0) + 1,
-                lapses: rating === 1 ? (card.lapses || 0) + 1 : (card.lapses || 0)
+            const log = {
+                id: crypto.randomUUID(),
+                cardId: card.id,
+                rating,
+                time: now,
+                lastInterval: card.interval,
+                newInterval: newCard.interval
             };
-        }
-
-        static formatInterval(interval, isReview = false) {
-            if (!isReview && interval < this.DAY) {
-                if (interval < this.MINUTE) return `${interval}s`;
-                if (interval < this.HOUR) return `${Math.floor(interval / this.MINUTE)}m`;
-                return `${Math.floor(interval / this.HOUR)}h`;
-            }
             
-            const days = isReview ? interval : Math.floor(interval / this.DAY);
-            if (days < 30) return `${days}d`;
-            if (days < 365) return `${Math.floor(days / 30)}mo`;
-            return `${Math.floor(days / 365)}y`;
-        }
+            return { card: newCard, log };
+        };
 
-        static getNextReviewTime(card, rating) {
-            const result = this.calculate(card, card.ease || 2500, rating);
-            return this.formatInterval(result.interval, card.type === 2);
-        }
-    }
+        // ==========================================
+        // SERVICE: Database (IndexedDB)
+        // ==========================================
+        const DB_NAME = 'AnkiMacOS_DB';
+        const DB_VERSION = 1;
 
-    // ============================================================================
-    // ANKI APP
-    // ============================================================================
-
-    class AnkiApp {
-        constructor() {
-            this.db = new AnkiDB();
-            this.currentDeck = null;
-            this.studyQueue = [];
-            this.currentCard = null;
-            this.currentNote = null;
-            this.isAnswerShown = false;
-            this.startTime = null;
-            this.timerInterval = null;
-            this.totalCards = 0;
-            this.cardsStudied = 0;
-            
-            this.init();
-        }
-
-        async init() {
-            try {
-                // Initialize database
-                await this.db.init();
-                
-                // Create default deck if needed
-                await this.ensureDefaultDeck();
-                
-                // Setup event listeners
-                this.setupEventListeners();
-                
-                // Update UI
-                await this.updateDeckSelect();
-                await this.renderDeckList();
-                await this.updateStats();
-                
-                // Hide loading screen
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-                
-                console.log('Anki App initialized successfully');
-            } catch (error) {
-                console.error('Failed to initialize app:', error);
-                alert('Failed to initialize app. Please refresh the page.');
-            }
-        }
-
-        async ensureDefaultDeck() {
-            const decks = await this.db.getAll('decks');
-            if (decks.length === 0) {
-                const defaultDeck = {
-                    id: Date.now(),
-                    name: 'Default',
-                    created: Date.now(),
-                    desc: 'Your default deck'
+        const initDB = () => {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('decks')) db.createObjectStore('decks', { keyPath: 'id' });
+                    if (!db.objectStoreNames.contains('notes')) db.createObjectStore('notes', { keyPath: 'id' });
+                    if (!db.objectStoreNames.contains('cards')) {
+                        const store = db.createObjectStore('cards', { keyPath: 'id' });
+                        store.createIndex('deckId', 'deckId', { unique: false });
+                        store.createIndex('due', 'due', { unique: false });
+                    }
+                    if (!db.objectStoreNames.contains('logs')) {
+                        const store = db.createObjectStore('logs', { keyPath: 'id' });
+                        store.createIndex('cardId', 'cardId', { unique: false });
+                    }
                 };
-                await this.db.add('decks', defaultDeck);
-                
-                // Add sample cards
-                await this.addSampleCards(defaultDeck.id);
-            }
-        }
+            });
+        };
 
-        async addSampleCards(deckId) {
-            // Sample Basic Card
-            const note1 = {
-                id: Date.now(),
-                deckId: deckId,
-                type: 'basic',
-                front: 'What is the capital of France?',
-                back: 'Paris',
-                tags: ['geography'],
-                created: Date.now()
-            };
-            await this.db.add('notes', note1);
-            
-            const card1 = {
-                id: Date.now() + 1,
-                noteId: note1.id,
-                deckId: deckId,
-                ord: 0,
-                type: 0,
-                queue: 0,
-                due: 0,
-                interval: 0,
-                ease: 2500,
-                factor: 2500,
-                reps: 0,
-                lapses: 0,
-                left: 0,
-                odue: 0,
-                odid: 0,
-                flags: 0,
-                data: '',
-                created: Date.now()
-            };
-            await this.db.add('cards', card1);
-            
-            // Sample Cloze Card
-            const note2 = {
-                id: Date.now() + 2,
-                deckId: deckId,
-                type: 'cloze',
-                front: 'The {{c1::capital}} of France is {{c2::Paris}}.',
-                back: 'France is located in Western Europe.',
-                tags: ['geography'],
-                created: Date.now()
-            };
-            await this.db.add('notes', note2);
-            
-            // Create cloze cards
-            const clozeNumbers = [1, 2];
-            for (let i = 0; i < clozeNumbers.length; i++) {
-                const card = {
-                    id: Date.now() + 3 + i,
-                    noteId: note2.id,
-                    deckId: deckId,
-                    ord: i,
-                    type: 0,
-                    queue: 0,
-                    due: 0,
-                    interval: 0,
-                    ease: 2500,
-                    factor: 2500,
-                    reps: 0,
-                    lapses: 0,
-                    left: 0,
-                    odue: 0,
-                    odid: 0,
-                    flags: 0,
-                    data: '',
-                    clozeNumber: clozeNumbers[i],
-                    created: Date.now()
-                };
-                await this.db.add('cards', card);
-            }
-        }
-
-        // ============================================================================
-        // NAVIGATION
-        // ============================================================================
-
-        setupEventListeners() {
-            // Navigation tabs
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    const view = e.target.dataset.view;
-                    this.switchView(view);
+        const dbService = {
+            async getAllDecks() {
+                const db = await initDB();
+                return new Promise((resolve) => {
+                    const tx = db.transaction('decks', 'readonly');
+                    const req = tx.objectStore('decks').getAll();
+                    req.onsuccess = () => resolve(req.result);
                 });
-            });
-            
-            // Add deck button
-            document.getElementById('add-deck-btn').addEventListener('click', () => {
-                this.createDeck();
-            });
-            
-            // Flashcard click
-            document.getElementById('flashcard').addEventListener('click', () => {
-                if (!this.isAnswerShown) {
-                    this.showAnswer();
-                }
-            });
-            
-            // Search input
-            document.getElementById('search-input').addEventListener('input', (e) => {
-                this.searchCards(e.target.value);
-            });
-            
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                // Ignore if typing in input
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                    return;
-                }
-                
-                const activeView = document.querySelector('.view.active').id;
-                
-                if (activeView === 'view-study') {
-                    if (!this.isAnswerShown && e.code === 'Space') {
-                        this.showAnswer();
-                        e.preventDefault();
-                    } else if (this.isAnswerShown) {
-                        switch(e.code) {
-                            case 'Digit1': this.answer(1); break;
-                            case 'Digit2': this.answer(2); break;
-                            case 'Digit3': this.answer(3); break;
-                            case 'Digit4': this.answer(4); break;
-                            case 'Enter': this.answer(3); break;
+            },
+            async addDeck(name) {
+                const db = await initDB();
+                const deck = { id: crypto.randomUUID(), name, created: Date.now() };
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('decks', 'readwrite');
+                    tx.objectStore('decks').add(deck);
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                });
+            },
+            async addNote(note, cards) {
+                const db = await initDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(['notes', 'cards'], 'readwrite');
+                    tx.objectStore('notes').add(note);
+                    const cardStore = tx.objectStore('cards');
+                    cards.forEach(card => cardStore.add(card));
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                });
+            },
+            async getDueCards(deckId) {
+                const db = await initDB();
+                return new Promise((resolve) => {
+                    const tx = db.transaction('cards', 'readonly');
+                    const store = tx.objectStore('cards');
+                    const index = store.index('deckId');
+                    const req = index.getAll(deckId);
+                    req.onsuccess = () => {
+                        const allCards = req.result;
+                        const now = Date.now();
+                        const dueCards = allCards.filter(c => {
+                            if (c.queue === 'new') return true;
+                            if (c.queue === 'learning') return c.due <= now;
+                            if (c.queue === 'review') return c.due <= now;
+                            return false;
+                        }).sort((a, b) => a.due - b.due);
+                        resolve(dueCards);
+                    };
+                });
+            },
+            async updateCard(card, log) {
+                const db = await initDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(['cards', 'logs'], 'readwrite');
+                    tx.objectStore('cards').put(card);
+                    tx.objectStore('logs').add(log);
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                });
+            },
+            async deleteDeck(id) {
+                const db = await initDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(['decks', 'cards', 'notes'], 'readwrite');
+                    tx.objectStore('decks').delete(id);
+                    const cardStore = tx.objectStore('cards');
+                    const cardIndex = cardStore.index('deckId');
+                    const cardRequest = cardIndex.getAllKeys(id);
+                    cardRequest.onsuccess = () => {
+                        cardRequest.result.forEach(key => cardStore.delete(key));
+                    };
+                    const noteStore = tx.objectStore('notes');
+                    const noteRequest = noteStore.openCursor();
+                    noteRequest.onsuccess = (event) => {
+                        const cursor = event.target.result;
+                        if (cursor) {
+                            if (cursor.value.deckId === id) cursor.delete();
+                            cursor.continue();
                         }
-                    }
-                }
-            });
-        }
-
-        switchView(view) {
-            // Update navigation
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.dataset.view === view) {
-                    item.classList.add('active');
-                }
-            });
-            
-            // Hide all views
-            document.querySelectorAll('.view').forEach(view => {
-                view.classList.remove('active');
-            });
-            
-            // Show selected view
-            const targetView = document.getElementById(`view-${view}`);
-            if (targetView) {
-                targetView.classList.add('active');
-                
-                // Update view-specific data
-                switch(view) {
-                    case 'decks':
-                        this.renderDeckList();
-                        break;
-                    case 'browse':
-                        this.searchCards();
-                        break;
-                    case 'stats':
-                        this.updateStats();
-                        break;
-                }
+                    };
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                });
             }
-        }
+        };
 
-        // ============================================================================
-        // DECK MANAGEMENT
-        // ============================================================================
+        // ==========================================
+        // COMPONENTS
+        // ==========================================
 
-        async renderDeckList() {
-            const container = document.getElementById('deck-list');
-            container.innerHTML = '';
-            
-            try {
-                const decks = await this.db.getAll('decks');
-                const allCards = await this.db.getAll('cards');
-                
-                if (decks.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">
-                                <i class="fa-solid fa-layer-group"></i>
-                            </div>
-                            <h3 class="text-lg font-medium mb-2">No Decks</h3>
-                            <p class="text-gray-500 mb-4">Create your first deck to get started</p>
-                            <button class="form-button" onclick="ankiApp.createDeck()">
-                                Create Deck
+        const Layout = ({ children, activeTab, onTabChange, isDarkMode, toggleTheme }) => {
+            return (
+                <div className="flex flex-col h-screen bg-[#F2F2F7] dark:bg-black text-gray-900 dark:text-white select-none transition-colors duration-300">
+                    <header className="h-[50px] bg-white/85 dark:bg-[#1C1C1E]/85 backdrop-blur-xl border-b border-gray-300/50 dark:border-gray-800/50 flex items-center justify-between px-4 sticky top-0 z-50 shadow-sm transition-colors">
+                        <div className="w-20 text-xs text-[#007AFF] font-medium cursor-pointer active:opacity-50">
+                           {activeTab === 'decks' && <span></span>}
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <h1 className="text-[17px] font-semibold text-black dark:text-white leading-tight">Anki</h1>
+                            <span className="text-[10px] text-gray-400 font-medium tracking-wide scale-90">©️MUHAMMAD DALER</span>
+                        </div>
+                        <div className="w-20 flex justify-end">
+                            <button onClick={toggleTheme} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                               <i className={`fa-solid ${isDarkMode ? 'fa-sun' : 'fa-moon'} text-sm`}></i>
                             </button>
                         </div>
-                    `;
-                    return;
-                }
-                
-                const now = Math.floor(Date.now() / 1000);
-                const today = Math.floor(now / 86400);
-                
-                for (const deck of decks) {
-                    const deckCards = allCards.filter(card => card.deckId === deck.id);
-                    
-                    // Calculate statistics
-                    const newCards = deckCards.filter(c => c.type === 0).length;
-                    const learningCards = deckCards.filter(c => 
-                        (c.type === 1 || c.type === 3) && c.due < now
-                    ).length;
-                    const reviewCards = deckCards.filter(c => 
-                        c.type === 2 && c.due <= today
-                    ).length;
-                    
-                    const deckElement = document.createElement('div');
-                    deckElement.className = 'deck-card';
-                    deckElement.innerHTML = `
-                        <div class="deck-name">${this.escapeHtml(deck.name)}</div>
-                        <div class="deck-stats">
-                            <div class="stat-item">
-                                <span class="text-blue-400">${newCards}</span>
-                                <span class="text-gray-500">new</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="text-yellow-400">${learningCards}</span>
-                                <span class="text-gray-500">learn</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="text-green-400">${reviewCards}</span>
-                                <span class="text-gray-500">review</span>
-                            </div>
+                    </header>
+                    <main className="flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth bg-[#F2F2F7] dark:bg-black">
+                        <div className="max-w-3xl mx-auto h-full p-4 md:p-6">
+                            {children}
                         </div>
-                    `;
-                    
-                    deckElement.addEventListener('click', () => this.studyDeck(deck.id));
-                    container.appendChild(deckElement);
-                }
-            } catch (error) {
-                console.error('Error rendering deck list:', error);
-                container.innerHTML = '<div class="alert alert-error">Error loading decks</div>';
-            }
-        }
-
-        async createDeck() {
-            const name = prompt('Enter deck name:');
-            if (!name || !name.trim()) return;
-            
-            try {
-                const deck = {
-                    id: Date.now(),
-                    name: name.trim(),
-                    created: Date.now(),
-                    desc: ''
-                };
-                
-                await this.db.add('decks', deck);
-                
-                // Update UI
-                await this.updateDeckSelect();
-                await this.renderDeckList();
-                await this.updateStats();
-                
-                this.showAlert('Deck created successfully!', 'success');
-            } catch (error) {
-                console.error('Error creating deck:', error);
-                this.showAlert('Failed to create deck', 'error');
-            }
-        }
-
-        async updateDeckSelect() {
-            const select = document.getElementById('deck-select');
-            select.innerHTML = '<option value="">Select deck...</option>';
-            
-            try {
-                const decks = await this.db.getAll('decks');
-                decks.forEach(deck => {
-                    const option = document.createElement('option');
-                    option.value = deck.id;
-                    option.textContent = deck.name;
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error loading decks:', error);
-            }
-        }
-
-        // ============================================================================
-        // STUDY SESSION
-        // ============================================================================
-
-        async studyDeck(deckId) {
-            try {
-                this.currentDeck = deckId;
-                await this.buildStudyQueue(deckId);
-                
-                if (this.studyQueue.length === 0) {
-                    this.showAlert('No cards to study right now!', 'error');
-                    return;
-                }
-                
-                // Update counts display
-                const now = Math.floor(Date.now() / 1000);
-                const today = Math.floor(now / 86400);
-                const deckCards = await this.db.getCardsByDeck(deckId);
-                
-                const newCount = deckCards.filter(c => c.type === 0).length;
-                const learnCount = deckCards.filter(c => 
-                    (c.type === 1 || c.type === 3) && c.due < now
-                ).length;
-                const reviewCount = deckCards.filter(c => c.type === 2 && c.due <= today).length;
-                
-                document.getElementById('count-new').textContent = newCount;
-                document.getElementById('count-learn').textContent = learnCount;
-                document.getElementById('count-review').textContent = reviewCount;
-                
-                // Start study session
-                this.totalCards = this.studyQueue.length;
-                this.cardsStudied = 0;
-                this.startTime = Date.now();
-                this.startTimer();
-                
-                // Switch to study view
-                this.switchView('study');
-                await this.showNextCard();
-                
-            } catch (error) {
-                console.error('Error starting study session:', error);
-                this.showAlert('Failed to start study session', 'error');
-            }
-        }
-
-        async buildStudyQueue(deckId) {
-            try {
-                const cards = await this.db.getCardsByDeck(deckId);
-                const now = Math.floor(Date.now() / 1000);
-                const today = Math.floor(now / 86400);
-                
-                // Sort cards: learning > review > new
-                const learningCards = cards.filter(card => 
-                    (card.type === 1 || card.type === 3) && card.due < now
-                ).sort((a, b) => a.due - b.due);
-                
-                const reviewCards = cards.filter(card => 
-                    card.type === 2 && card.due <= today
-                ).sort((a, b) => a.due - b.due);
-                
-                const newCards = cards.filter(card => card.type === 0);
-                
-                // Shuffle new cards
-                this.shuffleArray(newCards);
-                
-                this.studyQueue = [...learningCards, ...reviewCards, ...newCards.slice(0, 20)];
-                
-            } catch (error) {
-                console.error('Error building study queue:', error);
-                this.studyQueue = [];
-            }
-        }
-
-        async showNextCard() {
-            if (this.studyQueue.length === 0) {
-                await this.endStudySession();
-                return;
-            }
-            
-            this.currentCard = this.studyQueue.shift();
-            this.currentNote = await this.db.get('notes', this.currentCard.noteId);
-            this.isAnswerShown = false;
-            
-            if (!this.currentNote) {
-                console.error('Note not found for card:', this.currentCard);
-                await this.showNextCard();
-                return;
-            }
-            
-            this.renderCardFront();
-            
-            // Update UI
-            document.getElementById('answer-buttons').classList.add('hidden');
-            document.getElementById('show-answer-btn').classList.remove('hidden');
-            
-            // Update progress
-            this.cardsStudied++;
-            this.updateProgress();
-        }
-
-        renderCardFront() {
-            const container = document.getElementById('card-content');
-            
-            if (!this.currentNote) {
-                container.innerHTML = '<div class="alert alert-error">Error loading card</div>';
-                return;
-            }
-            
-            let content = '';
-            
-            switch(this.currentNote.type) {
-                case 'cloze':
-                case 'cloze+':
-                    content = this.renderClozeFront();
-                    break;
-                case 'basic-rev':
-                    if (this.currentCard.ord === 1) {
-                        content = this.formatText(this.currentNote.back || '');
-                    } else {
-                        content = this.formatText(this.currentNote.front);
-                    }
-                    break;
-                default:
-                    content = this.formatText(this.currentNote.front);
-            }
-            
-            container.innerHTML = content;
-        }
-
-        renderClozeFront() {
-            let text = this.currentNote.front;
-            const clozeNumber = this.currentCard.clozeNumber || 1;
-            
-            // Hide the current cloze
-            const regex = new RegExp(`{{c${clozeNumber}::(.*?)}}`, 'g');
-            text = text.replace(regex, (match, content) => {
-                // Check for hint
-                const parts = content.split('::');
-                if (parts.length > 1) {
-                    return `<span class="cloze-blank" data-hint="${this.escapeHtml(parts[1])}">[...]</span>`;
-                }
-                return '<span class="cloze-blank">[...]</span>';
-            });
-            
-            // Show other clozes
-            text = text.replace(/{{c\d+::(.*?)}}/g, (match, content) => {
-                const parts = content.split('::');
-                return this.escapeHtml(parts[0]);
-            });
-            
-            return this.formatText(text);
-        }
-
-        showAnswer() {
-            if (!this.currentNote || this.isAnswerShown) return;
-            
-            this.isAnswerShown = true;
-            const container = document.getElementById('card-content');
-            
-            let content = '';
-            
-            switch(this.currentNote.type) {
-                case 'cloze':
-                case 'cloze+':
-                    content = this.renderClozeAnswer();
-                    break;
-                case 'basic-rev':
-                    if (this.currentCard.ord === 1) {
-                        content = `
-                            <div class="text-xl mb-8">${this.formatText(this.currentNote.back || '')}</div>
-                            <div class="border-t border-gray-400 pt-6">
-                                <div class="text-sm text-gray-500 mb-2">Answer:</div>
-                                <div class="text-lg">${this.formatText(this.currentNote.front)}</div>
-                            </div>
-                        `;
-                    } else {
-                        content = `
-                            <div class="text-xl mb-8">${this.formatText(this.currentNote.front)}</div>
-                            <div class="border-t border-gray-400 pt-6">
-                                <div class="text-sm text-gray-500 mb-2">Answer:</div>
-                                <div class="text-lg">${this.formatText(this.currentNote.back || '')}</div>
-                            </div>
-                        `;
-                    }
-                    break;
-                default:
-                    content = `
-                        <div class="text-xl mb-8">${this.formatText(this.currentNote.front)}</div>
-                        <div class="border-t border-gray-400 pt-6">
-                            <div class="text-sm text-gray-500 mb-2">Answer:</div>
-                            <div class="text-lg">${this.formatText(this.currentNote.back || '')}</div>
-                        </div>
-                    `;
-            }
-            
-            container.innerHTML = content;
-            
-            // Update UI
-            document.getElementById('show-answer-btn').classList.add('hidden');
-            document.getElementById('answer-buttons').classList.remove('hidden');
-            
-            // Update button times
-            this.updateAnswerButtonTimes();
-        }
-
-        renderClozeAnswer() {
-            let text = this.currentNote.front;
-            const clozeNumber = this.currentCard.clozeNumber || 1;
-            
-            // Highlight current cloze
-            const regex = new RegExp(`{{c${clozeNumber}::(.*?)}}`, 'g');
-            text = text.replace(regex, (match, content) => {
-                const parts = content.split('::');
-                return `<span class="cloze">${this.escapeHtml(parts[0])}</span>`;
-            });
-            
-            // Show other clozes
-            text = text.replace(/{{c\d+::(.*?)}}/g, (match, content) => {
-                const parts = content.split('::');
-                return this.escapeHtml(parts[0]);
-            });
-            
-            let content = `<div class="text-xl mb-8">${this.formatText(text)}</div>`;
-            
-            // Add back content if exists
-            if (this.currentNote.back && this.currentNote.back.trim()) {
-                content += `
-                    <div class="border-t border-gray-400 pt-6">
-                        <div class="text-sm text-gray-500 mb-2">Additional Information:</div>
-                        <div>${this.formatText(this.currentNote.back)}</div>
-                    </div>
-                `;
-            }
-            
-            return content;
-        }
-
-        async answer(rating) {
-            try {
-                if (!this.currentCard) return;
-                
-                // Calculate new card state
-                const updatedCard = Scheduler.calculate(
-                    this.currentCard,
-                    this.currentCard.ease || 2500,
-                    rating
-                );
-                
-                // Merge with current card
-                const newCard = {
-                    ...this.currentCard,
-                    ...updatedCard,
-                    lastReviewed: Date.now()
-                };
-                
-                // Save updated card
-                await this.db.put('cards', newCard);
-                
-                // Log review
-                const reviewTime = Math.floor((Date.now() - this.startTime) / 1000);
-                await this.db.add('revlog', {
-                    id: Date.now(),
-                    cardId: this.currentCard.id,
-                    ease: rating,
-                    time: reviewTime,
-                    type: newCard.type,
-                    ivl: newCard.interval,
-                    lastIvl: this.currentCard.interval,
-                    factor: newCard.ease,
-                    created: Date.now()
-                });
-                
-                // Reset timer for next card
-                this.startTime = Date.now();
-                
-                // Show next card
-                await this.showNextCard();
-                
-            } catch (error) {
-                console.error('Error answering card:', error);
-                this.showAlert('Failed to save answer', 'error');
-            }
-        }
-
-        updateAnswerButtonTimes() {
-            if (!this.currentCard) return;
-            
-            const ratings = [1, 2, 3, 4];
-            ratings.forEach(rating => {
-                const time = Scheduler.getNextReviewTime(this.currentCard, rating);
-                const element = document.getElementById(`time-${['again', 'hard', 'good', 'easy'][rating - 1]}`);
-                if (element) {
-                    element.textContent = time;
-                }
-            });
-        }
-
-        updateProgress() {
-            const progress = (this.cardsStudied / this.totalCards) * 100;
-            document.getElementById('progress-fill').style.width = `${progress}%`;
-        }
-
-        startTimer() {
-            this.stopTimer();
-            
-            this.timerInterval = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-                const minutes = Math.floor(elapsed / 60);
-                const seconds = elapsed % 60;
-                document.getElementById('timer').textContent = 
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }, 1000);
-        }
-
-        stopTimer() {
-            if (this.timerInterval) {
-                clearInterval(this.timerInterval);
-                this.timerInterval = null;
-            }
-        }
-
-        async endStudySession() {
-            this.stopTimer();
-            
-            const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-            const minutes = Math.floor(elapsed / 60);
-            
-            let message = `Study session complete!\n\n`;
-            message += `Cards studied: ${this.cardsStudied}\n`;
-            message += `Time spent: ${minutes} minute${minutes !== 1 ? 's' : ''}\n\n`;
-            message += `Great job! 🎉`;
-            
-            alert(message);
-            
-            // Update stats and return to decks
-            await this.updateStats();
-            await this.renderDeckList();
-            this.switchView('decks');
-        }
-
-        // ============================================================================
-        // CARD MANAGEMENT
-        // ============================================================================
-
-        updateCardType() {
-            const type = document.getElementById('card-type').value;
-            const hint = document.getElementById('cloze-hint');
-            const frontLabel = document.getElementById('front-label');
-            
-            if (type === 'cloze' || type === 'cloze+') {
-                hint.classList.remove('hidden');
-                frontLabel.textContent = 'Text (use {{c1::cloze}} syntax)';
-                document.getElementById('front-field').placeholder = 
-                    'Example: The {{c1::capital}} of France is {{c2::Paris}}.';
-            } else {
-                hint.classList.add('hidden');
-                frontLabel.textContent = 'Front';
-                document.getElementById('front-field').placeholder = 'Enter question or text...';
-            }
-        }
-
-        async saveCard() {
-            try {
-                const deckId = document.getElementById('deck-select').value;
-                const cardType = document.getElementById('card-type').value;
-                const front = document.getElementById('front-field').value.trim();
-                const back = document.getElementById('back-field').value.trim();
-                
-                // Validation
-                if (!deckId) {
-                    this.showAlert('Please select a deck', 'error');
-                    return;
-                }
-                
-                if (!front) {
-                    this.showAlert('Front field is required', 'error');
-                    return;
-                }
-                
-                if ((cardType === 'basic' || cardType === 'basic-rev') && !back) {
-                    this.showAlert('Back field is required for basic cards', 'error');
-                    return;
-                }
-                
-                // Create note
-                const noteId = Date.now();
-                const note = {
-                    id: noteId,
-                    deckId: parseInt(deckId),
-                    type: cardType,
-                    front: front,
-                    back: back,
-                    tags: [],
-                    created: Date.now()
-                };
-                
-                await this.db.add('notes', note);
-                
-                // Create cards based on type
-                if (cardType === 'basic') {
-                    await this.createCard(noteId, deckId, 0);
-                } 
-                else if (cardType === 'basic-rev') {
-                    await this.createCard(noteId, deckId, 0); // Front
-                    await this.createCard(noteId, deckId, 1); // Back (reversed)
-                }
-                else if (cardType === 'cloze' || cardType === 'cloze+') {
-                    await this.createClozeCards(noteId, deckId, front);
-                }
-                
-                // Clear form
-                document.getElementById('front-field').value = '';
-                document.getElementById('back-field').value = '';
-                
-                this.showAlert('Card added successfully!', 'success');
-                
-                // Update UI
-                await this.updateStats();
-                await this.renderDeckList();
-                
-            } catch (error) {
-                console.error('Error saving card:', error);
-                this.showAlert('Failed to save card: ' + error.message, 'error');
-            }
-        }
-
-        async createCard(noteId, deckId, ord) {
-            const card = {
-                id: Date.now() + ord,
-                noteId: noteId,
-                deckId: parseInt(deckId),
-                ord: ord,
-                type: 0, // New
-                queue: 0,
-                due: 0,
-                interval: 0,
-                ease: 2500,
-                factor: 2500,
-                reps: 0,
-                lapses: 0,
-                left: 0,
-                odue: 0,
-                odid: 0,
-                flags: 0,
-                data: '',
-                created: Date.now()
-            };
-            
-            await this.db.add('cards', card);
-        }
-
-        async createClozeCards(noteId, deckId, text) {
-            // Extract cloze numbers
-            const regex = /{{c(\d+)::(.*?)}}/g;
-            const matches = [...text.matchAll(regex)];
-            const clozeNumbers = [...new Set(matches.map(m => parseInt(m[1])))];
-            
-            // If no cloze found, create one card
-            if (clozeNumbers.length === 0) {
-                clozeNumbers.push(1);
-            }
-            
-            // Create a card for each cloze
-            for (let i = 0; i < clozeNumbers.length; i++) {
-                const card = {
-                    id: Date.now() + i,
-                    noteId: noteId,
-                    deckId: parseInt(deckId),
-                    clozeNumber: clozeNumbers[i],
-                    type: 0,
-                    queue: 0,
-                    due: 0,
-                    interval: 0,
-                    ease: 2500,
-                    factor: 2500,
-                    reps: 0,
-                    lapses: 0,
-                    left: 0,
-                    odue: 0,
-                    odid: 0,
-                    flags: 0,
-                    data: '',
-                    created: Date.now()
-                };
-                
-                await this.db.add('cards', card);
-            }
-        }
-
-        async searchCards(query = '') {
-            const container = document.getElementById('browse-list');
-            container.innerHTML = '';
-            
-            try {
-                const notes = await this.db.getAll('notes');
-                const decks = await this.db.getAll('decks');
-                const cards = await this.db.getAll('cards');
-                
-                let filteredNotes = notes;
-                if (query) {
-                    const searchTerm = query.toLowerCase();
-                    filteredNotes = notes.filter(note => 
-                        note.front.toLowerCase().includes(searchTerm) ||
-                        note.back.toLowerCase().includes(searchTerm)
-                    );
-                }
-                
-                if (filteredNotes.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">
-                                <i class="fa-solid fa-search"></i>
-                            </div>
-                            <h3 class="text-lg font-medium mb-2">No Cards Found</h3>
-                            <p class="text-gray-500">${query ? 'Try a different search term' : 'Add some cards to get started'}</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                for (const note of filteredNotes.slice(0, 100)) {
-                    const deck = decks.find(d => d.id === note.deckId);
-                    const noteCards = cards.filter(c => c.noteId === note.id);
-                    
-                    const element = document.createElement('div');
-                    element.className = 'browser-item';
-                    element.innerHTML = `
-                        <div class="font-semibold mb-2">${this.formatText(note.front.substring(0, 200))}</div>
-                        <div class="text-gray-500 text-sm mb-2">${this.formatText(note.back.substring(0, 100))}</div>
-                        <div class="flex justify-between items-center text-xs text-gray-400">
-                            <span>${deck ? deck.name : 'Unknown'} • ${note.type} • ${noteCards.length} card(s)</span>
-                        </div>
-                    `;
-                    
-                    container.appendChild(element);
-                }
-            } catch (error) {
-                console.error('Error searching cards:', error);
-                container.innerHTML = '<div class="alert alert-error">Error loading cards</div>';
-            }
-        }
-
-        async editCard() {
-            if (!this.currentCard || !this.currentNote) {
-                this.showAlert('No card selected', 'error');
-                return;
-            }
-            
-            this.showAlert('Edit functionality coming soon!', 'error');
-        }
-
-        async deleteCard() {
-            if (!this.currentCard || !this.currentNote) {
-                this.showAlert('No card selected', 'error');
-                return;
-            }
-            
-            if (!confirm('Are you sure you want to delete this card?')) {
-                return;
-            }
-            
-            try {
-                // Delete the card
-                await this.db.delete('cards', this.currentCard.id);
-                
-                // Check if this was the last card for the note
-                const cards = await this.db.getAll('cards');
-                const noteCards = cards.filter(c => c.noteId === this.currentNote.id);
-                
-                if (noteCards.length === 0) {
-                    await this.db.delete('notes', this.currentNote.id);
-                }
-                
-                // Remove from study queue
-                this.studyQueue = this.studyQueue.filter(c => c.id !== this.currentCard.id);
-                
-                this.showAlert('Card deleted successfully', 'success');
-                
-                // Show next card or end session
-                if (this.studyQueue.length > 0) {
-                    await this.showNextCard();
-                } else {
-                    await this.endStudySession();
-                }
-                
-                // Update stats
-                await this.updateStats();
-                
-            } catch (error) {
-                console.error('Error deleting card:', error);
-                this.showAlert('Failed to delete card', 'error');
-            }
-        }
-
-        // ============================================================================
-        // STATISTICS
-        // ============================================================================
-
-        async updateStats() {
-            try {
-                const cards = await this.db.getAll('cards');
-                const notes = await this.db.getAll('notes');
-                const revlogs = await this.db.getAll('revlog');
-                
-                const now = Math.floor(Date.now() / 1000);
-                const today = Math.floor(now / 86400);
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-                
-                // Calculate statistics
-                const totalCards = cards.length;
-                
-                const dueToday = cards.filter(card => {
-                    if (card.type === 0) return true; // New cards
-                    if (card.type === 1 || card.type === 3) return card.due < now;
-                    if (card.type === 2) return card.due <= today;
-                    return false;
-                }).length;
-                
-                const learningCards = cards.filter(card => 
-                    (card.type === 1 || card.type === 3) && card.due < now
-                ).length;
-                
-                const reviewCards = cards.filter(card => 
-                    card.type === 2 && card.due <= today
-                ).length;
-                
-                // Update UI
-                document.getElementById('stat-total').textContent = totalCards;
-                document.getElementById('stat-due').textContent = dueToday;
-                document.getElementById('stat-learn').textContent = learningCards;
-                document.getElementById('stat-review').textContent = reviewCards;
-                
-            } catch (error) {
-                console.error('Error updating stats:', error);
-            }
-        }
-
-        // ============================================================================
-        // UTILITY FUNCTIONS
-        // ============================================================================
-
-        formatText(text) {
-            if (!text) return '';
-            
-            return text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/\n/g, '<br>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/`(.*?)`/g, '<code>$1</code>')
-                .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-blue-400">$1</a>');
-        }
-
-        escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        showAlert(message, type = 'info') {
-            // Create alert element
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-500">
-                        <i class="fa-solid fa-times"></i>
-                    </button>
+                    </main>
+                    <nav className="h-[83px] bg-white/90 dark:bg-[#1C1C1E]/90 backdrop-blur-2xl border-t border-gray-300/50 dark:border-gray-800/50 flex justify-around items-start pt-2 pb-safe transition-colors">
+                        <button onClick={() => onTabChange('decks')} className={`flex flex-col items-center justify-center w-20 space-y-1 transition-all active:scale-95 ${activeTab === 'decks' ? 'text-[#007AFF]' : 'text-gray-400 dark:text-gray-500'}`}>
+                            <i className={`fa-solid fa-layer-group text-[24px] ${activeTab === 'decks' ? 'opacity-100' : 'opacity-70'}`}></i>
+                            <span className="text-[10px] font-medium">Decks</span>
+                        </button>
+                        <button onClick={() => onTabChange('add')} className={`flex flex-col items-center justify-center w-20 space-y-1 transition-all active:scale-95 ${activeTab === 'add' ? 'text-[#007AFF]' : 'text-gray-400 dark:text-gray-500'}`}>
+                            <i className={`fa-solid fa-plus-circle text-[24px] ${activeTab === 'add' ? 'opacity-100' : 'opacity-70'}`}></i>
+                            <span className="text-[10px] font-medium">Add</span>
+                        </button>
+                        <button onClick={() => onTabChange('stats')} className={`flex flex-col items-center justify-center w-20 space-y-1 transition-all active:scale-95 ${activeTab === 'stats' ? 'text-[#007AFF]' : 'text-gray-400 dark:text-gray-500'}`}>
+                            <i className={`fa-solid fa-chart-simple text-[24px] ${activeTab === 'stats' ? 'opacity-100' : 'opacity-70'}`}></i>
+                            <span className="text-[10px] font-medium">Stats</span>
+                        </button>
+                    </nav>
                 </div>
-            `;
-            
-            // Insert at the beginning of the active view
-            const activeView = document.querySelector('.view.active');
-            if (activeView) {
-                activeView.insertBefore(alert, activeView.firstChild);
-                
-                // Remove after 5 seconds
-                setTimeout(() => {
-                    if (alert.parentElement) {
-                        alert.remove();
+            );
+        };
+
+        const DeckList = ({ onSelectDeck }) => {
+            const [decks, setDecks] = useState([]);
+            const [isCreating, setIsCreating] = useState(false);
+            const [newDeckName, setNewDeckName] = useState('');
+            const [isLoading, setIsLoading] = useState(true);
+            const [deckToDelete, setDeckToDelete] = useState(null);
+
+            useEffect(() => { loadDecks(); }, []);
+
+            const loadDecks = async () => {
+                try {
+                    const loaded = await dbService.getAllDecks();
+                    setDecks(loaded);
+                } catch (e) { console.error(e); } finally { setIsLoading(false); }
+            };
+
+            const handleCreateDeck = async (e) => {
+                e.preventDefault();
+                if (!newDeckName.trim()) return;
+                try {
+                    await dbService.addDeck(newDeckName);
+                    setNewDeckName('');
+                    setIsCreating(false);
+                    loadDecks();
+                } catch (err) { alert("Error."); }
+            };
+
+            const confirmDelete = async () => {
+                if (deckToDelete) {
+                    await dbService.deleteDeck(deckToDelete);
+                    setDeckToDelete(null);
+                    loadDecks();
+                }
+            };
+
+            return (
+                <div className="space-y-6 animate-fade-in-up pb-20 relative">
+                    <div className="flex justify-between items-end px-2 mb-4">
+                        <div>
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Library</h2>
+                            <p className="text-sm text-gray-400 font-medium mt-1">{decks.length} Decks</p>
+                        </div>
+                        <button onClick={() => setIsCreating(true)} className="bg-[#007AFF] text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform hover:bg-[#0062CC]">
+                            <i className="fa-solid fa-plus text-sm"></i>
+                        </button>
+                    </div>
+
+                    {isCreating && (
+                        <form onSubmit={handleCreateDeck} className="bg-white dark:bg-[#1C1C1E] p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 mb-6 flex flex-col gap-3 animate-slide-down">
+                            <input autoFocus type="text" value={newDeckName} onChange={(e) => setNewDeckName(e.target.value)} placeholder="Name your new deck" className="w-full bg-[#F2F2F7] dark:bg-[#2C2C2E] border-none rounded-xl px-4 py-3 text-[15px] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#007AFF] placeholder-gray-400" />
+                            <div className="flex gap-3">
+                                <button type="submit" className="flex-1 bg-[#007AFF] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#0062CC]">Create Deck</button>
+                                <button type="button" onClick={() => setIsCreating(false)} className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700">Cancel</button>
+                            </div>
+                        </form>
+                    )}
+                    
+                    {deckToDelete && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm animate-fade-in">
+                          <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden scale-100 animate-scale-up border border-gray-100 dark:border-gray-700">
+                            <div className="p-6 text-center">
+                              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Delete Deck?</h3>
+                              <p className="text-[13px] leading-relaxed text-gray-500 dark:text-gray-400">This will permanently delete this deck and all its content. This action cannot be undone.</p>
+                            </div>
+                            <div className="flex border-t border-gray-200 dark:border-gray-800">
+                              <button onClick={() => setDeckToDelete(null)} className="flex-1 py-3.5 text-[17px] text-gray-600 dark:text-gray-400 font-medium active:bg-gray-50 dark:active:bg-[#2C2C2E] transition-colors">Cancel</button>
+                              <div className="w-px bg-gray-200 dark:bg-gray-800"></div>
+                              <button onClick={confirmDelete} className="flex-1 py-3.5 text-[17px] text-[#FF3B30] font-bold active:bg-gray-50 dark:active:bg-[#2C2C2E] transition-colors">Delete</button>
+                            </div>
+                          </div>
+                        </div>
+                    )}
+
+                    {isLoading ? (
+                        <div className="text-center py-10"><div className="inline-block w-6 h-6 border-2 border-[#007AFF] border-t-transparent rounded-full animate-spin"></div></div>
+                    ) : decks.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+                            <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
+                                <i className="fa-solid fa-box-open text-3xl text-gray-400 dark:text-gray-500"></i>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Decks Yet</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs">Tap the + button above to create your first deck.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-4">
+                            {decks.map((deck) => (
+                                <div key={deck.id} onClick={() => onSelectDeck(deck.id)} className="group bg-white dark:bg-[#1C1C1E] p-5 rounded-[18px] shadow-sm border border-gray-100 dark:border-gray-800 active:scale-[0.98] transition-all cursor-pointer relative">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-[#007AFF]">
+                                                <i className="fa-solid fa-layer-group text-lg"></i>
+                                            </div>
+                                            <div>
+                                                <h3 className="text-[17px] font-semibold text-gray-900 dark:text-white leading-tight">{deck.name}</h3>
+                                                <span className="text-xs text-gray-400 font-medium">Tap to open</span>
+                                            </div>
+                                        </div>
+                                        <i className="fa-solid fa-chevron-right text-gray-300 dark:text-gray-600 text-xs"></i>
+                                    </div>
+                                    <button onClick={(e) => { e.stopPropagation(); setDeckToDelete(deck.id); }} className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-red-500 dark:hover:text-red-400">
+                                        <i className="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const AddCardForm = () => {
+            const [decks, setDecks] = useState([]);
+            const [selectedDeckId, setSelectedDeckId] = useState('');
+            const [type, setType] = useState('basic');
+            const [front, setFront] = useState('');
+            const [back, setBack] = useState('');
+            const [status, setStatus] = useState(null);
+            const frontInputRef = useRef(null);
+
+            useEffect(() => {
+                dbService.getAllDecks().then(data => {
+                    setDecks(data);
+                    if (data.length > 0) setSelectedDeckId(data[0].id);
+                });
+            }, []);
+
+            const insertCloze = () => {
+                if (!frontInputRef.current) return;
+                const textarea = frontInputRef.current;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+                const selection = text.substring(start, end);
+                const indices = getClozeIndices(text);
+                const nextNum = indices.length > 0 ? Math.max(...indices) + 1 : 1;
+                let replacement = '';
+                let newCursorPos = 0;
+
+                if (!selection) {
+                    replacement = `{{c${nextNum}::...}}`;
+                    newCursorPos = start + 3 + nextNum.toString().length + 2; 
+                } else {
+                    replacement = `{{c${nextNum}::${selection}}}`;
+                    newCursorPos = start + replacement.length;
+                }
+                const newText = text.substring(0, start) + replacement + text.substring(end);
+                setFront(newText);
+                setTimeout(() => { textarea.focus(); textarea.setSelectionRange(newCursorPos, newCursorPos); }, 0);
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                if (!selectedDeckId) { setStatus({msg: 'Select a deck.', type: 'error'}); return; }
+                if (!front.trim()) { setStatus({msg: 'Front required.', type: 'error'}); return; }
+
+                try {
+                    const noteId = crypto.randomUUID();
+                    const now = Date.now();
+                    const newNote = { id: noteId, deckId: selectedDeckId, type, fields: { front, back }, created: now };
+                    const cards = [];
+                    const safeFront = front.replace(/\n/g, '<br>');
+                    const safeBack = back.replace(/\n/g, '<br>');
+
+                    if (type === 'basic') {
+                        cards.push({ id: crypto.randomUUID(), noteId, deckId: selectedDeckId, ord: 0, queue: 'new', due: now, interval: 0, ease: 2.5, reps: 0, lapses: 0, front: safeFront, back: safeBack });
+                    } else if (type === 'cloze') {
+                        const indices = getClozeIndices(front);
+                        if (indices.length === 0) { setStatus({msg: 'No cloze deletions ({{c1::..}}).', type: 'error'}); return; }
+                        indices.forEach(index => {
+                            const content = generateClozeContent(safeFront, index);
+                            cards.push({
+                                id: crypto.randomUUID(),
+                                noteId,
+                                deckId: selectedDeckId,
+                                ord: index,
+                                queue: 'new',
+                                due: now,
+                                interval: 0,
+                                ease: 2.5,
+                                reps: 0,
+                                lapses: 0,
+                                front: content.front,
+                                back: `${content.back}${safeBack ? `<br/><br/><div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">${safeBack}</div>` : ''}`
+                            });
+                        });
                     }
-                }, 5000);
+                    await dbService.addNote(newNote, cards);
+                    setStatus({msg: 'Card saved!', type: 'success'});
+                    setFront(''); setBack('');
+                    setTimeout(() => setStatus(null), 2000);
+                } catch (err) { setStatus({msg: 'Error.', type: 'error'}); }
+            };
+
+            return (
+                <div className="max-w-xl mx-auto space-y-5 animate-fade-in-up pb-10">
+                   <div className="flex items-center justify-between">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Add Card</h2>
+                        {status && (<div className={`px-3 py-1.5 rounded-lg text-xs font-bold animate-pulse shadow-sm ${status.type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'}`}>{status.msg}</div>)}
+                   </div>
+                   <form onSubmit={handleSubmit} className="bg-white dark:bg-[#1C1C1E] p-5 rounded-[22px] shadow-sm border border-gray-200/50 dark:border-gray-800 transition-colors">
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wide ml-1">Deck</label>
+                        <div className="relative">
+                            <select value={selectedDeckId} onChange={e => setSelectedDeckId(e.target.value)} className="w-full appearance-none bg-[#F2F2F7] dark:bg-[#2C2C2E] border-0 text-gray-900 dark:text-white text-[15px] rounded-xl focus:ring-2 focus:ring-[#007AFF] block p-3.5 pr-8 font-medium transition-colors">
+                                {decks.length === 0 && <option value="">Create a deck first...</option>}
+                                {decks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500"><i className="fa-solid fa-chevron-down text-xs"></i></div>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wide ml-1">Card Type</label>
+                        <div className="grid grid-cols-2 gap-2 bg-[#F2F2F7] dark:bg-[#2C2C2E] p-1 rounded-xl">
+                            <button type="button" onClick={() => setType('basic')} className={`py-2.5 text-[13px] font-semibold rounded-[10px] transition-all duration-200 ${type === 'basic' ? 'bg-white dark:bg-[#3A3A3C] text-black dark:text-white shadow-sm scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>Basic</button>
+                            <button type="button" onClick={() => setType('cloze')} className={`py-2.5 text-[13px] font-semibold rounded-[10px] transition-all duration-200 ${type === 'cloze' ? 'bg-white dark:bg-[#3A3A3C] text-black dark:text-white shadow-sm scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>Cloze</button>
+                        </div>
+                      </div>
+                      <div className="space-y-2 relative">
+                        <div className="flex justify-between items-center ml-1">
+                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">{type === 'cloze' ? 'Text (Use {{c1::...}})' : 'Front'}</label>
+                            {type === 'cloze' && (<button type="button" onClick={insertCloze} className="text-[11px] bg-blue-50 dark:bg-blue-500/10 text-[#007AFF] dark:text-blue-400 px-2.5 py-1 rounded-md font-bold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors border border-blue-100 dark:border-blue-500/20"><i className="fa-solid fa-code mr-1"></i>Insert Cloze</button>)}
+                        </div>
+                        <textarea ref={frontInputRef} value={front} onChange={e => setFront(e.target.value)} rows={6} className="w-full bg-[#F2F2F7] dark:bg-[#2C2C2E] border-0 text-gray-900 dark:text-white text-[16px] leading-relaxed rounded-xl focus:ring-2 focus:ring-[#007AFF] block p-4 font-normal placeholder-gray-400 dark:placeholder-gray-600 resize-none transition-colors" placeholder={type === 'cloze' ? "The {{c1::capital}} of France is {{c2::Paris}}." : "Question or main text"} />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wide ml-1">Back (Extra)</label>
+                        <textarea value={back} onChange={e => setBack(e.target.value)} rows={3} className="w-full bg-[#F2F2F7] dark:bg-[#2C2C2E] border-0 text-gray-900 dark:text-white text-[16px] leading-relaxed rounded-xl focus:ring-2 focus:ring-[#007AFF] block p-4 font-normal placeholder-gray-400 dark:placeholder-gray-600 resize-none transition-colors" placeholder="Extra info..." />
+                      </div>
+                      <button type="submit" className="w-full bg-[#007AFF] hover:bg-[#0062cc] active:scale-[0.98] text-white font-semibold text-[15px] py-4 rounded-xl shadow-lg shadow-blue-500/25 transition-all duration-200 mt-2">Add Card</button>
+                   </form>
+                   <p className="text-center text-[10px] text-gray-400 dark:text-gray-600 px-4">Tip: In Cloze mode, type <code>{`{{c1::answer::hint}}`}</code>.</p>
+                </div>
+            );
+        };
+
+        const StudySession = ({ deckId, onExit }) => {
+            const [cards, setCards] = useState([]);
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [isFlipped, setIsFlipped] = useState(false);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                let mounted = true;
+                const load = async () => {
+                    try {
+                        const due = await dbService.getDueCards(deckId);
+                        if (mounted) { setCards(due); setLoading(false); }
+                    } catch (err) { if (mounted) setLoading(false); }
+                };
+                load();
+                return () => { mounted = false; };
+            }, [deckId]);
+
+            const currentCard = cards[currentIndex];
+
+            const handleRate = async (rating) => {
+                if (!currentCard) return;
+                setIsFlipped(false);
+                setTimeout(async () => {
+                    const { card: updatedCard, log } = scheduleCard(currentCard, rating);
+                    await dbService.updateCard(updatedCard, log);
+                    const newCards = cards.filter((_, idx) => idx !== currentIndex);
+                    setCards(newCards);
+                }, 200);
+            };
+
+            if (loading) return (<div className="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500"><div className="w-8 h-8 border-4 border-[#007AFF] border-t-transparent rounded-full animate-spin mb-4"></div><span className="text-sm font-medium">Loading cards...</span></div>);
+            
+            if (!currentCard) return (
+                <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-6 animate-fade-in">
+                    <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30"><i className="fa-solid fa-check text-4xl text-white"></i></div>
+                    <div><h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">You're all done!</h2><p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto">No more cards due for today.</p></div>
+                    <button onClick={onExit} className="mt-8 bg-[#007AFF] active:bg-[#0056CC] text-white px-8 py-3.5 rounded-xl font-semibold shadow-lg shadow-blue-500/20 transition-all transform active:scale-95">Back to Decks</button>
+                </div>
+            );
+
+            return (
+                <div className="h-full flex flex-col">
+                    <div className="flex justify-between items-center mb-4 px-1">
+                         <button onClick={onExit} className="text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-300 flex items-center"><i className="fa-solid fa-chevron-left mr-1"></i> Library</button>
+                         <div className="bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[10px] font-bold px-2 py-1 rounded-full">{cards.length} REMAINING</div>
+                    </div>
+                    <div className={`flex-1 relative card-container cursor-pointer mb-6 ${isFlipped ? 'card-flipped' : ''}`} onClick={() => !isFlipped && setIsFlipped(true)}>
+                        <div className="card-inner w-full h-full shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] rounded-[20px] bg-transparent">
+                             <div className="card-front flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-gray-800 rounded-[20px]">
+                                <div className="text-[22px] leading-relaxed text-gray-900 dark:text-gray-100 font-medium select-text" dangerouslySetInnerHTML={{ __html: currentCard.front }} />
+                                <div className="absolute bottom-8 text-xs font-semibold text-gray-300 dark:text-gray-600 uppercase tracking-widest pointer-events-none">Tap to Flip</div>
+                             </div>
+                             <div className="card-back flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-gray-800 rounded-[20px] overflow-y-auto">
+                                 <div className="text-[22px] leading-relaxed text-gray-900 dark:text-gray-100 font-medium select-text" dangerouslySetInnerHTML={{ __html: currentCard.back }} />
+                             </div>
+                        </div>
+                    </div>
+                    <div className={`grid grid-cols-4 gap-3 transition-all duration-300 ${isFlipped ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                         <button onClick={(e) => { e.stopPropagation(); handleRate(1); }} className="group flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-gray-800 active:bg-gray-50 dark:active:bg-[#2C2C2E] shadow-sm transition-all"><span className="text-[15px] font-semibold text-[#FF3B30] mb-1">Again</span><span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium group-active:text-gray-600">1m</span></button>
+                         <button onClick={(e) => { e.stopPropagation(); handleRate(2); }} className="group flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-gray-800 active:bg-gray-50 dark:active:bg-[#2C2C2E] shadow-sm transition-all"><span className="text-[15px] font-semibold text-[#FF9500] mb-1">Hard</span><span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium group-active:text-gray-600">10m</span></button>
+                         <button onClick={(e) => { e.stopPropagation(); handleRate(3); }} className="group flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-gray-800 active:bg-gray-50 dark:active:bg-[#2C2C2E] shadow-sm transition-all"><span className="text-[15px] font-semibold text-[#34C759] mb-1">Good</span><span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium group-active:text-gray-600">1d</span></button>
+                         <button onClick={(e) => { e.stopPropagation(); handleRate(4); }} className="group flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-gray-800 active:bg-gray-50 dark:active:bg-[#2C2C2E] shadow-sm transition-all"><span className="text-[15px] font-semibold text-[#007AFF] mb-1">Easy</span><span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium group-active:text-gray-600">4d</span></button>
+                    </div>
+                </div>
+            );
+        };
+
+        const Stats = () => {
+          return (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight text-center">Statistics</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white dark:bg-[#1C1C1E] p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col items-center transition-colors"><span className="text-4xl font-bold text-[#007AFF] mb-2">0</span><span className="text-xs text-gray-400 uppercase font-semibold">Cards Learned</span></div>
+                <div className="bg-white dark:bg-[#1C1C1E] p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col items-center transition-colors"><span className="text-4xl font-bold text-[#34C759] mb-2">0%</span><span className="text-xs text-gray-400 uppercase font-semibold">Retention</span></div>
+              </div>
+              <div className="bg-white dark:bg-[#1C1C1E] p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 text-center transition-colors">
+                <div className="text-gray-300 dark:text-gray-600 mb-4"><i className="fa-solid fa-chart-line text-5xl"></i></div>
+                <h3 className="text-gray-900 dark:text-white font-medium mb-1">Not enough data</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Study more cards to see detailed analytics.</p>
+              </div>
+            </div>
+          );
+        };
+
+        const App = () => {
+          const [activeTab, setActiveTab] = useState('decks');
+          const [selectedDeckId, setSelectedDeckId] = useState(null);
+          const [isDarkMode, setIsDarkMode] = useState(() => {
+             if(typeof window !== 'undefined' && window.localStorage) {
+                 const s = localStorage.getItem('anki-theme');
+                 if(s) return s === 'dark';
+             }
+             return window.matchMedia('(prefers-color-scheme: dark)').matches;
+          });
+
+          useEffect(() => {
+            localStorage.setItem('anki-theme', isDarkMode ? 'dark' : 'light');
+            if (isDarkMode) document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+          }, [isDarkMode]);
+
+          const renderContent = () => {
+            if (selectedDeckId) return <StudySession deckId={selectedDeckId} onExit={() => setSelectedDeckId(null)} />;
+            switch (activeTab) {
+              case 'decks': return <DeckList onSelectDeck={setSelectedDeckId} />;
+              case 'add': return <AddCardForm />;
+              case 'stats': return <Stats />;
+              default: return <DeckList onSelectDeck={setSelectedDeckId} />;
             }
-        }
-    }
+          };
 
-    // ============================================================================
-    // INITIALIZE APP
-    // ============================================================================
+          return (
+            <div className={isDarkMode ? 'dark' : ''}>
+              <Layout activeTab={selectedDeckId ? 'decks' : activeTab} onTabChange={(tab) => { setSelectedDeckId(null); setActiveTab(tab); }} isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)}>
+                {renderContent()}
+              </Layout>
+            </div>
+          );
+        };
 
-    // Initialize app when page loads
-    document.addEventListener('DOMContentLoaded', () => {
-        window.ankiApp = new AnkiApp();
-    });
-
-    // Make utility functions globally available
-    window.formatInterval = (interval) => {
-        if (interval < 60) return `${interval}s`;
-        if (interval < 3600) return `${Math.floor(interval / 60)}m`;
-        if (interval < 86400) return `${Math.floor(interval / 3600)}h`;
-        const days = Math.floor(interval / 86400);
-        if (days < 30) return `${days}d`;
-        if (days < 365) return `${Math.floor(days / 30)}mo`;
-        return `${Math.floor(days / 365)}y`;
-    };
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
