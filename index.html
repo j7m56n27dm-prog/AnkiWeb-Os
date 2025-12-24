@@ -2,1085 +2,1222 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anki iOS Clone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Anki iOS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         :root {
-            --primary: #007aff;
-            --secondary: #5856d6;
-            --danger: #ff3b30;
-            --warning: #ff9500;
-            --success: #34c759;
-            --background: #000000;
-            --card-bg: #1c1c1e;
-            --text: #ffffff;
+            --bg-primary: #000000;
+            --bg-secondary: #1c1c1e;
+            --text-primary: #ffffff;
             --text-secondary: #8e8e93;
+            --accent: #0a84ff;
+            --danger: #ff453a;
+            --success: #32d74b;
+            --warning: #ff9f0a;
+            --card-bg: #2c2c2e;
+            --separator: #38383a;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            height: 100vh;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
-            position: relative;
-        }
-
-        .app-container {
             height: 100vh;
-            display: flex;
-            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .header {
-            background: rgba(28, 28, 30, 0.9);
-            backdrop-filter: blur(20px);
-            padding: 12px 16px;
-            padding-top: env(safe-area-inset-top);
-            border-bottom: 1px solid #2c2c2e;
+        .view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding-top: calc(var(--safe-top) + 50px);
+            padding-bottom: calc(var(--safe-bottom) + 60px);
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .view.active {
+            display: flex;
+            opacity: 1;
+            z-index: 10;
+        }
+
+        header {
             position: fixed;
             top: 0;
+            left: 0;
             width: 100%;
-            z-index: 100;
-        }
-
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding-top: 60px;
-            padding-bottom: 80px;
+            height: calc(50px + var(--safe-top));
+            padding-top: var(--safe-top);
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 0.5px solid var(--separator);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-left: 16px;
+            padding-right: 16px;
+            z-index: 50;
         }
 
         .tab-bar {
             position: fixed;
             bottom: 0;
+            left: 0;
             width: 100%;
-            background: rgba(28, 28, 30, 0.9);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid #2c2c2e;
+            height: calc(55px + var(--safe-bottom));
+            padding-bottom: var(--safe-bottom);
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 0.5px solid var(--separator);
             display: flex;
-            padding-bottom: env(safe-area-inset-bottom);
-            z-index: 100;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 50;
         }
 
         .tab-item {
             flex: 1;
-            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             color: var(--text-secondary);
-            font-size: 12px;
+            font-size: 10px;
+            gap: 4px;
+            cursor: pointer;
         }
 
         .tab-item.active {
-            color: var(--primary);
+            color: var(--accent);
         }
 
-        .tab-icon {
-            font-size: 24px;
-            margin-bottom: 4px;
+        .tab-item i {
+            font-size: 20px;
         }
 
-        .page {
-            display: none;
+        .deck-item {
+            background-color: var(--bg-secondary);
             padding: 16px;
-            height: 100%;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        .deck-card {
-            background: var(--card-bg);
+            margin: 8px 16px;
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
         }
 
-        .deck-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .deck-stats {
+        .flashcard-container {
+            flex: 1;
             display: flex;
-            gap: 8px;
-        }
-
-        .stat {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .stat-new {
-            background: rgba(0, 122, 255, 0.2);
-            color: var(--primary);
-        }
-
-        .stat-learn {
-            background: rgba(255, 149, 0, 0.2);
-            color: var(--warning);
-        }
-
-        .stat-review {
-            background: rgba(52, 199, 89, 0.2);
-            color: var(--success);
+            flex-direction: column;
+            padding: 16px;
+            justify-content: center;
+            perspective: 1000px;
         }
 
         .flashcard {
             background: var(--card-bg);
             border-radius: 16px;
-            padding: 24px;
             min-height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 20px 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .card-content {
+            padding: 24px;
             font-size: 20px;
             line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            width: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+            cursor: pointer;
+            user-select: none;
         }
 
         .review-controls {
+            position: fixed;
+            bottom: calc(60px + var(--safe-bottom));
+            left: 0;
+            width: 100%;
+            padding: 0 16px;
             display: flex;
             gap: 8px;
-            margin-top: 20px;
+            z-index: 40;
         }
 
-        .review-btn {
+        .btn-answer {
             flex: 1;
-            padding: 16px;
-            border-radius: 10px;
-            border: none;
-            color: white;
+            padding: 12px 0;
+            border-radius: 8px;
             font-weight: 600;
+            font-size: 14px;
+            color: white;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-answer span.time { 
+            font-size: 10px; 
+            opacity: 0.8; 
+            font-weight: normal; 
+            margin-top: 2px; 
+        }
+
+        .btn-again { background-color: var(--danger); }
+        .btn-hard { background-color: var(--warning); }
+        .btn-good { background-color: var(--success); }
+        .btn-easy { background-color: var(--accent); }
+
+        input, textarea, select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--separator);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 12px;
+            width: 100%;
+            margin-bottom: 12px;
             font-size: 16px;
         }
+        
+        .fab {
+            position: fixed;
+            bottom: calc(70px + var(--safe-bottom));
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            z-index: 45;
+            cursor: pointer;
+            border: none;
+        }
 
-        .btn-again { background: var(--danger); }
-        .btn-hard { background: var(--warning); }
-        .btn-good { background: var(--success); }
-        .btn-easy { background: var(--primary); }
-
-        .cloze {
-            color: var(--primary);
-            font-weight: bold;
-            background: rgba(0, 122, 255, 0.1);
-            padding: 2px 6px;
+        .cloze { 
+            color: var(--accent); 
+            font-weight: bold; 
+            background: rgba(10, 132, 255, 0.1);
+            padding: 2px 4px;
             border-radius: 4px;
         }
 
         .cloze-blank {
-            color: var(--primary);
+            color: var(--accent);
             font-weight: bold;
-            border-bottom: 2px dashed var(--primary);
+            border-bottom: 2px dashed var(--accent);
             padding: 0 4px;
         }
 
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        .input-label {
-            display: block;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
-
-        .input-field {
-            width: 100%;
-            background: var(--card-bg);
-            border: 1px solid #2c2c2e;
-            border-radius: 10px;
-            padding: 12px;
-            color: var(--text);
-            font-size: 16px;
-        }
-
-        textarea.input-field {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            width: 100%;
-            margin-top: 20px;
+        .hidden {
+            display: none !important;
         }
 
         .modal {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
+            background: rgba(0,0,0,0.8);
             display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
         .modal-content {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 24px;
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
             width: 90%;
             max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
         }
 
-        .toast {
-            position: fixed;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--card-bg);
-            padding: 12px 24px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .toast.show {
-            opacity: 1;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-
-        .progress-bar {
-            height: 4px;
-            background: var(--primary);
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 101;
-        }
-
-        .show-answer-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            width: 100%;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
             margin-top: 20px;
         }
 
-        .header-title {
-            font-size: 20px;
-            font-weight: 700;
+        .stat-card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .card-actions {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-btn {
+            background: rgba(0,0,0,0.5);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Progress Bar -->
-        <div class="progress-bar" id="progressBar"></div>
+
+    <header>
+        <h1 id="header-title" class="text-lg font-bold">Anki iOS</h1>
+        <div id="header-actions"></div>
+    </header>
+
+    <!-- DECK LIST VIEW -->
+    <div id="view-decks" class="view active">
+        <div class="px-4 py-2">
+            <h2 class="text-sm text-gray-500 uppercase font-bold mb-2">My Decks</h2>
+            <div id="deck-list-container">
+                <!-- Decks injected here -->
+            </div>
+        </div>
+        <button class="fab" id="add-deck-btn">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+    </div>
+
+    <!-- REVIEW VIEW -->
+    <div id="view-review" class="view" style="padding-bottom: 0;">
+        <div class="w-full flex justify-between px-4 py-2 text-sm text-gray-500">
+            <span id="review-counts" class="font-mono">
+                <span class="text-blue-400">0</span> 
+                <span class="text-red-400">0</span> 
+                <span class="text-green-400">0</span>
+            </span>
+            <span id="timer">0s</span>
+        </div>
+
+        <div class="flashcard-container" id="card-area">
+            <div class="flashcard" id="card-content">
+                <div class="text-gray-500">Loading...</div>
+            </div>
+            <div class="card-actions">
+                <button class="card-btn" onclick="app.editCurrentCard()" title="Edit">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="card-btn" onclick="app.deleteCurrentCard()" title="Delete">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="ans-controls" class="review-controls hidden">
+            <button class="btn-answer btn-again" onclick="app.answerCard(1)">Again<span class="time" id="time-1">1m</span></button>
+            <button class="btn-answer btn-hard" onclick="app.answerCard(2)">Hard<span class="time" id="time-2">10m</span></button>
+            <button class="btn-answer btn-good" onclick="app.answerCard(3)">Good<span class="time" id="time-3">1d</span></button>
+            <button class="btn-answer btn-easy" onclick="app.answerCard(4)">Easy<span class="time" id="time-4">4d</span></button>
+        </div>
         
-        <!-- Header -->
-        <div class="header">
-            <div class="header-title" id="headerTitle">Anki iOS</div>
+        <div id="show-ans-control" class="review-controls">
+            <button class="w-full bg-gray-700 text-white py-3 rounded-lg font-semibold" onclick="app.showAnswer()">Show Answer</button>
         </div>
+    </div>
 
-        <!-- Content Area -->
-        <div class="content" id="content">
-            
-            <!-- Decks Page -->
-            <div class="page active" id="pageDecks">
-                <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">My Decks</h2>
-                <div id="decksList"></div>
-                <div class="empty-state" id="emptyDecks" style="display: none;">
-                    <i class="fas fa-layer-group" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                    <p>No decks yet. Create your first deck!</p>
-                </div>
-            </div>
+    <!-- ADD/EDIT VIEW -->
+    <div id="view-add" class="view">
+        <div class="px-4">
+            <label class="block text-sm text-gray-500 mb-1">Deck</label>
+            <select id="add-deck-select"></select>
 
-            <!-- Add Page -->
-            <div class="page" id="pageAdd">
-                <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">Add Card</h2>
-                <div class="input-group">
-                    <label class="input-label">Deck</label>
-                    <select class="input-field" id="deckSelect">
-                        <option value="">Select Deck</option>
-                    </select>
-                </div>
+            <label class="block text-sm text-gray-500 mb-1">Type</label>
+            <select id="add-note-type" onchange="app.toggleFields()">
+                <option value="basic">Basic</option>
+                <option value="basic-rev">Basic (and Reversed Card)</option>
+                <option value="cloze">Cloze</option>
+            </select>
+
+            <div id="fields-container">
+                <label class="block text-sm text-gray-500 mb-1">Front</label>
+                <textarea id="f-front" rows="3" placeholder="Front side (Use {{c1::cloze}} for cloze)"></textarea>
                 
-                <div class="input-group">
-                    <label class="input-label">Card Type</label>
-                    <select class="input-field" id="cardType">
-                        <option value="basic">Basic</option>
-                        <option value="cloze">Cloze</option>
-                        <option value="cloze++">Cloze+++</option>
-                    </select>
-                </div>
-
-                <div id="basicFields">
-                    <div class="input-group">
-                        <label class="input-label">Front</label>
-                        <textarea class="input-field" id="frontText" placeholder="Question"></textarea>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Back</label>
-                        <textarea class="input-field" id="backText" placeholder="Answer"></textarea>
-                    </div>
-                </div>
-
-                <div id="clozeFields" style="display: none;">
-                    <div class="input-group">
-                        <label class="input-label">Text with Cloze Deletions</label>
-                        <textarea class="input-field" id="clozeText" placeholder="Use {{c1::cloze}} for deletions"></textarea>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Extra Info (Optional)</label>
-                        <textarea class="input-field" id="clozeExtra" placeholder="Additional information"></textarea>
-                    </div>
-                </div>
-
-                <div id="clozePlusFields" style="display: none;">
-                    <div class="input-group">
-                        <label class="input-label">Text with Multiple Cloze</label>
-                        <textarea class="input-field" id="clozePlusText" placeholder="Use {{c1::first}}, {{c2::second}}, {{c3::third}}"></textarea>
-                    </div>
-                </div>
-
-                <button class="btn-primary" onclick="saveCard()">Add Card</button>
+                <label class="block text-sm text-gray-500 mb-1">Back</label>
+                <textarea id="f-back" rows="3" placeholder="Back side"></textarea>
             </div>
-
-            <!-- Review Page -->
-            <div class="page" id="pageReview">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                    <div style="display: flex; gap: 12px;">
-                        <span class="stat stat-new" id="newCount">0</span>
-                        <span class="stat stat-learn" id="learnCount">0</span>
-                        <span class="stat stat-review" id="reviewCount">0</span>
-                    </div>
-                    <div style="color: var(--text-secondary);" id="timer">0s</div>
-                </div>
-
-                <div class="flashcard" onclick="toggleCard()" id="flashcard">
-                    <div class="card-content" id="cardContent">
-                        Tap to reveal answer
-                    </div>
-                </div>
-
-                <div id="showAnswerControls" style="display: none;">
-                    <div class="review-controls">
-                        <button class="review-btn btn-again" onclick="answer(1)">Again</button>
-                        <button class="review-btn btn-hard" onclick="answer(2)">Hard</button>
-                        <button class="review-btn btn-good" onclick="answer(3)">Good</button>
-                        <button class="review-btn btn-easy" onclick="answer(4)">Easy</button>
-                    </div>
-                </div>
-
-                <div id="flipControls">
-                    <button class="show-answer-btn" onclick="showAnswer()">Show Answer</button>
-                </div>
-            </div>
-
-            <!-- Stats Page -->
-            <div class="page" id="pageStats">
-                <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">Statistics</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <div class="deck-card">
-                        <div>
-                            <div style="font-size: 32px; font-weight: 700;" id="totalCards">0</div>
-                            <div style="color: var(--text-secondary); font-size: 14px;">Total Cards</div>
-                        </div>
-                    </div>
-                    <div class="deck-card">
-                        <div>
-                            <div style="font-size: 32px; font-weight: 700; color: var(--success);" id="dueToday">0</div>
-                            <div style="color: var(--text-secondary); font-size: 14px;">Due Today</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="deck-card" style="margin-top: 16px;">
-                    <div>
-                        <div style="font-size: 32px; font-weight: 700; color: var(--primary);" id="reviewedToday">0</div>
-                        <div style="color: var(--text-secondary); font-size: 14px;">Reviewed Today</div>
-                    </div>
-                </div>
-            </div>
-
+            
+            <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold mt-4" onclick="app.saveNote()">Add Card</button>
         </div>
+    </div>
 
-        <!-- Tab Bar -->
-        <div class="tab-bar">
-            <div class="tab-item active" onclick="showPage('pageDecks')">
-                <i class="fas fa-layer-group tab-icon"></i>
-                <span>Decks</span>
-            </div>
-            <div class="tab-item" onclick="showPage('pageAdd')">
-                <i class="fas fa-plus-circle tab-icon"></i>
-                <span>Add</span>
-            </div>
-            <div class="tab-item" onclick="showPage('pageReview')">
-                <i class="fas fa-play-circle tab-icon"></i>
-                <span>Review</span>
-            </div>
-            <div class="tab-item" onclick="showPage('pageStats')">
-                <i class="fas fa-chart-bar tab-icon"></i>
-                <span>Stats</span>
+    <!-- BROWSER VIEW -->
+    <div id="view-browse" class="view">
+        <div class="px-4 mb-2">
+            <input type="text" id="search-input" placeholder="Search cards..." class="w-full">
+        </div>
+        <div id="browser-list" class="divide-y divide-gray-800"></div>
+    </div>
+
+    <!-- STATS VIEW -->
+    <div id="view-stats" class="view">
+        <div class="px-4 text-center mt-10">
+            <h2 class="text-2xl font-bold mb-4">Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="text-3xl font-bold text-blue-500" id="stat-total">0</div>
+                    <div class="text-xs text-gray-400">Total Cards</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-3xl font-bold text-green-500" id="stat-due">0</div>
+                    <div class="text-xs text-gray-400">Due Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-3xl font-bold text-yellow-500" id="stat-learn">0</div>
+                    <div class="text-xs text-gray-400">Learning</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-3xl font-bold text-purple-500" id="stat-review">0</div>
+                    <div class="text-xs text-gray-400">To Review</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast -->
-    <div class="toast" id="toast"></div>
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <div class="tab-item active" id="tab-decks">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Decks</span>
+        </div>
+        <div class="tab-item" id="tab-add">
+            <i class="fa-solid fa-plus-circle"></i>
+            <span>Add</span>
+        </div>
+        <div class="tab-item" id="tab-browse">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Browse</span>
+        </div>
+        <div class="tab-item" id="tab-stats">
+            <i class="fa-solid fa-chart-simple"></i>
+            <span>Stats</span>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="modal-deck" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="text-lg font-bold mb-4">New Deck</h3>
+            <input type="text" id="deck-name" placeholder="Deck name" class="w-full mb-4">
+            <div class="flex gap-2">
+                <button class="flex-1 bg-gray-700 py-2 rounded" onclick="app.hideModal()">Cancel</button>
+                <button class="flex-1 bg-blue-600 py-2 rounded" onclick="app.createDeck()">Create</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Database
-        let db;
-        const DB_NAME = 'AnkiDB';
-        const DB_VERSION = 1;
+    class AnkiDB {
+        constructor() {
+            this.dbName = 'AnkiCloneDB';
+            this.version = 2;
+            this.db = null;
+        }
 
-        // App State
-        let currentDeck = null;
-        let currentCard = null;
-        let currentNote = null;
-        let studyQueue = [];
-        let isAnswerShown = false;
-        let startTime = null;
-        let timerInterval = null;
-
-        // Initialize Database
-        function initDB() {
+        async init() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                const request = indexedDB.open(this.dbName, this.version);
 
                 request.onupgradeneeded = (e) => {
-                    db = e.target.result;
-
+                    const db = e.target.result;
+                    
                     if (!db.objectStoreNames.contains('decks')) {
-                        const deckStore = db.createObjectStore('decks', { keyPath: 'id' });
-                        deckStore.createIndex('name', 'name', { unique: true });
+                        db.createObjectStore('decks', { keyPath: 'id' });
                     }
-
+                    
                     if (!db.objectStoreNames.contains('notes')) {
                         const noteStore = db.createObjectStore('notes', { keyPath: 'id' });
-                        noteStore.createIndex('deckId', 'deckId');
+                        noteStore.createIndex('mid', 'mid', { unique: false });
                     }
-
+                    
                     if (!db.objectStoreNames.contains('cards')) {
                         const cardStore = db.createObjectStore('cards', { keyPath: 'id' });
-                        cardStore.createIndex('deckId', 'deckId');
-                        cardStore.createIndex('due', 'due');
-                        cardStore.createIndex('noteId', 'noteId');
+                        cardStore.createIndex('did', 'did', { unique: false });
+                        cardStore.createIndex('due', 'due', { unique: false });
+                        cardStore.createIndex('nid', 'nid', { unique: false });
                     }
-
-                    if (!db.objectStoreNames.contains('reviews')) {
-                        const reviewStore = db.createObjectStore('reviews', { keyPath: 'id' });
-                        reviewStore.createIndex('cardId', 'cardId');
-                        reviewStore.createIndex('date', 'date');
+                    
+                    if (!db.objectStoreNames.contains('revlog')) {
+                        const revStore = db.createObjectStore('revlog', { keyPath: 'id' });
+                        revStore.createIndex('cid', 'cid', { unique: false });
                     }
-
-                    // Add default deck
-                    const tx = e.target.transaction;
-                    const decks = tx.objectStore('decks');
-                    decks.add({ id: 1, name: 'Default', created: Date.now() });
                 };
 
                 request.onsuccess = (e) => {
-                    db = e.target.result;
-                    resolve();
+                    this.db = e.target.result;
+                    resolve(this);
                 };
-
-                request.onerror = (e) => {
-                    reject(e.target.error);
-                };
+                request.onerror = (e) => reject(e);
             });
         }
 
-        // Database Operations
-        function dbOp(storeName, mode, operation) {
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction(storeName, mode);
-                const store = tx.objectStore(storeName);
-                
-                const request = operation(store);
-                
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
+        async getAll(store) {
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(store, 'readonly');
+                const req = tx.objectStore(store).getAll();
+                req.onsuccess = () => resolve(req.result);
+            });
+        }
+        
+        async add(store, item) {
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(store, 'readwrite');
+                tx.objectStore(store).add(item);
+                tx.oncomplete = () => resolve();
             });
         }
 
-        async function getAll(storeName) {
-            return dbOp(storeName, 'readonly', store => store.getAll());
+        async put(store, item) {
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(store, 'readwrite');
+                tx.objectStore(store).put(item);
+                tx.oncomplete = () => resolve();
+            });
         }
 
-        async function add(storeName, item) {
-            return dbOp(storeName, 'readwrite', store => store.add(item));
+        async get(store, key) {
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(store, 'readonly');
+                const req = tx.objectStore(store).get(key);
+                req.onsuccess = () => resolve(req.result);
+            });
         }
 
-        async function put(storeName, item) {
-            return dbOp(storeName, 'readwrite', store => store.put(item));
+        async delete(store, key) {
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(store, 'readwrite');
+                tx.objectStore(store).delete(key);
+                tx.oncomplete = () => resolve();
+            });
         }
 
-        async function get(storeName, key) {
-            return dbOp(storeName, 'readonly', store => store.get(key));
+        async getCardsByDeck(did) {
+            return new Promise((resolve) => {
+                const tx = this.db.transaction('cards', 'readonly');
+                const store = tx.objectStore('cards');
+                const index = store.index('did');
+                const req = index.getAll(did);
+                req.onsuccess = () => resolve(req.result);
+            });
         }
 
-        async function remove(storeName, key) {
-            return dbOp(storeName, 'readwrite', store => store.delete(key));
+        async getCardsByNote(nid) {
+            return new Promise((resolve) => {
+                const tx = this.db.transaction('cards', 'readonly');
+                const store = tx.objectStore('cards');
+                const index = store.index('nid');
+                const req = index.getAll(nid);
+                req.onsuccess = () => resolve(req.result);
+            });
         }
+    }
 
-        // Scheduler (SM-2 Algorithm)
-        const scheduler = {
-            again: (card) => {
-                card.easeFactor = Math.max(1300, card.easeFactor - 200);
-                card.interval = 1;
-                card.due = Date.now() + 60000; // 1 minute
-                card.type = 1; // Learning
-                return card;
-            },
+    const SCHEDULER = {
+        MINUTE: 60,
+        HOUR: 3600,
+        DAY: 86400,
 
-            hard: (card) => {
-                card.easeFactor = Math.max(1300, card.easeFactor - 150);
-                card.interval = card.interval * 1.2;
-                card.due = Date.now() + card.interval * 60000;
-                return card;
-            },
+        STARTING_EASE: 2500,
+        EASY_BONUS: 1.3,
+        
+        answerCard(card, rating) {
+            const now = Math.floor(Date.now() / 1000);
+            const today = Math.floor(now / this.DAY);
 
-            good: (card) => {
-                card.interval = Math.max(1, Math.floor(card.interval * (card.easeFactor / 1000)));
-                card.due = Date.now() + card.interval * 86400000; // Convert to milliseconds
-                return card;
-            },
+            let nextIvl = 0;
+            let nextFactor = card.factor;
+            let nextType = card.type;
+            let nextDue = 0;
 
-            easy: (card) => {
-                card.easeFactor = Math.min(5000, card.easeFactor + 150);
-                card.interval = Math.max(1, Math.floor(card.interval * (card.easeFactor / 1000) * 1.3));
-                card.due = Date.now() + card.interval * 86400000;
-                return card;
+            // NEW CARDS (Type 0)
+            if (card.type === 0) {
+                if (rating === 1) { // Again
+                    nextType = 1;
+                    nextDue = now + 60;
+                    nextIvl = 60;
+                } else if (rating === 2) { // Hard
+                    nextType = 1;
+                    nextDue = now + 600;
+                    nextIvl = 600;
+                } else if (rating === 3) { // Good
+                    nextType = 2;
+                    nextIvl = 1;
+                    nextDue = today + 1;
+                } else if (rating === 4) { // Easy
+                    nextType = 2;
+                    nextIvl = 4;
+                    nextDue = today + 4;
+                }
+            } 
+            // LEARNING CARDS (Type 1)
+            else if (card.type === 1) {
+                if (rating === 1) { // Again
+                    nextDue = now + 60;
+                    nextIvl = 60;
+                } else if (rating === 2) { // Hard
+                    nextDue = now + 600;
+                    nextIvl = 600;
+                } else if (rating === 3) { // Good
+                    nextType = 2;
+                    nextIvl = 1;
+                    nextDue = today + 1;
+                } else if (rating === 4) { // Easy
+                    nextType = 2;
+                    nextIvl = 4;
+                    nextDue = today + 4;
+                }
             }
-        };
+            // REVIEW CARDS (Type 2)
+            else if (card.type === 2) {
+                if (rating === 1) { // Again
+                    nextType = 1;
+                    nextFactor = Math.max(1300, card.factor - 200);
+                    nextIvl = 60;
+                    nextDue = now + 60;
+                } else if (rating === 2) { // Hard
+                    nextFactor = Math.max(1300, card.factor - 150);
+                    nextIvl = Math.max(1, Math.floor(card.ivl * 1.2));
+                    nextDue = today + nextIvl;
+                } else if (rating === 3) { // Good
+                    nextIvl = Math.max(1, Math.floor(card.ivl * (card.factor / 1000)));
+                    nextDue = today + nextIvl;
+                } else if (rating === 4) { // Easy
+                    nextFactor = Math.min(5000, card.factor + 150);
+                    nextIvl = Math.max(1, Math.floor(card.ivl * (card.factor / 1000) * this.EASY_BONUS));
+                    nextDue = today + nextIvl;
+                }
+            }
 
-        // UI Functions
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
+            return {
+                ...card,
+                type: nextType || card.type,
+                ivl: nextIvl,
+                factor: nextFactor,
+                due: nextDue,
+                reps: card.reps + 1,
+                lapses: (rating === 1 && card.type === 2) ? card.lapses + 1 : card.lapses,
+                lastReview: now
+            };
+        },
+
+        formatTime(seconds) {
+            if (seconds < 60) return seconds + 's';
+            if (seconds < 3600) return Math.floor(seconds/60) + 'm';
+            if (seconds < 86400) return Math.floor(seconds/3600) + 'h';
             
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            const days = Math.floor(seconds / 86400);
+            if (days < 30) return days + 'd';
+            if (days < 365) return Math.floor(days/30) + 'mo';
+            return Math.floor(days/365) + 'y';
+        }
+    };
+
+    class AnkiApp {
+        constructor() {
+            this.db = new AnkiDB();
+            this.currentDeck = null;
+            this.studyQueue = [];
+            this.currentCard = null;
+            this.currentNote = null;
+            this.isShowingBack = false;
+            this.startTime = 0;
+            this.timerInterval = null;
         }
 
-        function showPage(pageId) {
-            // Update tab bar
-            document.querySelectorAll('.tab-item').forEach(tab => {
-                tab.classList.remove('active');
+        async init() {
+            try {
+                await this.db.init();
+                
+                const decks = await this.db.getAll('decks');
+                if (decks.length === 0) {
+                    await this.db.add('decks', { 
+                        id: 1, 
+                        name: 'Default',
+                        created: Date.now(),
+                        desc: ''
+                    });
+                }
+
+                this.setupEventListeners();
+                this.renderDeckList();
+                this.toggleFields();
+                
+                if (window.MathJax) {
+                    window.MathJax.startup.promise.then(() => {
+                        console.log('MathJax ready');
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to initialize app:", e);
+                alert("Failed to initialize database. Please refresh the page.");
+            }
+        }
+
+        setupEventListeners() {
+            // Tab navigation
+            document.getElementById('tab-decks').addEventListener('click', () => this.nav('decks'));
+            document.getElementById('tab-add').addEventListener('click', () => this.nav('add'));
+            document.getElementById('tab-browse').addEventListener('click', () => this.nav('browse'));
+            document.getElementById('tab-stats').addEventListener('click', () => this.nav('stats'));
+            
+            // Add deck button
+            document.getElementById('add-deck-btn').addEventListener('click', () => this.showModal());
+            
+            // Search input
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                this.renderBrowser(e.target.value);
             });
-            
-            // Update pages
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
+
+            // Card tap/flip
+            document.getElementById('card-content').addEventListener('click', () => {
+                if (!this.isShowingBack) {
+                    this.showAnswer();
+                }
             });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (!this.isShowingBack && e.code === 'Space') {
+                    this.showAnswer();
+                    e.preventDefault();
+                } else if (this.isShowingBack) {
+                    switch(e.code) {
+                        case 'Digit1': this.answerCard(1); break;
+                        case 'Digit2': this.answerCard(2); break;
+                        case 'Digit3': this.answerCard(3); break;
+                        case 'Digit4': this.answerCard(4); break;
+                    }
+                }
+            });
+        }
+
+        nav(viewName) {
+            // Update views
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewName}`).classList.add('active');
             
-            // Show selected page
-            document.getElementById(pageId).classList.add('active');
-            
+            // Update tabs
+            document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${viewName}`).classList.add('active');
+
             // Update header
             const titles = {
-                'pageDecks': 'My Decks',
-                'pageAdd': 'Add Card',
-                'pageReview': 'Study',
-                'pageStats': 'Statistics'
+                'decks': 'My Decks',
+                'add': 'Add Card',
+                'browse': 'Browse',
+                'stats': 'Statistics',
+                'review': 'Study'
             };
-            
-            document.getElementById('headerTitle').textContent = titles[pageId];
-            
-            // Load data for page
-            switch(pageId) {
-                case 'pageDecks':
-                    loadDecks();
-                    break;
-                case 'pageAdd':
-                    loadDeckSelect();
-                    setupCardType();
-                    break;
-                case 'pageStats':
-                    loadStats();
-                    break;
+            document.getElementById('header-title').textContent = titles[viewName] || 'Anki iOS';
+
+            // Refresh data
+            switch(viewName) {
+                case 'decks': this.renderDeckList(); break;
+                case 'browse': this.renderBrowser(); break;
+                case 'stats': this.renderStats(); break;
             }
         }
 
-        async function loadDecks() {
-            try {
-                const decks = await getAll('decks');
-                const decksList = document.getElementById('decksList');
-                const emptyDecks = document.getElementById('emptyDecks');
-                
-                if (decks.length === 0) {
-                    decksList.innerHTML = '';
-                    emptyDecks.style.display = 'block';
-                    return;
-                }
-                
-                emptyDecks.style.display = 'none';
-                
-                let html = '';
-                for (const deck of decks) {
-                    const cards = await getAll('cards');
-                    const deckCards = cards.filter(c => c.deckId === deck.id);
-                    
-                    const now = Date.now();
-                    const newCards = deckCards.filter(c => c.type === 0).length;
-                    const learningCards = deckCards.filter(c => c.type === 1 && c.due > now).length;
-                    const reviewCards = deckCards.filter(c => c.type === 2 && c.due <= now).length;
-                    
-                    html += `
-                        <div class="deck-card" onclick="startStudy(${deck.id})">
-                            <div>
-                                <div class="deck-title">${deck.name}</div>
-                                <div style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">
-                                    ${deckCards.length} cards
-                                </div>
-                            </div>
-                            <div class="deck-stats">
-                                ${newCards > 0 ? `<span class="stat stat-new">${newCards}</span>` : ''}
-                                ${learningCards > 0 ? `<span class="stat stat-learn">${learningCards}</span>` : ''}
-                                ${reviewCards > 0 ? `<span class="stat stat-review">${reviewCards}</span>` : ''}
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                decksList.innerHTML = html;
-            } catch (error) {
-                showToast('Error loading decks');
-            }
+        showModal() {
+            document.getElementById('modal-deck').classList.remove('hidden');
+            document.getElementById('deck-name').focus();
         }
 
-        async function loadDeckSelect() {
-            const decks = await getAll('decks');
-            const select = document.getElementById('deckSelect');
-            
-            select.innerHTML = '<option value="">Select Deck</option>';
-            decks.forEach(deck => {
-                const option = document.createElement('option');
-                option.value = deck.id;
-                option.textContent = deck.name;
-                select.appendChild(option);
-            });
+        hideModal() {
+            document.getElementById('modal-deck').classList.add('hidden');
+            document.getElementById('deck-name').value = '';
         }
 
-        function setupCardType() {
-            const cardType = document.getElementById('cardType');
-            const basicFields = document.getElementById('basicFields');
-            const clozeFields = document.getElementById('clozeFields');
-            const clozePlusFields = document.getElementById('clozePlusFields');
-            
-            cardType.addEventListener('change', () => {
-                const value = cardType.value;
-                
-                basicFields.style.display = 'none';
-                clozeFields.style.display = 'none';
-                clozePlusFields.style.display = 'none';
-                
-                if (value === 'basic') {
-                    basicFields.style.display = 'block';
-                } else if (value === 'cloze') {
-                    clozeFields.style.display = 'block';
-                } else if (value === 'cloze++') {
-                    clozePlusFields.style.display = 'block';
-                }
-            });
+        async createDeck() {
+            const name = document.getElementById('deck-name').value.trim();
+            if (!name) return;
+
+            const deck = {
+                id: Date.now(),
+                name: name,
+                created: Date.now(),
+                desc: ''
+            };
+
+            await this.db.add('decks', deck);
+            this.hideModal();
+            this.renderDeckList();
         }
 
-        async function saveCard() {
-            try {
-                const deckId = parseInt(document.getElementById('deckSelect').value);
-                const cardType = document.getElementById('cardType').value;
-                
-                if (!deckId) {
-                    showToast('Please select a deck');
-                    return;
-                }
-                
-                const noteId = Date.now();
-                let note = {
-                    id: noteId,
-                    deckId: deckId,
-                    type: cardType,
-                    created: Date.now()
-                };
-                
-                if (cardType === 'basic') {
-                    const front = document.getElementById('frontText').value.trim();
-                    const back = document.getElementById('backText').value.trim();
-                    
-                    if (!front) {
-                        showToast('Front text is required');
-                        return;
-                    }
-                    
-                    note.fields = [front, back];
-                    
-                    // Create card
-                    const card = {
-                        id: Date.now(),
-                        noteId: noteId,
-                        deckId: deckId,
-                        type: 0, // New
-                        easeFactor: 2500,
-                        interval: 0,
-                        due: Date.now(),
-                        reviews: 0,
-                        lapses: 0
-                    };
-                    
-                    await add('cards', card);
-                    
-                } else if (cardType === 'cloze' || cardType === 'cloze++') {
-                    const text = cardType === 'cloze' 
-                        ? document.getElementById('clozeText').value.trim()
-                        : document.getElementById('clozePlusText').value.trim();
-                    
-                    const extra = cardType === 'cloze' 
-                        ? document.getElementById('clozeExtra').value.trim()
-                        : '';
-                    
-                    if (!text) {
-                        showToast('Text is required');
-                        return;
-                    }
-                    
-                    note.fields = [text, extra];
-                    
-                    // Extract cloze numbers
-                    const clozeRegex = /\{\{c(\d+)::(.*?)\}\}/g;
-                    const matches = [...text.matchAll(clozeRegex)];
-                    const clozeNumbers = [...new Set(matches.map(m => parseInt(m[1])))];
-                    
-                    if (clozeNumbers.length === 0) {
-                        showToast('No cloze deletions found');
-                        return;
-                    }
-                    
-                    // Create cards for each cloze
-                    for (const num of clozeNumbers) {
-                        const card = {
-                            id: Date.now() + num,
-                            noteId: noteId,
-                            deckId: deckId,
-                            clozeNumber: num,
-                            type: 0,
-                            easeFactor: 2500,
-                            interval: 0,
-                            due: Date.now(),
-                            reviews: 0,
-                            lapses: 0
-                        };
-                        
-                        await add('cards', card);
-                    }
-                }
-                
-                await add('notes', note);
-                
-                // Clear form
-                document.getElementById('frontText').value = '';
-                document.getElementById('backText').value = '';
-                document.getElementById('clozeText').value = '';
-                document.getElementById('clozeExtra').value = '';
-                document.getElementById('clozePlusText').value = '';
-                
-                showToast('Card added successfully');
-                
-                // Update decks list
-                loadDecks();
-                
-            } catch (error) {
-                console.error(error);
-                showToast('Error saving card');
-            }
-        }
+        async renderDeckList() {
+            const container = document.getElementById('deck-list-container');
+            container.innerHTML = '';
+            
+            const decks = await this.db.getAll('decks');
+            const cards = await this.db.getAll('cards');
+            const now = Math.floor(Date.now() / 1000);
 
-        async function startStudy(deckId) {
-            currentDeck = deckId;
-            
-            // Get deck info
-            const deck = await get('decks', deckId);
-            document.getElementById('headerTitle').textContent = `Studying: ${deck.name}`;
-            
-            // Build study queue
-            const cards = await getAll('cards');
-            const now = Date.now();
-            
-            studyQueue = cards.filter(card => 
-                card.deckId === deckId && 
-                (card.type === 1 || card.due <= now)
-            );
-            
-            if (studyQueue.length === 0) {
-                showToast('No cards to review!');
-                showPage('pageDecks');
-                return;
-            }
-            
-            // Update counts
-            const newCards = cards.filter(c => c.deckId === deckId && c.type === 0).length;
-            const learningCards = cards.filter(c => c.deckId === deckId && c.type === 1).length;
-            const reviewCards = cards.filter(c => c.deckId === deckId && c.type === 2 && c.due <= now).length;
-            
-            document.getElementById('newCount').textContent = newCards;
-            document.getElementById('learnCount').textContent = learningCards;
-            document.getElementById('reviewCount').textContent = reviewCards;
-            
-            // Show review page
-            showPage('pageReview');
-            
-            // Start timer
-            startTime = Date.now();
-            timerInterval = setInterval(updateTimer, 1000);
-            
-            // Load first card
-            nextCard();
-        }
+            for (const deck of decks) {
+                const deckCards = cards.filter(c => c.did === deck.id);
+                
+                const newCount = deckCards.filter(c => c.type === 0).length;
+                const learnCount = deckCards.filter(c => c.type === 1 && c.due <= now).length;
+                const reviewCount = deckCards.filter(c => c.type === 2 && c.due <= Math.floor(now/86400)).length;
 
-        async function nextCard() {
-            if (studyQueue.length === 0) {
-                showToast('All cards reviewed!');
-                showPage('pageDecks');
-                clearInterval(timerInterval);
-                return;
-            }
-            
-            currentCard = studyQueue.shift();
-            currentNote = await get('notes', currentCard.noteId);
-            isAnswerShown = false;
-            
-            renderCardFront();
-            
-            document.getElementById('showAnswerControls').style.display = 'none';
-            document.getElementById('flipControls').style.display = 'block';
-        }
-
-        function renderCardFront() {
-            const content = document.getElementById('cardContent');
-            
-            if (!currentNote) {
-                content.innerHTML = 'Error loading card';
-                return;
-            }
-            
-            if (currentNote.type === 'basic') {
-                content.innerHTML = formatText(currentNote.fields[0]);
-            } else if (currentNote.type === 'cloze' || currentNote.type === 'cloze++') {
-                let text = currentNote.fields[0];
-                const clozeNum = currentCard.clozeNumber || 1;
-                
-                // Hide the current cloze
-                const regex = new RegExp(`\\{\\{c${clozeNum}::(.*?)\\}\\}`, 'g');
-                text = text.replace(regex, '<span class="cloze-blank">[...]</span>');
-                
-                // Show other clozes
-                text = text.replace(/\{\{c\d+::(.*?)\}\}/g, '$1');
-                
-                content.innerHTML = formatText(text);
-                
-                // Add extra info if exists
-                if (currentNote.fields[1]) {
-                    content.innerHTML += `<div style="margin-top: 20px; color: var(--text-secondary); font-size: 16px;">${formatText(currentNote.fields[1])}</div>`;
-                }
-            }
-        }
-
-        function renderCardBack() {
-            const content = document.getElementById('cardContent');
-            
-            if (currentNote.type === 'basic') {
-                content.innerHTML = `
-                    <div style="text-align: left;">
-                        <div style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #2c2c2e;">
-                            ${formatText(currentNote.fields[0])}
-                        </div>
-                        <div>${formatText(currentNote.fields[1])}</div>
+                const el = document.createElement('div');
+                el.className = 'deck-item';
+                el.innerHTML = `
+                    <div class="flex-1">
+                        <div class="font-semibold text-lg">${deck.name}</div>
+                        <div class="text-sm text-gray-500">${deckCards.length} cards</div>
+                    </div>
+                    <div class="flex gap-3 text-sm font-mono">
+                        <span class="text-blue-400 font-bold" title="New">${newCount}</span>
+                        <span class="text-red-400 font-bold" title="Learning">${learnCount}</span>
+                        <span class="text-green-400 font-bold" title="Review">${reviewCount}</span>
                     </div>
                 `;
-            } else if (currentNote.type === 'cloze' || currentNote.type === 'cloze++') {
-                let text = currentNote.fields[0];
-                const clozeNum = currentCard.clozeNumber || 1;
-                
-                // Highlight current cloze
-                const regex = new RegExp(`\\{\\{c${clozeNum}::(.*?)\\}\\}`, 'g');
-                text = text.replace(regex, '<span class="cloze">$1</span>');
-                
-                // Show other clozes
-                text = text.replace(/\{\{c\d+::(.*?)\}\}/g, '$1');
-                
-                content.innerHTML = formatText(text);
-                
-                if (currentNote.fields[1]) {
-                    content.innerHTML += `<div style="margin-top: 20px; color: var(--text-secondary); font-size: 16px;">${formatText(currentNote.fields[1])}</div>`;
-                }
+                el.addEventListener('click', () => this.startStudy(deck.id));
+                container.appendChild(el);
             }
         }
 
-        function showAnswer() {
-            isAnswerShown = true;
-            renderCardBack();
-            document.getElementById('showAnswerControls').style.display = 'block';
-            document.getElementById('flipControls').style.display = 'none';
-        }
-
-        function toggleCard() {
-            if (isAnswerShown) {
-                renderCardFront();
-                isAnswerShown = false;
-                document.getElementById('showAnswerControls').style.display = 'none';
-                document.getElementById('flipControls').style.display = 'block';
+        toggleFields() {
+            const type = document.getElementById('add-note-type').value;
+            const container = document.getElementById('fields-container');
+            
+            let html = '';
+            if (type === 'cloze') {
+                html = `
+                    <label class="block text-sm text-gray-500 mb-1">Text (Use {{c1::cloze}} syntax)</label>
+                    <textarea id="f-front" rows="5" placeholder="Enter text with {{c1::cloze deletions}}"></textarea>
+                    <label class="block text-sm text-gray-500 mb-1">Extra (Optional)</label>
+                    <textarea id="f-back" rows="2" placeholder="Additional information"></textarea>
+                `;
             } else {
-                showAnswer();
+                html = `
+                    <label class="block text-sm text-gray-500 mb-1">Front</label>
+                    <textarea id="f-front" rows="3" placeholder="Front side"></textarea>
+                    <label class="block text-sm text-gray-500 mb-1">Back</label>
+                    <textarea id="f-back" rows="3" placeholder="Back side"></textarea>
+                `;
             }
+            
+            container.innerHTML = html;
+            
+            // Populate deck select
+            this.populateDeckSelect();
         }
 
-        async function answer(rating) {
-            try {
-                // Update card based on rating
-                const now = Date.now();
+        async populateDeckSelect() {
+            const select = document.getElementById('add-deck-select');
+            select.innerHTML = '';
+            
+            const decks = await this.db.getAll('decks');
+            decks.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.id;
+                opt.textContent = d.name;
+                select.appendChild(opt);
+            });
+        }
+
+        async saveNote() {
+            const front = document.getElementById('f-front').value.trim();
+            const back = document.getElementById('f-back').value.trim();
+            const deckId = parseInt(document.getElementById('add-deck-select').value);
+            const type = document.getElementById('add-note-type').value;
+
+            if (!front) {
+                alert("Front field is required");
+                return;
+            }
+
+            if (!deckId) {
+                alert("Please select a deck");
+                return;
+            }
+
+            const noteId = Date.now();
+            
+            // Save Note
+            await this.db.add('notes', {
+                id: noteId,
+                mid: type,
+                flds: [front, back],
+                tags: [],
+                created: Date.now()
+            });
+
+            // Create cards based on type
+            if (type === 'basic') {
+                await this.db.add('cards', {
+                    id: noteId * 100,
+                    nid: noteId,
+                    did: deckId,
+                    ord: 0,
+                    type: 0,
+                    queue: 0,
+                    due: 0,
+                    ivl: 0,
+                    factor: 2500,
+                    reps: 0,
+                    lapses: 0,
+                    created: Date.now()
+                });
+            } 
+            else if (type === 'basic-rev') {
+                await this.db.add('cards', {
+                    id: noteId * 100,
+                    nid: noteId,
+                    did: deckId,
+                    ord: 0,
+                    type: 0,
+                    queue: 0,
+                    due: 0,
+                    ivl: 0,
+                    factor: 2500,
+                    reps: 0,
+                    lapses: 0,
+                    created: Date.now()
+                });
                 
-                // Log review
-                const review = {
-                    id: Date.now(),
-                    cardId: currentCard.id,
-                    rating: rating,
-                    time: Math.floor((now - startTime) / 1000),
-                    date: now
-                };
+                await this.db.add('cards', {
+                    id: noteId * 100 + 1,
+                    nid: noteId,
+                    did: deckId,
+                    ord: 1,
+                    type: 0,
+                    queue: 0,
+                    due: 0,
+                    ivl: 0,
+                    factor: 2500,
+                    reps: 0,
+                    lapses: 0,
+                    created: Date.now()
+                });
+            }
+            else if (type === 'cloze') {
+                // Extract cloze numbers
+                const clozeRegex = /{{c(\d+)::(.*?)}}/g;
+                const matches = [...front.matchAll(clozeRegex)];
+                const clozeNumbers = [...new Set(matches.map(m => parseInt(m[1])))];
                 
-                await add('reviews', review);
+                // If no cloze found, create one card
+                const ords = clozeNumbers.length > 0 ? clozeNumbers : [1];
                 
-                // Update card scheduling
-                currentCard.reviews = (currentCard.reviews || 0) + 1;
-                currentCard.lastReview = now;
-                
-                // Apply scheduler
-                if (rating === 1) {
-                    currentCard = scheduler.again(currentCard);
-                    currentCard.lapses = (currentCard.lapses || 0) + 1;
-                } else if (rating === 2) {
-                    currentCard = scheduler.hard(currentCard);
-                } else if (rating === 3) {
-                    currentCard = scheduler.good(currentCard);
-                } else if (rating === 4) {
-                    currentCard = scheduler.easy(currentCard);
+                for (let i = 0; i < ords.length; i++) {
+                    await this.db.add('cards', {
+                        id: noteId * 100 + i,
+                        nid: noteId,
+                        did: deckId,
+                        ord: i,
+                        type: 0,
+                        queue: 0,
+                        due: 0,
+                        ivl: 0,
+                        factor: 2500,
+                        reps: 0,
+                        lapses: 0,
+                        created: Date.now()
+                    });
                 }
-                
-                // Save updated card
-                await put('cards', currentCard);
-                
-                // Reset timer for next card
-                startTime = Date.now();
-                
-                // Next card
-                nextCard();
-                
-            } catch (error) {
-                console.error(error);
-                showToast('Error saving answer');
             }
+
+            // Clear inputs
+            document.getElementById('f-front').value = '';
+            document.getElementById('f-back').value = '';
+            
+            alert("Card added successfully!");
+            this.nav('decks');
         }
 
-        function updateTimer() {
-            if (!startTime) return;
+        async startStudy(deckId) {
+            this.currentDeck = deckId;
+            const now = Math.floor(Date.now() / 1000);
+            const today = Math.floor(now / 86400);
+
+            // Get cards for this deck
+            const allCards = await this.db.getCardsByDeck(deckId);
             
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            const minutes = Math.floor(elapsed / 60);
-            const seconds = elapsed % 60;
+            // Filter and sort
+            const learning = allCards.filter(c => c.type === 1 && c.due <= now).sort((a,b) => a.due - b.due);
+            const review = allCards.filter(c => c.type === 2 && c.due <= today).sort((a,b) => a.due - b.due);
+            const newCards = allCards.filter(c => c.type === 0).slice(0, 20);
+
+            this.studyQueue = [...learning, ...review, ...newCards];
             
-            document.getElementById('timer').textContent = 
-                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            if (this.studyQueue.length === 0) {
+                alert("No cards to study right now!");
+                return;
+            }
+
+            // Update counts display
+            document.getElementById('review-counts').innerHTML = `
+                <span class="text-blue-400">${newCards.length}</span> 
+                <span class="text-red-400">${learning.length}</span> 
+                <span class="text-green-400">${review.length}</span>
+            `;
+
+            this.nav('review');
+            this.startTimer();
+            this.nextCard();
         }
 
-        function formatText(text) {
+        startTimer() {
+            this.startTime = Date.now();
+            clearInterval(this.timerInterval);
+            
+            this.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                document.getElementById('timer').textContent = `${elapsed}s`;
+            }, 1000);
+        }
+
+        stopTimer() {
+            clearInterval(this.timerInterval);
+        }
+
+        async nextCard() {
+            if (this.studyQueue.length === 0) {
+                this.stopTimer();
+                alert("Congratulations! You've finished this study session.");
+                this.nav('decks');
+                return;
+            }
+
+            this.currentCard = this.studyQueue[0];
+            this.currentNote = await this.db.get('notes', this.currentCard.nid);
+            this.isShowingBack = false;
+
+            this.renderCardFront();
+            document.getElementById('ans-controls').classList.add('hidden');
+            document.getElementById('show-ans-control').classList.remove('hidden');
+        }
+
+        renderCardFront() {
+            const content = document.getElementById('card-content');
+            let text = this.currentNote.flds[0];
+            
+            // Handle cloze cards
+            if (this.currentNote.mid === 'cloze') {
+                const ord = this.currentCard.ord + 1;
+                // Replace the current cloze with blank, show others
+                text = text.replace(new RegExp(`{{c${ord}::(.*?)}}`, 'g'), '<span class="cloze-blank">[...]</span>');
+                text = text.replace(/{{c\d+::(.*?)}}/g, '$1');
+            }
+            // Handle reversed cards
+            else if (this.currentCard.ord === 1) {
+                text = this.currentNote.flds[1];
+            }
+
+            content.innerHTML = this.formatText(text);
+            this.refreshMath();
+        }
+
+        showAnswer() {
+            this.isShowingBack = true;
+            const content = document.getElementById('card-content');
+            let text = '';
+
+            // Handle cloze cards
+            if (this.currentNote.mid === 'cloze') {
+                const ord = this.currentCard.ord + 1;
+                // Highlight the current cloze
+                let clozeText = this.currentNote.flds[0];
+                clozeText = clozeText.replace(new RegExp(`{{c${ord}::(.*?)}}`, 'g'), '<span class="cloze">$1</span>');
+                clozeText = clozeText.replace(/{{c\d+::(.*?)}}/g, '$1');
+                
+                text = `<div class="mb-4">${this.formatText(clozeText)}</div>`;
+                if (this.currentNote.flds[1]) {
+                    text += `<div class="mt-4 pt-4 border-t border-gray-600">${this.formatText(this.currentNote.flds[1])}</div>`;
+                }
+            }
+            // Handle reversed cards
+            else if (this.currentCard.ord === 1) {
+                text = `
+                    <div class="mb-4">${this.formatText(this.currentNote.flds[1])}</div>
+                    <div class="mt-4 pt-4 border-t border-gray-600">${this.formatText(this.currentNote.flds[0])}</div>
+                `;
+            }
+            // Handle basic cards
+            else {
+                text = `
+                    <div class="mb-4">${this.formatText(this.currentNote.flds[0])}</div>
+                    <div class="mt-4 pt-4 border-t border-gray-600">${this.formatText(this.currentNote.flds[1])}</div>
+                `;
+            }
+
+            content.innerHTML = text;
+            this.refreshMath();
+
+            // Show answer buttons
+            document.getElementById('show-ans-control').classList.add('hidden');
+            document.getElementById('ans-controls').classList.remove('hidden');
+
+            // Update button times
+            [1, 2, 3, 4].forEach(r => {
+                const pred = SCHEDULER.answerCard(this.currentCard, r);
+                document.getElementById(`time-${r}`).textContent = SCHEDULER.formatTime(pred.ivl * 86400);
+            });
+        }
+
+        async answerCard(rating) {
+            const newCardState = SCHEDULER.answerCard(this.currentCard, rating);
+            
+            // Log review
+            await this.db.add('revlog', {
+                id: Date.now(),
+                cid: this.currentCard.id,
+                ease: rating,
+                ivl: newCardState.ivl,
+                time: Math.floor((Date.now() - this.startTime) / 1000),
+                type: this.currentCard.type
+            });
+
+            // Update card
+            await this.db.put('cards', newCardState);
+
+            // Remove from queue
+            this.studyQueue.shift();
+            
+            // Update counts
+            const counts = document.getElementById('review-counts').textContent.split(' ');
+            if (rating === 1 && this.currentCard.type === 0) counts[0]--;
+            else if (rating !== 1 && this.currentCard.type === 0) counts[0]--;
+            
+            document.getElementById('review-counts').textContent = counts.join(' ');
+
+            // Next card
+            this.startTime = Date.now();
+            this.nextCard();
+        }
+
+        formatText(text) {
+            if (!text) return '';
+            
             return text
                 .replace(/\n/g, '<br>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>');
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code class="bg-gray-800 px-1 rounded">$1</code>')
+                .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-blue-400 underline">$1</a>');
         }
 
-        async function loadStats() {
-            try {
-                const cards = await getAll('cards');
-                const now = Date.now();
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-                
-                // Total cards
-                document.getElementById('totalCards').textContent = cards.length;
-                
-                // Due today
-                const dueToday = cards.filter(card => 
-                    card.due <= now && (card.type === 1 || card.type === 2)
-                ).length;
-                document.getElementById('dueToday').textContent = dueToday;
-                
-                // Reviewed today
-                const reviews = await getAll('reviews');
-                const reviewedToday = reviews.filter(review => 
-                    review.date >= todayStart.getTime()
-                ).length;
-                document.getElementById('reviewedToday').textContent = reviewedToday;
-                
-            } catch (error) {
-                showToast('Error loading stats');
+        refreshMath() {
+            if (window.MathJax) {
+                window.MathJax.typesetPromise([document.getElementById('card-content')]);
             }
         }
 
-        // Initialize app
-        window.onload = async function() {
-            try {
-                await initDB();
-                await loadDecks();
-                showToast('Anki iOS Ready!');
-            } catch (error) {
-                showToast('Error initializing app');
+        async renderBrowser(query = '') {
+            const list = document.getElementById('browser-list');
+            list.innerHTML = '';
+            
+            const notes = await this.db.getAll('notes');
+            const filtered = notes.filter(n => 
+                n.flds[0].toLowerCase().includes(query.toLowerCase()) ||
+                n.flds[1].toLowerCase().includes(query.toLowerCase())
+            ).slice(0, 100);
+
+            for (const note of filtered) {
+                const cards = await this.db.getCardsByNote(note.id);
+                const deck = cards.length > 0 ? await this.db.get('decks', cards[0].did) : null;
+                
+                const el = document.createElement('div');
+                el.className = 'p-4 hover:bg-gray-800 cursor-pointer';
+                el.innerHTML = `
+                    <div class="font-bold truncate">${this.formatText(note.flds[0])}</div>
+                    <div class="text-sm text-gray-500">${deck ? deck.name : 'No deck'}</div>
+                `;
+                el.addEventListener('click', () => {
+                    // TODO: Implement card editing
+                    console.log('Edit card:', note.id);
+                });
+                list.appendChild(el);
             }
-        };
+        }
+
+        async renderStats() {
+            const cards = await this.db.getAll('cards');
+            const now = Math.floor(Date.now() / 1000);
+            const today = Math.floor(now / 86400);
+
+            const total = cards.length;
+            const due = cards.filter(c => 
+                (c.type === 2 && c.due <= today) || 
+                (c.type === 1 && c.due <= now) ||
+                (c.type === 0)
+            ).length;
+            const learn = cards.filter(c => c.type === 1 && c.due <= now).length;
+            const review = cards.filter(c => c.type === 2 && c.due <= today).length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-due').textContent = due;
+            document.getElementById('stat-learn').textContent = learn;
+            document.getElementById('stat-review').textContent = review;
+        }
+
+        editCurrentCard() {
+            if (this.currentNote) {
+                alert('Edit functionality coming soon!');
+                // TODO: Implement card editing
+            }
+        }
+
+        async deleteCurrentCard() {
+            if (!this.currentCard || !this.currentNote) return;
+            
+            if (confirm('Delete this card?')) {
+                // Delete the card
+                await this.db.delete('cards', this.currentCard.id);
+                
+                // Check if this was the last card for this note
+                const cards = await this.db.getCardsByNote(this.currentNote.id);
+                if (cards.length === 0) {
+                    await this.db.delete('notes', this.currentNote.id);
+                }
+                
+                // Remove from queue and go to next
+                this.studyQueue = this.studyQueue.filter(c => c.id !== this.currentCard.id);
+                this.nextCard();
+            }
+        }
+    }
+
+    // Initialize app
+    const app = new AnkiApp();
+    document.addEventListener('DOMContentLoaded', () => app.init());
+
+    // Make app available globally for onclick handlers
+    window.app = app;
     </script>
 </body>
 </html>
