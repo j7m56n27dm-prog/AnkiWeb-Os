@@ -1,1233 +1,1547 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anki macOS - Made by ©️Muhammad Daler</title>
     
-    <!-- React 18 & ReactDOM -->
+    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     
-    <!-- Babel for JSX compilation -->
+    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              ios: {
-                blue: '#007AFF',
-                green: '#34C759',
-                red: '#FF3B30',
-                yellow: '#FF9500',
-                gray: '#8E8E93',
-                bg: '#F2F2F7',
-                darkBg: '#000000',
-                card: '#FFFFFF',
-                darkCard: '#1C1C1E'
-              }
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ios: {
+                            blue: '#007AFF',
+                            green: '#34C759',
+                            red: '#FF3B30',
+                            yellow: '#FF9500',
+                            gray: '#8E8E93',
+                            bg: '#F2F2F7',
+                            darkBg: '#000000',
+                            card: '#FFFFFF',
+                            darkCard: '#1C1C1E'
+                        }
+                    },
+                    fontFamily: {
+                        'sf': ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'Helvetica Neue', 'sans-serif']
+                    }
+                }
             }
-          }
         }
-      }
     </script>
     
-    <!-- FontAwesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- DOMPurify for XSS protection -->
+    <!-- DOMPurify for security -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
     
     <style>
-      /* Force San Francisco / System Fonts */
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-        background-color: #F2F2F7;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        overscroll-behavior-y: none;
-        transition: background-color 0.3s ease;
-        margin: 0;
-        padding: 0;
-      }
-
-      /* Dark Mode */
-      html.dark body {
-        background-color: #000000;
-      }
-      
-      /* Hide Scrollbar */
-      ::-webkit-scrollbar {
-        display: none;
-      }
-      
-      /* Cloze Styles */
-      .cloze-hidden {
-        color: #007AFF;
-        font-weight: 700;
-        background: rgba(0, 122, 255, 0.12);
-        padding: 2px 6px;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s;
-        border: 1px dashed rgba(0, 122, 255, 0.3);
-        user-select: none;
-      }
-
-      html.dark .cloze-hidden {
-        color: #409CFF;
-        background: rgba(10, 132, 255, 0.25);
-        border-color: rgba(64, 156, 255, 0.4);
-      }
-
-      .cloze-revealed {
-        color: #34C759;
-        font-weight: 700;
-        text-decoration: underline;
-        text-decoration-thickness: 2px;
-      }
-
-      html.dark .cloze-revealed {
-        color: #30D158;
-      }
-
-      /* Card Flip Animation */
-      .card-container {
-        perspective: 1000px;
-      }
-      
-      .card-inner {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-        transform-style: preserve-3d;
-      }
-      
-      .card-flipped .card-inner {
-        transform: rotateY(180deg);
-      }
-      
-      .card-front, .card-back {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-      }
-      
-      .card-back {
-        transform: rotateY(180deg);
-      }
-
-      /* Native-like interactions */
-      * {
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
-      }
-
-      /* Loading Skeleton */
-      .skeleton {
-        background: linear-gradient(
-          90deg,
-          rgba(190, 190, 190, 0.2) 25%,
-          rgba(129, 129, 129, 0.24) 37%,
-          rgba(190, 190, 190, 0.2) 63%
-        );
-        background-size: 400% 100%;
-        animation: skeleton-loading 1.4s ease infinite;
-      }
-
-      @keyframes skeleton-loading {
-        0% { background-position: 100% 50%; }
-        100% { background-position: 0 50%; }
-      }
-
-      /* Animations */
-      @keyframes fade-in-up {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      
-      @keyframes scale-up {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-      }
-      
-      @keyframes fade-in {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      
-      @keyframes slide-up {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
-      }
-
-      .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
-      .animate-scale-up { animation: scale-up 0.2s ease-out forwards; }
-      .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
-      .animate-slide-up { animation: slide-up 0.3s ease-out forwards; }
-      
-      /* Safe area for iOS */
-      .pb-safe {
-        padding-bottom: env(safe-area-inset-bottom, 20px);
-      }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            background-color: #F2F2F7;
+            color: #000000;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease;
+        }
+        
+        html.dark body {
+            background-color: #000000;
+            color: #FFFFFF;
+        }
+        
+        /* Hide scrollbar but keep functionality */
+        ::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            background: transparent;
+        }
+        
+        /* iOS Safe Areas */
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        
+        /* Card Flip Animation */
+        .card-container {
+            perspective: 1000px;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .card-flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        
+        /* Cloze Styles */
+        .cloze-hidden {
+            color: #007AFF;
+            background: rgba(0, 122, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px dashed rgba(0, 122, 255, 0.3);
+        }
+        
+        .dark .cloze-hidden {
+            color: #5AC8FA;
+            background: rgba(90, 200, 250, 0.2);
+            border-color: rgba(90, 200, 250, 0.4);
+        }
+        
+        .cloze-revealed {
+            color: #34C759;
+            background: rgba(52, 199, 89, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+        
+        .dark .cloze-revealed {
+            color: #30D158;
+            background: rgba(48, 209, 88, 0.2);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .animate-slideUp {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .animate-scaleIn {
+            animation: scaleIn 0.2s ease-out;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(0, 122, 255, 0.1);
+            border-top: 3px solid #007AFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Selection */
+        ::selection {
+            background-color: rgba(0, 122, 255, 0.2);
+        }
+        
+        .dark ::selection {
+            background-color: rgba(90, 200, 250, 0.3);
+        }
     </style>
 </head>
 <body class="antialiased">
     <div id="root"></div>
 
-    <!-- Application Code -->
     <script type="text/babel">
+        // ============================================
+        // CONSTANTS & UTILITIES
+        // ============================================
         const { useState, useEffect, useRef, Fragment } = React;
-
-        // ==========================================
-        // UTILS: Security & Sanitization
-        // ==========================================
-        const SecurityUtils = {
-            sanitizeHTML(html) {
-                if (typeof html !== 'string') return '';
-                return DOMPurify.sanitize(html, {
-                    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'div', 'span', 'p', 'code', 'pre'],
-                    ALLOWED_ATTR: ['class', 'title', 'style'],
-                    RETURN_DOM_FRAGMENT: false,
-                    RETURN_DOM: false
-                });
-            },
-
-            validateInput(text, maxLength = 10000) {
-                if (typeof text !== 'string') return false;
-                if (text.length > maxLength) return false;
-                if (text.includes('<script>') || text.includes('javascript:')) return false;
-                return true;
-            }
+        
+        // Security utility for sanitizing HTML
+        const sanitizeHTML = (html) => {
+            if (typeof html !== 'string') return '';
+            return DOMPurify.sanitize(html, {
+                ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+                ALLOWED_ATTR: ['class', 'style', 'title']
+            });
         };
-
-        // ==========================================
-        // UTILS: Cloze Parser
-        // ==========================================
+        
+        // Get cloze indices from text
         const getClozeIndices = (text) => {
+            if (!text) return [];
             const regex = /{{c(\d+)::(.*?)}}/gs;
             const indices = new Set();
             let match;
-            regex.lastIndex = 0;
+            
             while ((match = regex.exec(text)) !== null) {
                 const num = parseInt(match[1], 10);
-                if (!isNaN(num)) indices.add(num);
+                if (!isNaN(num) && num > 0) {
+                    indices.add(num);
+                }
             }
+            
             return Array.from(indices).sort((a, b) => a - b);
         };
-
-        const generateClozeContent = (text, ord) => {
-            const regex = /{{c(\d+)::(.*?)}}/gs;
+        
+        // Generate cloze content
+        const generateClozeContent = (text, clozeNumber, isFront = true) => {
+            if (!text) return '';
             
-            const processText = (isFront) => {
-                return text.replace(regex, (match, numStr, inside) => {
-                    const index = parseInt(numStr, 10);
-                    let answer = inside;
-                    let hint = "";
-                    const separatorIdx = inside.indexOf("::");
-                    
-                    if (separatorIdx !== -1) {
-                        answer = inside.substring(0, separatorIdx);
-                        hint = inside.substring(separatorIdx + 2);
-                    }
-
-                    if (index === ord) {
-                        if (isFront) {
-                            const display = hint ? `[${hint}]` : '[...]';
-                            return `<span class="cloze-hidden" title="Show Answer">${display}</span>`;
-                        } else {
-                            return `<span class="cloze-revealed">${answer}</span>`;
-                        }
-                    } else {
-                        return answer;
-                    }
+            const regex = /{{c(\d+)::(.*?)}}/gs;
+            let processedText = text;
+            let match;
+            const matches = [];
+            
+            // Collect all matches
+            while ((match = regex.exec(text)) !== null) {
+                matches.push({
+                    full: match[0],
+                    number: parseInt(match[1]),
+                    content: match[2],
+                    index: match.index
                 });
-            };
-
-            return { 
-                front: SecurityUtils.sanitizeHTML(processText(true).replace(/\n/g, '<br>')), 
-                back: SecurityUtils.sanitizeHTML(processText(false).replace(/\n/g, '<br>')) 
-            };
+            }
+            
+            // Process matches in reverse to maintain correct indices
+            matches.reverse().forEach((matchInfo) => {
+                const { full, number, content, index } = matchInfo;
+                
+                // Split content into answer and hint if exists
+                let answer = content;
+                let hint = '';
+                const hintIndex = content.indexOf('::');
+                
+                if (hintIndex !== -1) {
+                    answer = content.substring(0, hintIndex);
+                    hint = content.substring(hintIndex + 2);
+                }
+                
+                let replacement = '';
+                
+                if (number === clozeNumber) {
+                    if (isFront) {
+                        // Show cloze placeholder on front
+                        replacement = hint ? 
+                            `<span class="cloze-hidden" title="Click to reveal">[${hint}]</span>` :
+                            `<span class="cloze-hidden" title="Click to reveal">[...]</span>`;
+                    } else {
+                        // Show answer on back
+                        replacement = `<span class="cloze-revealed">${answer}</span>`;
+                    }
+                } else {
+                    // For other cloze numbers, show the answer
+                    replacement = answer;
+                }
+                
+                processedText = processedText.substring(0, index) + 
+                               replacement + 
+                               processedText.substring(index + full.length);
+            });
+            
+            // Replace newlines with <br>
+            processedText = processedText.replace(/\n/g, '<br>');
+            
+            return sanitizeHTML(processedText);
         };
-
-        // ==========================================
-        // UTILS: Scheduler
-        // ==========================================
-        const LEARN_STEPS = [1 * 60 * 1000, 10 * 60 * 1000];
-        const GRADUATING_INTERVAL = 1;
-        const EASY_INTERVAL = 4;
-        const STARTING_EASE = 2.5;
-
+        
+        // Scheduler algorithm for spaced repetition
         const scheduleCard = (card, rating) => {
             const now = Date.now();
-            const newCard = { ...card };
+            const updatedCard = { ...card };
             
-            if (newCard.queue === 'new' || newCard.queue === 'learning') {
-                if (rating === 1) {
-                    newCard.queue = 'learning';
-                    newCard.due = now + LEARN_STEPS[0];
-                    newCard.interval = 0;
-                } else if (rating === 2) {
-                    newCard.due = now + (LEARN_STEPS[0] * 1.5);
-                } else if (rating === 3) {
-                    if (newCard.interval === 0) {
-                        newCard.interval = 1; 
-                        newCard.due = now + LEARN_STEPS[1];
-                        newCard.queue = 'learning';
-                    } else {
-                        newCard.queue = 'review';
-                        newCard.interval = GRADUATING_INTERVAL;
-                        newCard.due = now + (GRADUATING_INTERVAL * 24 * 60 * 60 * 1000);
-                        newCard.ease = STARTING_EASE;
-                    }
-                } else if (rating === 4) {
-                    newCard.queue = 'review';
-                    newCard.interval = EASY_INTERVAL;
-                    newCard.due = now + (EASY_INTERVAL * 24 * 60 * 60 * 1000);
-                    newCard.ease = STARTING_EASE;
+            // Rating: 1=Again, 2=Hard, 3=Good, 4=Easy
+            if (updatedCard.queue === 'new' || updatedCard.queue === 'learning') {
+                // Card is new or in learning phase
+                switch(rating) {
+                    case 1: // Again
+                        updatedCard.queue = 'learning';
+                        updatedCard.interval = 1 * 60 * 1000; // 1 minute
+                        updatedCard.due = now + updatedCard.interval;
+                        break;
+                    case 2: // Hard
+                        updatedCard.queue = 'learning';
+                        updatedCard.interval = 10 * 60 * 1000; // 10 minutes
+                        updatedCard.due = now + updatedCard.interval;
+                        break;
+                    case 3: // Good
+                        updatedCard.queue = 'review';
+                        updatedCard.interval = 24 * 60 * 60 * 1000; // 1 day
+                        updatedCard.ease = 2.5;
+                        updatedCard.due = now + updatedCard.interval;
+                        break;
+                    case 4: // Easy
+                        updatedCard.queue = 'review';
+                        updatedCard.interval = 4 * 24 * 60 * 60 * 1000; // 4 days
+                        updatedCard.ease = 2.5;
+                        updatedCard.due = now + updatedCard.interval;
+                        break;
                 }
             } else {
-                if (rating === 1) {
-                    newCard.queue = 'learning';
-                    newCard.due = now + LEARN_STEPS[0];
-                    newCard.interval = 1;
-                    newCard.ease = Math.max(1.3, newCard.ease - 0.2);
-                    newCard.lapses += 1;
-                } else {
-                    if (rating === 2) {
-                        newCard.ease = Math.max(1.3, newCard.ease - 0.15);
-                        newCard.interval = newCard.interval * 1.2;
-                    } else if (rating === 3) {
-                        newCard.interval = newCard.interval * newCard.ease;
-                    } else if (rating === 4) {
-                        newCard.ease += 0.15;
-                        newCard.interval = newCard.interval * newCard.ease * 1.3;
-                    }
-                    newCard.due = now + (newCard.interval * 24 * 60 * 60 * 1000);
+                // Card is in review phase
+                switch(rating) {
+                    case 1: // Again (lapse)
+                        updatedCard.queue = 'learning';
+                        updatedCard.interval = 1 * 60 * 1000; // 1 minute
+                        updatedCard.due = now + updatedCard.interval;
+                        updatedCard.ease = Math.max(1.3, updatedCard.ease - 0.2);
+                        updatedCard.lapses += 1;
+                        break;
+                    case 2: // Hard
+                        updatedCard.ease = Math.max(1.3, updatedCard.ease - 0.15);
+                        updatedCard.interval = updatedCard.interval * 1.2;
+                        updatedCard.due = now + (updatedCard.interval * 24 * 60 * 60 * 1000);
+                        break;
+                    case 3: // Good
+                        updatedCard.interval = updatedCard.interval * updatedCard.ease;
+                        updatedCard.due = now + (updatedCard.interval * 24 * 60 * 60 * 1000);
+                        break;
+                    case 4: // Easy
+                        updatedCard.ease = updatedCard.ease + 0.15;
+                        updatedCard.interval = updatedCard.interval * updatedCard.ease * 1.3;
+                        updatedCard.due = now + (updatedCard.interval * 24 * 60 * 60 * 1000);
+                        break;
                 }
             }
-            newCard.reps += 1;
             
+            updatedCard.reps += 1;
+            updatedCard.lastReview = now;
+            
+            // Create review log
             const log = {
                 id: crypto.randomUUID(),
-                cardId: card.id,
-                rating,
+                cardId: updatedCard.id,
+                rating: rating,
                 time: now,
-                lastInterval: card.interval,
-                newInterval: newCard.interval
+                previousInterval: card.interval,
+                newInterval: updatedCard.interval,
+                ease: updatedCard.ease
             };
             
-            return { card: newCard, log };
+            return { updatedCard, log };
         };
-
-        // ==========================================
-        // SERVICE: Database (IndexedDB)
-        // ==========================================
-        const DB_NAME = 'AnkiMacOS_DB';
-        const DB_VERSION = 1;
-
-        const initDB = () => {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => resolve(request.result);
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains('decks')) db.createObjectStore('decks', { keyPath: 'id' });
-                    if (!db.objectStoreNames.contains('notes')) db.createObjectStore('notes', { keyPath: 'id' });
-                    if (!db.objectStoreNames.contains('cards')) {
-                        const store = db.createObjectStore('cards', { keyPath: 'id' });
-                        store.createIndex('deckId', 'deckId', { unique: false });
-                        store.createIndex('due', 'due', { unique: false });
-                    }
-                    if (!db.objectStoreNames.contains('logs')) {
-                        const store = db.createObjectStore('logs', { keyPath: 'id' });
-                        store.createIndex('cardId', 'cardId', { unique: false });
-                    }
-                };
-            });
-        };
-
-        const dbService = {
-            async getAllDecks() {
-                const db = await initDB();
-                return new Promise((resolve) => {
-                    const tx = db.transaction('decks', 'readonly');
-                    const req = tx.objectStore('decks').getAll();
-                    req.onsuccess = () => resolve(req.result);
-                });
-            },
-            async addDeck(name) {
-                const db = await initDB();
-                const deck = { id: crypto.randomUUID(), name, created: Date.now(), cardCount: 0 };
+        
+        // ============================================
+        // DATABASE SERVICE
+        // ============================================
+        const DatabaseService = {
+            DB_NAME: 'AnkiMacOS',
+            DB_VERSION: 3,
+            
+            async openDatabase() {
                 return new Promise((resolve, reject) => {
-                    const tx = db.transaction('decks', 'readwrite');
-                    tx.objectStore('decks').add(deck);
-                    tx.oncomplete = () => resolve(deck);
-                    tx.onerror = () => reject(tx.error);
-                });
-            },
-            async addNote(note, cards) {
-                const db = await initDB();
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(['notes', 'cards'], 'readwrite');
-                    tx.objectStore('notes').add(note);
-                    const cardStore = tx.objectStore('cards');
-                    cards.forEach(card => cardStore.add(card));
+                    const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
                     
-                    // Update deck card count
-                    const deckStore = tx.objectStore('decks');
-                    const deckRequest = deckStore.get(note.deckId);
-                    deckRequest.onsuccess = () => {
-                        const deck = deckRequest.result;
-                        if (deck) {
-                            deck.cardCount = (deck.cardCount || 0) + cards.length;
-                            deckStore.put(deck);
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => resolve(request.result);
+                    
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        
+                        // Create decks store
+                        if (!db.objectStoreNames.contains('decks')) {
+                            const decksStore = db.createObjectStore('decks', { keyPath: 'id' });
+                            decksStore.createIndex('created', 'created', { unique: false });
+                        }
+                        
+                        // Create notes store
+                        if (!db.objectStoreNames.contains('notes')) {
+                            const notesStore = db.createObjectStore('notes', { keyPath: 'id' });
+                            notesStore.createIndex('deckId', 'deckId', { unique: false });
+                        }
+                        
+                        // Create cards store
+                        if (!db.objectStoreNames.contains('cards')) {
+                            const cardsStore = db.createObjectStore('cards', { keyPath: 'id' });
+                            cardsStore.createIndex('deckId', 'deckId', { unique: false });
+                            cardsStore.createIndex('due', 'due', { unique: false });
+                            cardsStore.createIndex('queue', 'queue', { unique: false });
+                        }
+                        
+                        // Create logs store
+                        if (!db.objectStoreNames.contains('logs')) {
+                            const logsStore = db.createObjectStore('logs', { keyPath: 'id' });
+                            logsStore.createIndex('cardId', 'cardId', { unique: false });
+                            logsStore.createIndex('time', 'time', { unique: false });
                         }
                     };
-                    
-                    tx.oncomplete = () => resolve();
-                    tx.onerror = () => reject(tx.error);
                 });
             },
-            async getDueCards(deckId) {
-                const db = await initDB();
-                return new Promise((resolve) => {
-                    const tx = db.transaction('cards', 'readonly');
-                    const store = tx.objectStore('cards');
-                    const index = store.index('deckId');
-                    const req = index.getAll(deckId);
-                    req.onsuccess = () => {
-                        const allCards = req.result;
-                        const now = Date.now();
-                        const dueCards = allCards.filter(c => {
-                            if (c.queue === 'new') return true;
-                            if (c.queue === 'learning') return c.due <= now;
-                            if (c.queue === 'review') return c.due <= now;
-                            return false;
-                        }).sort((a, b) => a.due - b.due);
-                        resolve(dueCards);
-                    };
-                });
-            },
-            async updateCard(card, log) {
-                const db = await initDB();
+            
+            async withTransaction(stores, mode, operation) {
+                const db = await this.openDatabase();
                 return new Promise((resolve, reject) => {
-                    const tx = db.transaction(['cards', 'logs'], 'readwrite');
-                    tx.objectStore('cards').put(card);
-                    tx.objectStore('logs').add(log);
-                    tx.oncomplete = () => resolve();
+                    const tx = db.transaction(stores, mode);
+                    const result = operation(tx);
+                    
+                    tx.oncomplete = () => resolve(result);
                     tx.onerror = () => reject(tx.error);
                 });
             },
-            async deleteDeck(id) {
-                const db = await initDB();
+            
+            // Deck operations
+            async getAllDecks() {
+                return this.withTransaction(['decks'], 'readonly', (tx) => {
+                    return new Promise((resolve) => {
+                        const store = tx.objectStore('decks');
+                        const request = store.getAll();
+                        request.onsuccess = () => resolve(request.result || []);
+                    });
+                });
+            },
+            
+            async createDeck(name) {
+                const deck = {
+                    id: crypto.randomUUID(),
+                    name: name.trim(),
+                    created: Date.now(),
+                    modified: Date.now(),
+                    cardCount: 0
+                };
+                
+                await this.withTransaction(['decks'], 'readwrite', (tx) => {
+                    tx.objectStore('decks').add(deck);
+                });
+                
+                return deck;
+            },
+            
+            async deleteDeck(deckId) {
+                // Delete deck and all associated cards and notes
+                const db = await this.openDatabase();
+                
                 return new Promise((resolve, reject) => {
                     const tx = db.transaction(['decks', 'cards', 'notes'], 'readwrite');
-                    tx.objectStore('decks').delete(id);
-                    const cardStore = tx.objectStore('cards');
-                    const cardIndex = cardStore.index('deckId');
-                    const cardRequest = cardIndex.getAllKeys(id);
-                    cardRequest.onsuccess = () => {
-                        cardRequest.result.forEach(key => cardStore.delete(key));
-                    };
-                    const noteStore = tx.objectStore('notes');
-                    const noteRequest = noteStore.openCursor();
-                    noteRequest.onsuccess = (event) => {
+                    
+                    // Delete deck
+                    tx.objectStore('decks').delete(deckId);
+                    
+                    // Delete cards
+                    const cardsStore = tx.objectStore('cards');
+                    const cardsIndex = cardsStore.index('deckId');
+                    const cardsRequest = cardsIndex.openKeyCursor(IDBKeyRange.only(deckId));
+                    
+                    cardsRequest.onsuccess = (event) => {
                         const cursor = event.target.result;
                         if (cursor) {
-                            if (cursor.value.deckId === id) cursor.delete();
+                            cardsStore.delete(cursor.primaryKey);
                             cursor.continue();
                         }
                     };
+                    
+                    // Delete notes
+                    const notesStore = tx.objectStore('notes');
+                    const notesIndex = notesStore.index('deckId');
+                    const notesRequest = notesIndex.openKeyCursor(IDBKeyRange.only(deckId));
+                    
+                    notesRequest.onsuccess = (event) => {
+                        const cursor = event.target.result;
+                        if (cursor) {
+                            notesStore.delete(cursor.primaryKey);
+                            cursor.continue();
+                        }
+                    };
+                    
                     tx.oncomplete = () => resolve();
                     tx.onerror = () => reject(tx.error);
                 });
             },
-            async getStats() {
-                const db = await initDB();
-                return new Promise((resolve) => {
-                    const tx = db.transaction(['cards', 'logs'], 'readonly');
-                    const cardStore = tx.objectStore('cards');
-                    const logStore = tx.objectStore('logs');
-                    
-                    const cardsRequest = cardStore.count();
-                    const logsRequest = logStore.getAll();
-                    
-                    Promise.all([
-                        new Promise(res => { cardsRequest.onsuccess = () => res(cardsRequest.result); }),
-                        new Promise(res => { logsRequest.onsuccess = () => res(logsRequest.result); })
-                    ]).then(([totalCards, logs]) => {
-                        const today = new Date().toDateString();
-                        const todayLogs = logs.filter(log => 
-                            new Date(log.time).toDateString() === today
-                        );
+            
+            // Card operations
+            async createCard(note, cards) {
+                return this.withTransaction(['notes', 'cards', 'decks'], 'readwrite', (tx) => {
+                    return new Promise((resolve, reject) => {
+                        // Add note
+                        tx.objectStore('notes').add(note);
                         
-                        const stats = {
-                            totalCards,
-                            reviewsToday: todayLogs.length,
-                            retentionRate: logs.length > 0 
-                                ? Math.round((logs.filter(l => l.rating >= 3).length / logs.length) * 100)
-                                : 0
+                        // Add cards
+                        const cardsStore = tx.objectStore('cards');
+                        cards.forEach(card => cardsStore.add(card));
+                        
+                        // Update deck card count
+                        const decksStore = tx.objectStore('decks');
+                        const deckRequest = decksStore.get(note.deckId);
+                        
+                        deckRequest.onsuccess = () => {
+                            const deck = deckRequest.result;
+                            if (deck) {
+                                deck.cardCount = (deck.cardCount || 0) + cards.length;
+                                deck.modified = Date.now();
+                                decksStore.put(deck);
+                            }
                         };
                         
-                        resolve(stats);
+                        resolve();
+                    });
+                });
+            },
+            
+            async getDueCards(deckId) {
+                return this.withTransaction(['cards'], 'readonly', (tx) => {
+                    return new Promise((resolve) => {
+                        const store = tx.objectStore('cards');
+                        const index = store.index('deckId');
+                        const request = index.getAll(deckId);
+                        
+                        request.onsuccess = () => {
+                            const allCards = request.result || [];
+                            const now = Date.now();
+                            
+                            const dueCards = allCards.filter(card => {
+                                if (card.queue === 'new') return true;
+                                return card.due <= now;
+                            }).sort((a, b) => a.due - b.due);
+                            
+                            resolve(dueCards);
+                        };
+                    });
+                });
+            },
+            
+            async updateCard(card, log) {
+                return this.withTransaction(['cards', 'logs'], 'readwrite', (tx) => {
+                    // Update card
+                    tx.objectStore('cards').put(card);
+                    
+                    // Add log if provided
+                    if (log) {
+                        tx.objectStore('logs').add(log);
+                    }
+                });
+            },
+            
+            // Stats operations
+            async getStats() {
+                return this.withTransaction(['cards', 'logs', 'decks'], 'readonly', (tx) => {
+                    return new Promise((resolve) => {
+                        const cardsStore = tx.objectStore('cards');
+                        const logsStore = tx.objectStore('logs');
+                        const decksStore = tx.objectStore('decks');
+                        
+                        const cardsCountRequest = cardsStore.count();
+                        const logsRequest = logsStore.getAll();
+                        const decksRequest = decksStore.getAll();
+                        
+                        Promise.all([
+                            new Promise(r => { cardsCountRequest.onsuccess = () => r(cardsCountRequest.result); }),
+                            new Promise(r => { logsRequest.onsuccess = () => r(logsRequest.result || []); }),
+                            new Promise(r => { decksRequest.onsuccess = () => r(decksRequest.result || []); })
+                        ]).then(([totalCards, allLogs, allDecks]) => {
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            const todayTimestamp = today.getTime();
+                            
+                            const reviewsToday = allLogs.filter(log => 
+                                new Date(log.time).setHours(0, 0, 0, 0) === todayTimestamp
+                            ).length;
+                            
+                            const totalReviews = allLogs.length;
+                            const retentionRate = totalReviews > 0 ? 
+                                Math.round((allLogs.filter(log => log.rating >= 3).length / totalReviews) * 100) : 0;
+                            
+                            const stats = {
+                                totalCards,
+                                totalDecks: allDecks.length,
+                                reviewsToday,
+                                totalReviews,
+                                retentionRate,
+                                cardsDueToday: 0 // Will be calculated separately
+                            };
+                            
+                            resolve(stats);
+                        });
                     });
                 });
             }
         };
-
-        // ==========================================
+        
+        // ============================================
         // COMPONENTS
-        // ==========================================
-
+        // ============================================
+        
+        // Toast Notification Component
         const Toast = ({ message, type = 'info', onClose }) => {
-            React.useEffect(() => {
+            useEffect(() => {
                 const timer = setTimeout(() => {
                     onClose();
                 }, 3000);
                 return () => clearTimeout(timer);
             }, [onClose]);
-
-            const bgColor = {
-                success: 'bg-green-500',
-                error: 'bg-red-500',
-                info: 'bg-blue-500',
-                warning: 'bg-yellow-500'
-            }[type];
-
+            
+            const bgColor = type === 'success' ? 'bg-green-500' : 
+                          type === 'error' ? 'bg-red-500' : 
+                          type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+            
             return React.createElement('div', {
-                className: `fixed top-4 right-4 z-50 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg animate-slide-up`,
-                role: 'alert'
-            },
-                React.createElement('div', { className: 'flex items-center' },
-                    React.createElement('span', { className: 'mr-2' },
-                        type === 'success' ? '✓' :
-                        type === 'error' ? '✗' :
-                        type === 'warning' ? '⚠' : 'ℹ'
-                    ),
-                    React.createElement('span', { className: 'font-medium' }, message)
-                )
+                className: `fixed top-4 right-4 z-50 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg animate-slideUp flex items-center justify-between min-w-64`,
+                style: { animation: 'slideUp 0.3s ease-out' }
+            }, 
+                React.createElement('span', { className: 'font-medium' }, message),
+                React.createElement('button', {
+                    onClick: onClose,
+                    className: 'ml-4 text-white hover:text-gray-200',
+                    'aria-label': 'Close'
+                }, '✕')
             );
         };
-
-        const Spinner = ({ size = 'medium', className = '' }) => {
-            const sizeClass = {
-                small: 'w-4 h-4',
-                medium: 'w-8 h-8',
-                large: 'w-12 h-12'
-            }[size];
-
+        
+        // Loading Spinner Component
+        const LoadingSpinner = ({ size = 'medium', color = 'blue' }) => {
+            const sizeClass = size === 'small' ? 'w-6 h-6' : 
+                            size === 'medium' ? 'w-8 h-8' : 'w-12 h-12';
+            
+            const borderColor = color === 'blue' ? 'border-ios.blue' :
+                              color === 'white' ? 'border-white' :
+                              color === 'gray' ? 'border-gray-400' : 'border-ios.blue';
+            
             return React.createElement('div', {
-                className: `${sizeClass} border-2 border-ios.blue border-t-transparent rounded-full animate-spin ${className}`
+                className: `${sizeClass} spinner ${borderColor}`
             });
         };
-
+        
+        // Layout Component
         const Layout = ({ children, activeTab, onTabChange, isDarkMode, toggleTheme }) => {
             return React.createElement('div', {
-                className: 'flex flex-col h-screen bg-ios.bg dark:bg-black text-gray-900 dark:text-white select-none transition-colors duration-300'
+                className: `flex flex-col h-screen bg-ios.bg dark:bg-black transition-colors duration-300 ${isDarkMode ? 'dark' : ''}`
             },
+                // Header
                 React.createElement('header', {
-                    className: 'h-[50px] bg-white/85 dark:bg-ios.darkCard/85 backdrop-blur-xl border-b border-gray-300/50 dark:border-gray-800/50 flex items-center justify-between px-4 sticky top-0 z-50 shadow-sm'
+                    className: 'h-14 bg-white dark:bg-ios.darkCard border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 sticky top-0 z-50'
                 },
-                    React.createElement('div', { className: 'w-20' }),
+                    React.createElement('div', { className: 'w-16' }),
                     React.createElement('div', { className: 'flex flex-col items-center' },
-                        React.createElement('h1', { className: 'text-[17px] font-semibold text-black dark:text-white leading-tight' }, 'Anki'),
-                        React.createElement('span', { className: 'text-[10px] text-gray-400 font-medium tracking-wide scale-90' }, '©️MUHAMMAD DALER')
+                        React.createElement('h1', { 
+                            className: 'text-lg font-semibold text-gray-900 dark:text-white'
+                        }, 'Anki'),
+                        React.createElement('span', { 
+                            className: 'text-xs text-gray-500 dark:text-gray-400 mt-0.5'
+                        }, '© MUHAMMAD DALER')
                     ),
-                    React.createElement('div', { className: 'w-20 flex justify-end' },
-                        React.createElement('button', {
-                            onClick: toggleTheme,
-                            className: 'w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors',
-                            'aria-label': 'Toggle theme'
-                        },
-                            React.createElement('i', { className: `fa-solid ${isDarkMode ? 'fa-sun' : 'fa-moon'} text-sm` })
-                        )
+                    React.createElement('button', {
+                        onClick: toggleTheme,
+                        className: 'w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors',
+                        'aria-label': isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'
+                    },
+                        React.createElement('i', { 
+                            className: isDarkMode ? 'fas fa-sun text-sm' : 'fas fa-moon text-sm'
+                        })
                     )
                 ),
-
+                
+                // Main Content
                 React.createElement('main', {
-                    className: 'flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth bg-ios.bg dark:bg-black'
+                    className: 'flex-1 overflow-y-auto bg-ios.bg dark:bg-black'
                 },
                     React.createElement('div', { className: 'max-w-3xl mx-auto h-full p-4 md:p-6' }, children)
                 ),
-
+                
+                // Bottom Navigation
                 React.createElement('nav', {
-                    className: 'h-[83px] bg-white/90 dark:bg-ios.darkCard/90 backdrop-blur-2xl border-t border-gray-300/50 dark:border-gray-800/50 flex justify-around items-start pt-2 pb-safe'
+                    className: 'h-16 bg-white dark:bg-ios.darkCard border-t border-gray-200 dark:border-gray-800 flex justify-around items-center safe-bottom'
                 },
                     ['decks', 'add', 'stats'].map(tab => 
                         React.createElement('button', {
                             key: tab,
                             onClick: () => onTabChange(tab),
-                            className: `flex flex-col items-center justify-center w-20 space-y-1 transition-all active:scale-95 ${activeTab === tab ? 'text-ios.blue' : 'text-gray-400 dark:text-gray-500'}`,
+                            className: `flex flex-col items-center justify-center w-20 py-1 transition-all ${activeTab === tab ? 'text-ios.blue' : 'text-gray-500 dark:text-gray-400'}`,
                             'aria-label': `${tab} tab`
                         },
                             React.createElement('i', {
-                                className: `fa-solid ${
+                                className: `fas ${
                                     tab === 'decks' ? 'fa-layer-group' :
-                                    tab === 'add' ? 'fa-plus-circle' : 'fa-chart-simple'
-                                } text-[24px] ${activeTab === tab ? 'opacity-100' : 'opacity-70'}`
+                                    tab === 'add' ? 'fa-plus-circle' :
+                                    'fa-chart-simple'
+                                } text-xl mb-1`
                             }),
-                            React.createElement('span', { className: 'text-[10px] font-medium capitalize' }, tab)
+                            React.createElement('span', { 
+                                className: 'text-xs font-medium capitalize'
+                            }, tab)
                         )
                     )
                 )
             );
         };
-
+        
+        // Deck List Component
         const DeckList = ({ onSelectDeck }) => {
             const [decks, setDecks] = useState([]);
-            const [isCreating, setIsCreating] = useState(false);
+            const [isCreatingDeck, setIsCreatingDeck] = useState(false);
             const [newDeckName, setNewDeckName] = useState('');
-            const [loading, setLoading] = useState(true);
             const [deckToDelete, setDeckToDelete] = useState(null);
+            const [isLoading, setIsLoading] = useState(true);
             const [toast, setToast] = useState(null);
-
-            useEffect(() => { 
-                loadDecks(); 
-            }, []);
-
+            
             const loadDecks = async () => {
                 try {
-                    setLoading(true);
-                    const loaded = await dbService.getAllDecks();
-                    setDecks(loaded);
-                } catch (e) { 
+                    setIsLoading(true);
+                    const decksData = await DatabaseService.getAllDecks();
+                    setDecks(decksData);
+                } catch (error) {
+                    console.error('Error loading decks:', error);
                     setToast({ message: 'Failed to load decks', type: 'error' });
-                    console.error(e); 
-                } finally { 
-                    setLoading(false); 
+                } finally {
+                    setIsLoading(false);
                 }
             };
-
+            
+            useEffect(() => {
+                loadDecks();
+            }, []);
+            
             const handleCreateDeck = async (e) => {
                 e.preventDefault();
                 if (!newDeckName.trim()) {
-                    setToast({ message: 'Deck name cannot be empty', type: 'error' });
+                    setToast({ message: 'Please enter a deck name', type: 'error' });
                     return;
                 }
+                
                 try {
-                    await dbService.addDeck(newDeckName);
+                    await DatabaseService.createDeck(newDeckName);
                     setNewDeckName('');
-                    setIsCreating(false);
+                    setIsCreatingDeck(false);
                     setToast({ message: 'Deck created successfully', type: 'success' });
                     loadDecks();
-                } catch (err) { 
-                    setToast({ message: 'Error creating deck', type: 'error' });
+                } catch (error) {
+                    console.error('Error creating deck:', error);
+                    setToast({ message: 'Failed to create deck', type: 'error' });
                 }
             };
-
-            const confirmDelete = async () => {
+            
+            const handleDeleteDeck = async () => {
                 if (!deckToDelete) return;
+                
                 try {
-                    await dbService.deleteDeck(deckToDelete);
-                    setToast({ message: 'Deck deleted successfully', type: 'success' });
+                    await DatabaseService.deleteDeck(deckToDelete);
                     setDeckToDelete(null);
+                    setToast({ message: 'Deck deleted successfully', type: 'success' });
                     loadDecks();
                 } catch (error) {
+                    console.error('Error deleting deck:', error);
                     setToast({ message: 'Failed to delete deck', type: 'error' });
                 }
             };
-
-            return React.createElement(React.Fragment, null,
+            
+            return React.createElement(Fragment, null,
+                // Toast notifications
                 toast && React.createElement(Toast, {
                     message: toast.message,
                     type: toast.type,
                     onClose: () => setToast(null)
                 }),
-
-                React.createElement('div', { className: 'space-y-6 animate-fade-in-up pb-20 relative' },
-                    React.createElement('div', { className: 'flex justify-between items-end px-2 mb-4' },
+                
+                React.createElement('div', { className: 'space-y-6 animate-fadeIn' },
+                    // Header
+                    React.createElement('div', { className: 'flex justify-between items-center' },
                         React.createElement('div', null,
-                            React.createElement('h2', { className: 'text-3xl font-bold text-gray-900 dark:text-white tracking-tight' }, 'Library'),
-                            React.createElement('p', { className: 'text-sm text-gray-400 font-medium mt-1' }, `${decks.length} Decks`)
+                            React.createElement('h2', { className: 'text-2xl font-bold text-gray-900 dark:text-white' }, 'Decks'),
+                            React.createElement('p', { className: 'text-sm text-gray-500 dark:text-gray-400 mt-1' }, 
+                                `${decks.length} deck${decks.length !== 1 ? 's' : ''}`
+                            )
                         ),
                         React.createElement('button', {
-                            onClick: () => setIsCreating(true),
-                            className: 'bg-ios.blue text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform hover:bg-[#0062CC]',
+                            onClick: () => setIsCreatingDeck(true),
+                            className: 'w-10 h-10 rounded-full bg-ios.blue text-white flex items-center justify-center hover:bg-blue-600 active:scale-95 transition-all',
                             'aria-label': 'Create new deck'
                         },
-                            React.createElement('i', { className: 'fa-solid fa-plus text-sm' })
-                        )
-                    ),
-
-                    isCreating && React.createElement('form', {
-                        onSubmit: handleCreateDeck,
-                        className: 'bg-white dark:bg-ios.darkCard p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 mb-6 flex flex-col gap-3 animate-scale-up'
-                    },
-                        React.createElement('input', {
-                            type: 'text',
-                            value: newDeckName,
-                            onChange: (e) => setNewDeckName(e.target.value),
-                            placeholder: 'Name your new deck',
-                            autoFocus: true,
-                            className: 'w-full bg-ios.bg dark:bg-[#2C2C2E] border-none rounded-xl px-4 py-3 text-[15px] text-gray-900 dark:text-white focus:ring-2 focus:ring-ios.blue placeholder-gray-400 dark:placeholder-gray-600',
-                            maxLength: 100
-                        }),
-                        React.createElement('div', { className: 'flex gap-3' },
-                            React.createElement('button', {
-                                type: 'submit',
-                                className: 'flex-1 bg-ios.blue text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#0062CC] transition-colors'
-                            }, 'Create Deck'),
-                            React.createElement('button', {
-                                type: 'button',
-                                onClick: () => setIsCreating(false),
-                                className: 'flex-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors'
-                            }, 'Cancel')
+                            React.createElement('i', { className: 'fas fa-plus' })
                         )
                     ),
                     
+                    // Create Deck Form
+                    isCreatingDeck && React.createElement('div', {
+                        className: 'bg-white dark:bg-ios.darkCard rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800 animate-scaleIn'
+                    },
+                        React.createElement('h3', { className: 'text-lg font-semibold text-gray-900 dark:text-white mb-3' }, 'Create New Deck'),
+                        React.createElement('form', { onSubmit: handleCreateDeck },
+                            React.createElement('input', {
+                                type: 'text',
+                                value: newDeckName,
+                                onChange: (e) => setNewDeckName(e.target.value),
+                                placeholder: 'Enter deck name...',
+                                className: 'w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white mb-3 focus:outline-none focus:ring-2 focus:ring-ios.blue',
+                                autoFocus: true
+                            }),
+                            React.createElement('div', { className: 'flex gap-2' },
+                                React.createElement('button', {
+                                    type: 'submit',
+                                    className: 'flex-1 bg-ios.blue text-white py-2.5 rounded-lg font-medium hover:bg-blue-600 transition-colors'
+                                }, 'Create'),
+                                React.createElement('button', {
+                                    type: 'button',
+                                    onClick: () => setIsCreatingDeck(false),
+                                    className: 'flex-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors'
+                                }, 'Cancel')
+                            )
+                        )
+                    ),
+                    
+                    // Delete Confirmation Modal
                     deckToDelete && React.createElement('div', {
-                        className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm animate-fade-in'
+                        className: 'fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fadeIn'
                     },
                         React.createElement('div', {
-                            className: 'bg-white dark:bg-ios.darkCard rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden scale-100 animate-scale-up border border-gray-100 dark:border-gray-700'
+                            className: 'bg-white dark:bg-ios.darkCard rounded-xl p-6 max-w-sm w-full animate-scaleIn'
                         },
-                            React.createElement('div', { className: 'p-6 text-center' },
-                                React.createElement('h3', { className: 'text-lg font-bold text-gray-900 dark:text-white mb-2' }, 'Delete Deck?'),
-                                React.createElement('p', { className: 'text-[13px] leading-relaxed text-gray-500 dark:text-gray-400' }, 'This will permanently delete this deck and all its content. This action cannot be undone.')
+                            React.createElement('h3', { className: 'text-lg font-semibold text-gray-900 dark:text-white mb-2' }, 'Delete Deck'),
+                            React.createElement('p', { className: 'text-gray-600 dark:text-gray-400 mb-4' }, 
+                                'Are you sure you want to delete this deck? All cards in this deck will also be deleted.'
                             ),
-                            React.createElement('div', { className: 'flex border-t border-gray-200 dark:border-gray-800' },
+                            React.createElement('div', { className: 'flex gap-2' },
                                 React.createElement('button', {
                                     onClick: () => setDeckToDelete(null),
-                                    className: 'flex-1 py-3.5 text-[17px] text-gray-600 dark:text-gray-400 font-medium active:bg-gray-50 dark:active:bg-[#2C2C2E] transition-colors'
+                                    className: 'flex-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors'
                                 }, 'Cancel'),
-                                React.createElement('div', { className: 'w-px bg-gray-200 dark:bg-gray-800' }),
                                 React.createElement('button', {
-                                    onClick: confirmDelete,
-                                    className: 'flex-1 py-3.5 text-[17px] text-ios.red font-bold active:bg-gray-50 dark:active:bg-[#2C2C2E] transition-colors'
+                                    onClick: handleDeleteDeck,
+                                    className: 'flex-1 bg-ios.red text-white py-2.5 rounded-lg font-medium hover:bg-red-500 transition-colors'
                                 }, 'Delete')
                             )
                         )
                     ),
-
-                    loading ? React.createElement('div', { className: 'text-center py-10' },
-                        React.createElement(Spinner, { size: 'medium' })
-                    ) : decks.length === 0 ? React.createElement('div', {
-                        className: 'flex flex-col items-center justify-center py-20 text-center px-6'
-                    },
-                        React.createElement('div', {
-                            className: 'w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6'
-                        },
-                            React.createElement('i', { className: 'fa-solid fa-box-open text-3xl text-gray-400 dark:text-gray-500' })
+                    
+                    // Loading State
+                    isLoading ? React.createElement('div', { className: 'flex justify-center py-12' },
+                        React.createElement(LoadingSpinner, { size: 'large' })
+                    ) :
+                    
+                    // Empty State
+                    decks.length === 0 ? React.createElement('div', { className: 'text-center py-12' },
+                        React.createElement('div', { className: 'w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4' },
+                            React.createElement('i', { className: 'fas fa-layer-group text-3xl text-gray-400 dark:text-gray-500' })
                         ),
                         React.createElement('h3', { className: 'text-lg font-semibold text-gray-900 dark:text-white mb-2' }, 'No Decks Yet'),
-                        React.createElement('p', { className: 'text-gray-500 dark:text-gray-400 text-sm max-w-xs' }, 'Tap the + button above to create your first deck.')
-                    ) : React.createElement('div', { className: 'grid grid-cols-1 gap-4' },
-                        decks.map((deck) => React.createElement('div', {
+                        React.createElement('p', { className: 'text-gray-500 dark:text-gray-400' }, 'Create your first deck to get started')
+                    ) :
+                    
+                    // Decks List
+                    React.createElement('div', { className: 'space-y-3' },
+                        decks.map(deck => React.createElement('div', {
                             key: deck.id,
                             onClick: () => onSelectDeck(deck.id),
-                            className: 'group bg-white dark:bg-ios.darkCard p-5 rounded-[18px] shadow-sm border border-gray-100 dark:border-gray-800 active:scale-[0.98] transition-all cursor-pointer relative'
+                            className: 'bg-white dark:bg-ios.darkCard rounded-xl p-4 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 active:scale-[0.98] transition-all cursor-pointer'
                         },
                             React.createElement('div', { className: 'flex items-center justify-between' },
-                                React.createElement('div', { className: 'flex items-center gap-4' },
-                                    React.createElement('div', {
-                                        className: 'w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-ios.blue'
-                                    },
-                                        React.createElement('i', { className: 'fa-solid fa-layer-group text-lg' })
+                                React.createElement('div', { className: 'flex items-center gap-3' },
+                                    React.createElement('div', { className: 'w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center' },
+                                        React.createElement('i', { className: 'fas fa-layer-group text-lg text-ios.blue' })
                                     ),
                                     React.createElement('div', null,
-                                        React.createElement('h3', {
-                                            className: 'text-[17px] font-semibold text-gray-900 dark:text-white leading-tight'
-                                        }, deck.name),
-                                        React.createElement('span', {
-                                            className: 'text-xs text-gray-400 font-medium'
-                                        }, `${deck.cardCount || 0} cards`)
+                                        React.createElement('h3', { className: 'font-semibold text-gray-900 dark:text-white' }, deck.name),
+                                        React.createElement('p', { className: 'text-sm text-gray-500 dark:text-gray-400' }, 
+                                            `${deck.cardCount || 0} card${deck.cardCount !== 1 ? 's' : ''}`
+                                        )
                                     )
                                 ),
-                                React.createElement('i', { className: 'fa-solid fa-chevron-right text-gray-300 dark:text-gray-600 text-xs' })
-                            ),
-                            React.createElement('button', {
-                                onClick: (e) => { e.stopPropagation(); setDeckToDelete(deck.id); },
-                                className: 'absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-ios.red dark:hover:text-red-400',
-                                'aria-label': 'Delete deck'
-                            },
-                                React.createElement('i', { className: 'fa-solid fa-trash-can text-sm' })
+                                React.createElement('button', {
+                                    onClick: (e) => {
+                                        e.stopPropagation();
+                                        setDeckToDelete(deck.id);
+                                    },
+                                    className: 'w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-ios.red hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors',
+                                    'aria-label': 'Delete deck'
+                                },
+                                    React.createElement('i', { className: 'fas fa-trash text-sm' })
+                                )
                             )
                         ))
                     )
                 )
             );
         };
-
+        
+        // Add Card Form Component
         const AddCardForm = () => {
             const [decks, setDecks] = useState([]);
             const [selectedDeckId, setSelectedDeckId] = useState('');
-            const [type, setType] = useState('basic');
-            const [front, setFront] = useState('');
-            const [back, setBack] = useState('');
-            const [loading, setLoading] = useState(true);
+            const [cardType, setCardType] = useState('basic');
+            const [frontText, setFrontText] = useState('');
+            const [backText, setBackText] = useState('');
+            const [isLoading, setIsLoading] = useState(true);
             const [toast, setToast] = useState(null);
-            const frontInputRef = useRef(null);
-
-            useEffect(() => {
-                dbService.getAllDecks().then(data => {
-                    setDecks(data);
-                    if (data.length > 0) setSelectedDeckId(data[0].id);
-                    setLoading(false);
-                }).catch(err => {
+            const frontTextareaRef = useRef(null);
+            
+            const loadDecks = async () => {
+                try {
+                    setIsLoading(true);
+                    const decksData = await DatabaseService.getAllDecks();
+                    setDecks(decksData);
+                    if (decksData.length > 0) {
+                        setSelectedDeckId(decksData[0].id);
+                    }
+                } catch (error) {
+                    console.error('Error loading decks:', error);
                     setToast({ message: 'Failed to load decks', type: 'error' });
-                    setLoading(false);
-                });
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            
+            useEffect(() => {
+                loadDecks();
             }, []);
-
-            const insertCloze = () => {
-                if (!frontInputRef.current) return;
-                const textarea = frontInputRef.current;
+            
+            const insertClozeSyntax = () => {
+                if (!frontTextareaRef.current) return;
+                
+                const textarea = frontTextareaRef.current;
                 const start = textarea.selectionStart;
                 const end = textarea.selectionEnd;
                 const text = textarea.value;
-                const selection = text.substring(start, end);
-                const indices = getClozeIndices(text);
-                const nextNum = indices.length > 0 ? Math.max(...indices) + 1 : 1;
-                let replacement = '';
-                let newCursorPos = 0;
-
-                if (!selection) {
-                    replacement = `{{c${nextNum}::...}}`;
-                    newCursorPos = start + 3 + nextNum.toString().length + 2;
-                } else {
-                    replacement = `{{c${nextNum}::${selection}}}`;
-                    newCursorPos = start + replacement.length;
-                }
-                const newText = text.substring(0, start) + replacement + text.substring(end);
-                setFront(newText);
-                setTimeout(() => { 
-                    textarea.focus(); 
-                    textarea.setSelectionRange(newCursorPos, newCursorPos); 
-                }, 0);
+                const selectedText = text.substring(start, end);
+                
+                // Find existing cloze numbers
+                const existingIndices = getClozeIndices(text);
+                const nextClozeNumber = existingIndices.length > 0 ? Math.max(...existingIndices) + 1 : 1;
+                
+                const clozeSyntax = selectedText ? 
+                    `{{c${nextClozeNumber}::${selectedText}}}` : 
+                    `{{c${nextClozeNumber}::...}}`;
+                
+                const newText = text.substring(0, start) + clozeSyntax + text.substring(end);
+                setFrontText(newText);
+                
+                // Set cursor position after insertion
+                setTimeout(() => {
+                    textarea.focus();
+                    const newCursorPos = start + clozeSyntax.length;
+                    textarea.setSelectionRange(newCursorPos, newCursorPos);
+                }, 10);
             };
-
+            
             const handleSubmit = async (e) => {
                 e.preventDefault();
-                if (!selectedDeckId) { 
-                    setToast({ message: 'Select a deck.', type: 'error' }); 
-                    return; 
+                
+                if (!selectedDeckId) {
+                    setToast({ message: 'Please select a deck', type: 'error' });
+                    return;
                 }
-                if (!front.trim()) { 
-                    setToast({ message: 'Front content is required.', type: 'error' }); 
-                    return; 
+                
+                if (!frontText.trim()) {
+                    setToast({ message: 'Front text is required', type: 'error' });
+                    return;
                 }
-
+                
+                if (cardType === 'cloze') {
+                    const clozeIndices = getClozeIndices(frontText);
+                    if (clozeIndices.length === 0) {
+                        setToast({ message: 'No cloze deletions found. Use {{c1::...}} syntax.', type: 'error' });
+                        return;
+                    }
+                }
+                
                 try {
                     const noteId = crypto.randomUUID();
                     const now = Date.now();
-                    const newNote = { 
-                        id: noteId, 
-                        deckId: selectedDeckId, 
-                        type, 
-                        fields: { front, back }, 
-                        created: now 
+                    
+                    const note = {
+                        id: noteId,
+                        deckId: selectedDeckId,
+                        type: cardType,
+                        front: frontText,
+                        back: backText,
+                        created: now,
+                        modified: now
                     };
+                    
                     const cards = [];
-                    const safeFront = SecurityUtils.sanitizeHTML(front.replace(/\n/g, '<br>'));
-                    const safeBack = SecurityUtils.sanitizeHTML(back.replace(/\n/g, '<br>'));
-
-                    if (type === 'basic') {
-                        cards.push({ 
-                            id: crypto.randomUUID(), 
-                            noteId, 
-                            deckId: selectedDeckId, 
-                            ord: 0, 
-                            queue: 'new', 
-                            due: now, 
-                            interval: 0, 
-                            ease: STARTING_EASE, 
-                            reps: 0, 
-                            lapses: 0, 
-                            front: safeFront, 
-                            back: safeBack,
+                    
+                    if (cardType === 'basic') {
+                        // Create a single basic card
+                        const cardId = crypto.randomUUID();
+                        cards.push({
+                            id: cardId,
+                            noteId: noteId,
+                            deckId: selectedDeckId,
+                            type: 'basic',
+                            front: sanitizeHTML(frontText.replace(/\n/g, '<br>')),
+                            back: sanitizeHTML(backText.replace(/\n/g, '<br>')),
+                            queue: 'new',
+                            due: now,
+                            interval: 0,
+                            ease: 2.5,
+                            reps: 0,
+                            lapses: 0,
                             created: now
                         });
-                    } else if (type === 'cloze') {
-                        const indices = getClozeIndices(front);
-                        if (indices.length === 0) { 
-                            setToast({ message: 'No cloze deletions ({{c1::..}}) found.', type: 'error' }); 
-                            return; 
-                        }
-                        indices.forEach(index => {
-                            const content = generateClozeContent(safeFront, index);
+                    } else if (cardType === 'cloze') {
+                        // Create multiple cloze cards (one for each cloze deletion)
+                        const clozeIndices = getClozeIndices(frontText);
+                        
+                        clozeIndices.forEach(clozeNumber => {
+                            const cardId = crypto.randomUUID();
+                            const frontContent = generateClozeContent(frontText, clozeNumber, true);
+                            const backContent = generateClozeContent(frontText, clozeNumber, false);
+                            
+                            let fullBackContent = backContent;
+                            if (backText.trim()) {
+                                fullBackContent += `<div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">${sanitizeHTML(backText.replace(/\n/g, '<br>'))}</div>`;
+                            }
+                            
                             cards.push({
-                                id: crypto.randomUUID(),
-                                noteId,
+                                id: cardId,
+                                noteId: noteId,
                                 deckId: selectedDeckId,
-                                ord: index,
+                                type: 'cloze',
+                                clozeNumber: clozeNumber,
+                                front: frontContent,
+                                back: fullBackContent,
                                 queue: 'new',
                                 due: now,
                                 interval: 0,
-                                ease: STARTING_EASE,
+                                ease: 2.5,
                                 reps: 0,
                                 lapses: 0,
-                                front: content.front,
-                                back: `${content.back}${safeBack ? `<br/><br/><div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">${safeBack}</div>` : ''}`,
                                 created: now
                             });
                         });
                     }
-                    await dbService.addNote(newNote, cards);
-                    setToast({ message: `Card${cards.length > 1 ? 's' : ''} added successfully!`, type: 'success' });
-                    setFront(''); 
-                    setBack('');
-                    setTimeout(() => setToast(null), 2000);
-                } catch (err) { 
-                    setToast({ message: 'Error saving card.', type: 'error' }); 
+                    
+                    await DatabaseService.createCard(note, cards);
+                    
+                    setToast({ 
+                        message: `Card${cards.length > 1 ? 's' : ''} created successfully!`, 
+                        type: 'success' 
+                    });
+                    
+                    setFrontText('');
+                    setBackText('');
+                    
+                    if (frontTextareaRef.current) {
+                        frontTextareaRef.current.focus();
+                    }
+                } catch (error) {
+                    console.error('Error creating card:', error);
+                    setToast({ message: 'Failed to create card', type: 'error' });
                 }
             };
-
-            return React.createElement(React.Fragment, null,
+            
+            return React.createElement(Fragment, null,
                 toast && React.createElement(Toast, {
                     message: toast.message,
                     type: toast.type,
                     onClose: () => setToast(null)
                 }),
-
-                React.createElement('div', { className: 'max-w-xl mx-auto space-y-5 animate-fade-in-up pb-10' },
-                    React.createElement('div', { className: 'flex items-center justify-between' },
-                        React.createElement('h2', { className: 'text-2xl font-bold text-gray-900 dark:text-white tracking-tight' }, 'Add Card'),
-                        loading && React.createElement(Spinner, { size: 'small' })
+                
+                React.createElement('div', { className: 'space-y-6 animate-fadeIn' },
+                    // Header
+                    React.createElement('div', { className: 'flex justify-between items-center' },
+                        React.createElement('h2', { className: 'text-2xl font-bold text-gray-900 dark:text-white' }, 'Add Card'),
+                        isLoading && React.createElement(LoadingSpinner, { size: 'small' })
                     ),
-                    React.createElement('form', {
+                    
+                    // Form
+                    React.createElement('form', { 
                         onSubmit: handleSubmit,
-                        className: 'bg-white dark:bg-ios.darkCard p-5 rounded-[22px] shadow-sm border border-gray-200/50 dark:border-gray-800 transition-colors'
+                        className: 'space-y-6'
                     },
+                        // Deck Selection
                         React.createElement('div', { className: 'space-y-2' },
-                            React.createElement('label', { className: 'text-[11px] font-bold text-gray-400 uppercase tracking-wide ml-1' }, 'Deck'),
-                            React.createElement('div', { className: 'relative' },
-                                React.createElement('select', {
-                                    value: selectedDeckId,
-                                    onChange: e => setSelectedDeckId(e.target.value),
-                                    className: 'w-full appearance-none bg-ios.bg dark:bg-[#2C2C2E] border-0 text-gray-900 dark:text-white text-[15px] rounded-xl focus:ring-2 focus:ring-ios.blue block p-3.5 pr-8 font-medium transition-colors'
-                                },
-                                    decks.length === 0 && React.createElement('option', { value: '' }, 'Create a deck first...'),
-                                    decks.map(d => React.createElement('option', { key: d.id, value: d.id }, d.name))
-                                ),
-                                React.createElement('div', { className: 'pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500' },
-                                    React.createElement('i', { className: 'fa-solid fa-chevron-down text-xs' })
+                            React.createElement('label', { 
+                                className: 'text-sm font-medium text-gray-700 dark:text-gray-300'
+                            }, 'Deck'),
+                            React.createElement('select', {
+                                value: selectedDeckId,
+                                onChange: (e) => setSelectedDeckId(e.target.value),
+                                disabled: decks.length === 0,
+                                className: 'w-full bg-white dark:bg-ios.darkCard border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-ios.blue disabled:opacity-50'
+                            },
+                                decks.length === 0 ? 
+                                React.createElement('option', { value: '' }, 'No decks available') :
+                                decks.map(deck => 
+                                    React.createElement('option', { key: deck.id, value: deck.id }, deck.name)
                                 )
                             )
                         ),
+                        
+                        // Card Type Selection
                         React.createElement('div', { className: 'space-y-2' },
-                            React.createElement('label', { className: 'text-[11px] font-bold text-gray-400 uppercase tracking-wide ml-1' }, 'Card Type'),
-                            React.createElement('div', { className: 'grid grid-cols-2 gap-2 bg-ios.bg dark:bg-[#2C2C2E] p-1 rounded-xl' },
+                            React.createElement('label', { 
+                                className: 'text-sm font-medium text-gray-700 dark:text-gray-300'
+                            }, 'Card Type'),
+                            React.createElement('div', { className: 'grid grid-cols-2 gap-2' },
                                 React.createElement('button', {
                                     type: 'button',
-                                    onClick: () => setType('basic'),
-                                    className: `py-2.5 text-[13px] font-semibold rounded-[10px] transition-all duration-200 ${type === 'basic' ? 'bg-white dark:bg-[#3A3A3C] text-black dark:text-white shadow-sm scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`
+                                    onClick: () => setCardType('basic'),
+                                    className: `py-3 rounded-lg font-medium transition-colors ${cardType === 'basic' ? 'bg-ios.blue text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`,
+                                    'aria-label': 'Basic card type'
                                 }, 'Basic'),
                                 React.createElement('button', {
                                     type: 'button',
-                                    onClick: () => setType('cloze'),
-                                    className: `py-2.5 text-[13px] font-semibold rounded-[10px] transition-all duration-200 ${type === 'cloze' ? 'bg-white dark:bg-[#3A3A3C] text-black dark:text-white shadow-sm scale-[1.02]' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`
+                                    onClick: () => setCardType('cloze'),
+                                    className: `py-3 rounded-lg font-medium transition-colors ${cardType === 'cloze' ? 'bg-ios.blue text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`,
+                                    'aria-label': 'Cloze card type'
                                 }, 'Cloze')
                             )
                         ),
-                        React.createElement('div', { className: 'space-y-2 relative' },
-                            React.createElement('div', { className: 'flex justify-between items-center ml-1' },
-                                React.createElement('label', { className: 'text-[11px] font-bold text-gray-400 uppercase tracking-wide' }, type === 'cloze' ? 'Text (Use {{c1::...}})' : 'Front'),
-                                type === 'cloze' && React.createElement('button', {
+                        
+                        // Front Text
+                        React.createElement('div', { className: 'space-y-2' },
+                            React.createElement('div', { className: 'flex justify-between items-center' },
+                                React.createElement('label', { 
+                                    className: 'text-sm font-medium text-gray-700 dark:text-gray-300'
+                                }, cardType === 'cloze' ? 'Text (with cloze deletions)' : 'Front'),
+                                cardType === 'cloze' && React.createElement('button', {
                                     type: 'button',
-                                    onClick: insertCloze,
-                                    className: 'text-[11px] bg-blue-50 dark:bg-blue-500/10 text-ios.blue dark:text-blue-400 px-2.5 py-1 rounded-md font-bold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors border border-blue-100 dark:border-blue-500/20'
+                                    onClick: insertClozeSyntax,
+                                    className: 'text-sm bg-blue-50 dark:bg-blue-900/30 text-ios.blue dark:text-blue-400 px-3 py-1.5 rounded-md font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors'
                                 },
-                                    React.createElement('i', { className: 'fa-solid fa-code mr-1' }),
+                                    React.createElement('i', { className: 'fas fa-code mr-1.5' }),
                                     'Insert Cloze'
                                 )
                             ),
                             React.createElement('textarea', {
-                                ref: frontInputRef,
-                                value: front,
-                                onChange: e => setFront(e.target.value),
-                                rows: 6,
-                                className: 'w-full bg-ios.bg dark:bg-[#2C2C2E] border-0 text-gray-900 dark:text-white text-[16px] leading-relaxed rounded-xl focus:ring-2 focus:ring-ios.blue block p-4 font-normal placeholder-gray-400 dark:placeholder-gray-600 resize-none transition-colors',
-                                placeholder: type === 'cloze' ? "The {{c1::capital}} of France is {{c2::Paris}}." : "Question or main text"
-                            })
+                                ref: frontTextareaRef,
+                                value: frontText,
+                                onChange: (e) => setFrontText(e.target.value),
+                                placeholder: cardType === 'cloze' ? 
+                                    'Example: The {{c1::capital}} of France is {{c2::Paris}}.' :
+                                    'Enter the question or front text...',
+                                rows: 4,
+                                className: 'w-full bg-white dark:bg-ios.darkCard border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-ios.blue resize-none'
+                            }),
+                            cardType === 'cloze' && frontText && React.createElement('p', { 
+                                className: 'text-xs text-gray-500 dark:text-gray-400'
+                            }, 
+                                `${getClozeIndices(frontText).length} cloze deletion${getClozeIndices(frontText).length !== 1 ? 's' : ''} found`
+                            )
                         ),
+                        
+                        // Back Text
                         React.createElement('div', { className: 'space-y-2' },
-                            React.createElement('label', { className: 'text-[11px] font-bold text-gray-400 uppercase tracking-wide ml-1' }, 'Back (Extra)'),
+                            React.createElement('label', { 
+                                className: 'text-sm font-medium text-gray-700 dark:text-gray-300'
+                            }, 'Back (Additional Info)'),
                             React.createElement('textarea', {
-                                value: back,
-                                onChange: e => setBack(e.target.value),
+                                value: backText,
+                                onChange: (e) => setBackText(e.target.value),
+                                placeholder: 'Enter the answer or additional information...',
                                 rows: 3,
-                                className: 'w-full bg-ios.bg dark:bg-[#2C2C2E] border-0 text-gray-900 dark:text-white text-[16px] leading-relaxed rounded-xl focus:ring-2 focus:ring-ios.blue block p-4 font-normal placeholder-gray-400 dark:placeholder-gray-600 resize-none transition-colors',
-                                placeholder: 'Extra info...'
+                                className: 'w-full bg-white dark:bg-ios.darkCard border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-ios.blue resize-none'
                             })
                         ),
+                        
+                        // Submit Button
                         React.createElement('button', {
                             type: 'submit',
-                            className: 'w-full bg-ios.blue hover:bg-[#0062cc] active:scale-[0.98] text-white font-semibold text-[15px] py-4 rounded-xl shadow-lg shadow-blue-500/25 transition-all duration-200 mt-2'
+                            disabled: decks.length === 0,
+                            className: 'w-full bg-ios.blue text-white py-3.5 rounded-lg font-medium hover:bg-blue-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed'
                         }, 'Add Card')
                     ),
-                    React.createElement('p', { className: 'text-center text-[10px] text-gray-400 dark:text-gray-600 px-4' },
-                        'Tip: In Cloze mode, type ',
-                        React.createElement('code', { className: 'bg-gray-100 dark:bg-gray-800 px-1 rounded' }, '{{c1::answer::hint}}'),
-                        ' for hints.'
+                    
+                    // Help Text
+                    cardType === 'cloze' && React.createElement('div', { 
+                        className: 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4'
+                    },
+                        React.createElement('h4', { 
+                            className: 'text-sm font-medium text-ios.blue dark:text-blue-400 mb-2'
+                        }, 'Cloze Deletion Help'),
+                        React.createElement('ul', { className: 'text-xs text-gray-600 dark:text-gray-400 space-y-1' },
+                            React.createElement('li', null, '• Use {{c1::answer}} to create a cloze deletion'),
+                            React.createElement('li', null, '• Use {{c1::answer::hint}} to add an optional hint'),
+                            React.createElement('li', null, '• Multiple cloze deletions will create multiple cards'),
+                            React.createElement('li', null, '• Number cloze deletions sequentially: c1, c2, c3...')
+                        )
                     )
                 )
             );
         };
-
+        
+        // Study Session Component
         const StudySession = ({ deckId, onExit }) => {
             const [cards, setCards] = useState([]);
-            const [currentIndex, setCurrentIndex] = useState(0);
-            const [isFlipped, setIsFlipped] = useState(false);
-            const [loading, setLoading] = useState(true);
+            const [currentCardIndex, setCurrentCardIndex] = useState(0);
+            const [isCardFlipped, setIsCardFlipped] = useState(false);
+            const [isLoading, setIsLoading] = useState(true);
             const [toast, setToast] = useState(null);
-
-            useEffect(() => {
-                let mounted = true;
-                const load = async () => {
-                    try {
-                        const due = await dbService.getDueCards(deckId);
-                        if (mounted) { 
-                            setCards(due); 
-                            setLoading(false); 
-                        }
-                    } catch (err) { 
-                        if (mounted) {
-                            setToast({ message: 'Failed to load cards', type: 'error' });
-                            setLoading(false); 
-                        }
+            const [currentDeckName, setCurrentDeckName] = useState('');
+            
+            const loadCards = async () => {
+                try {
+                    setIsLoading(true);
+                    const dueCards = await DatabaseService.getDueCards(deckId);
+                    setCards(dueCards);
+                    
+                    // Get deck name
+                    const decks = await DatabaseService.getAllDecks();
+                    const deck = decks.find(d => d.id === deckId);
+                    if (deck) {
+                        setCurrentDeckName(deck.name);
                     }
-                };
-                load();
-                return () => { mounted = false; };
-            }, [deckId]);
-
-            const currentCard = cards[currentIndex];
-
-            const handleRate = async (rating) => {
-                if (!currentCard) return;
-                setIsFlipped(false);
-                setTimeout(async () => {
-                    try {
-                        const { card: updatedCard, log } = scheduleCard(currentCard, rating);
-                        await dbService.updateCard(updatedCard, log);
-                        const newCards = cards.filter((_, idx) => idx !== currentIndex);
-                        setCards(newCards);
-                        if (newCards.length > 0) {
-                            setCurrentIndex(Math.min(currentIndex, newCards.length - 1));
-                        }
-                    } catch (error) {
-                        setToast({ message: 'Failed to update card', type: 'error' });
-                    }
-                }, 200);
+                } catch (error) {
+                    console.error('Error loading cards:', error);
+                    setToast({ message: 'Failed to load cards', type: 'error' });
+                } finally {
+                    setIsLoading(false);
+                }
             };
-
-            const handleClozeClick = (e) => {
+            
+            useEffect(() => {
+                loadCards();
+            }, [deckId]);
+            
+            const handleCardRate = async (rating) => {
+                if (cards.length === 0) return;
+                
+                const currentCard = cards[currentCardIndex];
+                
+                try {
+                    const { updatedCard, log } = scheduleCard(currentCard, rating);
+                    await DatabaseService.updateCard(updatedCard, log);
+                    
+                    // Remove the reviewed card
+                    const newCards = cards.filter((_, index) => index !== currentCardIndex);
+                    setCards(newCards);
+                    
+                    // Reset flip state
+                    setIsCardFlipped(false);
+                    
+                    // If there are no more cards, show completion message
+                    if (newCards.length === 0) {
+                        setToast({ message: 'All cards reviewed!', type: 'success' });
+                    } else {
+                        // Adjust index if needed
+                        if (currentCardIndex >= newCards.length) {
+                            setCurrentCardIndex(newCards.length - 1);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error updating card:', error);
+                    setToast({ message: 'Failed to update card', type: 'error' });
+                }
+            };
+            
+            const handleRevealCloze = (e) => {
                 if (e.target.classList.contains('cloze-hidden')) {
                     e.target.classList.remove('cloze-hidden');
                     e.target.classList.add('cloze-revealed');
-                    e.target.textContent = 'Revealed';
+                    e.target.textContent = e.target.getAttribute('data-answer') || 'Answer';
                 }
             };
-
-            if (loading) return React.createElement('div', {
-                className: 'h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500'
-            },
-                React.createElement(Spinner, { size: 'medium', className: 'mb-4' }),
-                React.createElement('span', { className: 'text-sm font-medium' }, 'Loading cards...')
-            );
             
-            if (!currentCard) return React.createElement('div', {
-                className: 'h-full flex flex-col items-center justify-center text-center p-6 space-y-6 animate-fade-in'
-            },
-                React.createElement('div', {
-                    className: 'w-24 h-24 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30'
-                },
-                    React.createElement('i', { className: 'fa-solid fa-check text-4xl text-white' })
-                ),
-                React.createElement('div', null,
-                    React.createElement('h2', { className: 'text-2xl font-bold text-gray-900 dark:text-white mb-2' }, 'You\'re all done!'),
-                    React.createElement('p', { className: 'text-gray-500 dark:text-gray-400 max-w-xs mx-auto' }, 'No more cards due for today.')
-                ),
-                React.createElement('button', {
-                    onClick: onExit,
-                    className: 'mt-8 bg-ios.blue active:bg-[#0056CC] text-white px-8 py-3.5 rounded-xl font-semibold shadow-lg shadow-blue-500/20 transition-all transform active:scale-95'
-                }, 'Back to Decks')
-            );
-
-            return React.createElement(React.Fragment, null,
+            if (isLoading) {
+                return React.createElement('div', { className: 'flex flex-col items-center justify-center h-full' },
+                    React.createElement(LoadingSpinner, { size: 'large' }),
+                    React.createElement('p', { className: 'text-gray-500 dark:text-gray-400 mt-4' }, 'Loading cards...')
+                );
+            }
+            
+            if (cards.length === 0) {
+                return React.createElement('div', { className: 'flex flex-col items-center justify-center h-full text-center p-6' },
+                    React.createElement('div', { className: 'w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4' },
+                        React.createElement('i', { className: 'fas fa-check text-3xl text-green-600 dark:text-green-400' })
+                    ),
+                    React.createElement('h3', { className: 'text-xl font-semibold text-gray-900 dark:text-white mb-2' }, 'All Done!'),
+                    React.createElement('p', { className: 'text-gray-500 dark:text-gray-400 mb-6' }, 'No more cards to review today.'),
+                    React.createElement('button', {
+                        onClick: onExit,
+                        className: 'bg-ios.blue text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 active:scale-95 transition-all'
+                    }, 'Back to Decks')
+                );
+            }
+            
+            const currentCard = cards[currentCardIndex];
+            
+            return React.createElement(Fragment, null,
                 toast && React.createElement(Toast, {
                     message: toast.message,
                     type: toast.type,
                     onClose: () => setToast(null)
                 }),
-
-                React.createElement('div', { className: 'h-full flex flex-col' },
-                    React.createElement('div', { className: 'flex justify-between items-center mb-4 px-1' },
+                
+                React.createElement('div', { className: 'flex flex-col h-full' },
+                    // Header
+                    React.createElement('div', { className: 'flex items-center justify-between mb-6' },
                         React.createElement('button', {
                             onClick: onExit,
-                            className: 'text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-300 flex items-center'
+                            className: 'flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors',
+                            'aria-label': 'Back to decks'
                         },
-                            React.createElement('i', { className: 'fa-solid fa-chevron-left mr-1' }),
-                            'Library'
+                            React.createElement('i', { className: 'fas fa-chevron-left mr-2' }),
+                            'Decks'
                         ),
-                        React.createElement('div', { className: 'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[10px] font-bold px-2 py-1 rounded-full' }, `${cards.length} REMAINING`)
+                        React.createElement('div', { className: 'text-center' },
+                            React.createElement('h2', { className: 'font-semibold text-gray-900 dark:text-white' }, currentDeckName),
+                            React.createElement('p', { className: 'text-sm text-gray-500 dark:text-gray-400' }, 
+                                `${cards.length} card${cards.length !== 1 ? 's' : ''} remaining`
+                            )
+                        ),
+                        React.createElement('div', { className: 'w-10' }) // Spacer for alignment
                     ),
+                    
+                    // Card
                     React.createElement('div', {
-                        className: `card-container flex-1 relative cursor-pointer mb-6 ${isFlipped ? 'card-flipped' : ''}`,
-                        onClick: () => !isFlipped && setIsFlipped(true)
+                        className: `card-container flex-1 mb-6 ${isCardFlipped ? 'card-flipped' : ''}`
                     },
                         React.createElement('div', {
-                            className: 'card-inner w-full h-full shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] rounded-[20px] bg-transparent'
+                            className: 'card-inner w-full h-full',
+                            onClick: () => !isCardFlipped && setIsCardFlipped(true)
                         },
+                            // Front of card
                             React.createElement('div', {
-                                className: 'card-front flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-ios.darkCard border border-gray-100 dark:border-gray-800 rounded-[20px]',
-                                onClick: handleClozeClick,
+                                className: 'card-front bg-white dark:bg-ios.darkCard rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8 flex flex-col items-center justify-center h-full',
+                                onClick: handleRevealCloze,
                                 dangerouslySetInnerHTML: { __html: currentCard.front }
                             }),
+                            
+                            // Back of card
                             React.createElement('div', {
-                                className: 'card-back flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-ios.darkCard border border-gray-100 dark:border-gray-800 rounded-[20px] overflow-y-auto',
-                                onClick: handleClozeClick,
+                                className: 'card-back bg-white dark:bg-ios.darkCard rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8 flex flex-col items-center justify-center h-full overflow-y-auto',
+                                onClick: handleRevealCloze,
                                 dangerouslySetInnerHTML: { __html: currentCard.back }
                             })
                         )
                     ),
-                    React.createElement('div', {
-                        className: `grid grid-cols-4 gap-3 transition-all duration-300 ${isFlipped ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`
+                    
+                    // Rating Buttons (only shown when card is flipped)
+                    isCardFlipped && React.createElement('div', { 
+                        className: 'grid grid-cols-4 gap-3 animate-fadeIn'
                     },
-                        React.createElement('button', {
-                            onClick: (e) => { e.stopPropagation(); handleRate(1); },
-                            className: 'group flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-ios.darkCard border border-gray-200 dark:border-gray-800 active:bg-gray-50 dark:active:bg-[#2C2C2E] shadow-sm transition-all'
-                        },
-                            React.createElement('span', { className: 'text-[15px] font-semibold text-ios.red mb-1' }, 'Again'),
-                            React.createElement('span', { className: 'text-[10px] text-gray-400 dark:text-gray-500 font-medium group-active:text-gray-600' }, '1m')
-                        ),
-                        React.createElement('button', {
-                            onClick: (e) => { e.stopPropagation(); handleRate(2); },
-                            className: 'group flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-ios.darkCard border border-gray-200 dark:border-gray-800 active:bg-gray-50 dark:active:bg-[#2C2C2E] shadow-sm transition-all'
-                        },
-                            React.createElement('span', { className: 'text-[15px] font-semibold text-ios.yellow mb-1' }, 'Hard'),
-                            React.createElement('span', { className: 'text-[10px] text-gray-400 dark:text-gray-500 font-medium group-active:text-gray-600' }, '10m')
-                        ),
-                        React.createElement('button', {
-                            onClick: (e) => { e.stopPropagation(); handleRate(3); },
-                            className: 'group flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-ios.darkCard border border-gray-200 dark:border-gray-800 active:bg-gray-50 dark:active:bg-[#2C2C2E] shadow-sm transition-all'
-                        },
-                            React.createElement('span', { className: 'text-[15px] font-semibold text-ios.green mb-1' }, 'Good'),
-                            React.createElement('span', { className: 'text-[10px] text-gray-400 dark:text-gray-500 font-medium group-active:text-gray-600' }, '1d')
-                        ),
-                        React.createElement('button', {
-                            onClick: (e) => { e.stopPropagation(); handleRate(4); },
-                            className: 'group flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-ios.darkCard border border-gray-200 dark:border-gray-800 active:bg-gray-50 dark:active:bg-[#2C2C2E] shadow-sm transition-all'
-                        },
-                            React.createElement('span', { className: 'text-[15px] font-semibold text-ios.blue mb-1' }, 'Easy'),
-                            React.createElement('span', { className: 'text-[10px] text-gray-400 dark:text-gray-500 font-medium group-active:text-gray-600' }, '4d')
+                        [
+                            { rating: 1, label: 'Again', color: 'red', time: '1m' },
+                            { rating: 2, label: 'Hard', color: 'yellow', time: '10m' },
+                            { rating: 3, label: 'Good', color: 'green', time: '1d' },
+                            { rating: 4, label: 'Easy', color: 'blue', time: '4d' }
+                        ].map(({ rating, label, color, time }) => 
+                            React.createElement('button', {
+                                key: rating,
+                                onClick: () => handleCardRate(rating),
+                                className: `bg-white dark:bg-ios.darkCard border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex flex-col items-center hover:bg-gray-50 dark:hover:bg-gray-900 active:scale-95 transition-all`
+                            },
+                                React.createElement('span', { 
+                                    className: `text-sm font-semibold text-ios.${color} mb-1`
+                                }, label),
+                                React.createElement('span', { 
+                                    className: 'text-xs text-gray-500 dark:text-gray-400'
+                                }, time)
+                            )
                         )
-                    )
+                    ),
+                    
+                    // Flip Hint (only shown when card is not flipped)
+                    !isCardFlipped && React.createElement('p', {
+                        className: 'text-center text-sm text-gray-500 dark:text-gray-400 animate-fadeIn'
+                    }, 'Tap card to reveal answer')
                 )
             );
         };
-
+        
+        // Stats Component
         const Stats = () => {
             const [stats, setStats] = useState({
                 totalCards: 0,
+                totalDecks: 0,
                 reviewsToday: 0,
+                totalReviews: 0,
                 retentionRate: 0
             });
-            const [loading, setLoading] = useState(true);
-
+            const [isLoading, setIsLoading] = useState(true);
+            
+            const loadStats = async () => {
+                try {
+                    setIsLoading(true);
+                    const statsData = await DatabaseService.getStats();
+                    setStats(statsData);
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            
             useEffect(() => {
                 loadStats();
             }, []);
-
-            const loadStats = async () => {
-                try {
-                    setLoading(true);
-                    const statsData = await dbService.getStats();
-                    setStats(statsData);
-                } catch (error) {
-                    console.error('Failed to load stats:', error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            return React.createElement('div', { className: 'space-y-6 animate-fade-in-up' },
-                React.createElement('h2', { className: 'text-2xl font-bold text-gray-900 dark:text-white tracking-tight text-center' }, 'Statistics'),
-                loading ? React.createElement('div', { className: 'text-center py-10' },
-                    React.createElement(Spinner, { size: 'medium' })
-                ) : React.createElement(React.Fragment, null,
+            
+            const statCards = [
+                { label: 'Total Cards', value: stats.totalCards, icon: 'fa-layer-group', color: 'blue' },
+                { label: 'Total Decks', value: stats.totalDecks, icon: 'fa-folder', color: 'green' },
+                { label: 'Reviews Today', value: stats.reviewsToday, icon: 'fa-check-circle', color: 'yellow' },
+                { label: 'Retention Rate', value: `${stats.retentionRate}%`, icon: 'fa-brain', color: 'purple' }
+            ];
+            
+            return React.createElement('div', { className: 'space-y-6 animate-fadeIn' },
+                // Header
+                React.createElement('div', null,
+                    React.createElement('h2', { className: 'text-2xl font-bold text-gray-900 dark:text-white' }, 'Statistics'),
+                    React.createElement('p', { className: 'text-gray-500 dark:text-gray-400 mt-1' }, 'Track your learning progress')
+                ),
+                
+                // Loading State
+                isLoading ? React.createElement('div', { className: 'flex justify-center py-12' },
+                    React.createElement(LoadingSpinner, { size: 'large' })
+                ) :
+                
+                React.createElement(Fragment, null,
+                    // Stats Grid
                     React.createElement('div', { className: 'grid grid-cols-2 gap-4' },
-                        React.createElement('div', { className: 'bg-white dark:bg-ios.darkCard p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col items-center transition-colors' },
-                            React.createElement('span', { className: 'text-4xl font-bold text-ios.blue mb-2' }, stats.totalCards),
-                            React.createElement('span', { className: 'text-xs text-gray-400 uppercase font-semibold' }, 'Total Cards')
-                        ),
-                        React.createElement('div', { className: 'bg-white dark:bg-ios.darkCard p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col items-center transition-colors' },
-                            React.createElement('span', { className: 'text-4xl font-bold text-ios.green mb-2' }, `${stats.retentionRate}%`),
-                            React.createElement('span', { className: 'text-xs text-gray-400 uppercase font-semibold' }, 'Retention Rate')
+                        statCards.map((stat, index) => 
+                            React.createElement('div', {
+                                key: index,
+                                className: 'bg-white dark:bg-ios.darkCard rounded-xl p-6 border border-gray-200 dark:border-gray-800'
+                            },
+                                React.createElement('div', { className: 'flex items-center justify-between mb-4' },
+                                    React.createElement('div', { 
+                                        className: `w-10 h-10 bg-${stat.color}-50 dark:bg-${stat.color}-900/30 rounded-lg flex items-center justify-center`
+                                    },
+                                        React.createElement('i', { 
+                                            className: `fas ${stat.icon} text-lg text-ios.${stat.color}`
+                                        })
+                                    )
+                                ),
+                                React.createElement('div', { className: 'text-3xl font-bold text-gray-900 dark:text-white mb-1' }, 
+                                    stat.value
+                                ),
+                                React.createElement('p', { className: 'text-sm text-gray-500 dark:text-gray-400' }, 
+                                    stat.label
+                                )
+                            )
                         )
                     ),
-                    React.createElement('div', { className: 'bg-white dark:bg-ios.darkCard p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col items-center transition-colors' },
-                        React.createElement('span', { className: 'text-4xl font-bold text-ios.yellow mb-2' }, stats.reviewsToday),
-                        React.createElement('span', { className: 'text-xs text-gray-400 uppercase font-semibold' }, 'Reviews Today')
+                    
+                    // Study Activity
+                    React.createElement('div', { className: 'bg-white dark:bg-ios.darkCard rounded-xl p-6 border border-gray-200 dark:border-gray-800' },
+                        React.createElement('h3', { className: 'text-lg font-semibold text-gray-900 dark:text-white mb-4' }, 'Study Activity'),
+                        React.createElement('div', { className: 'space-y-4' },
+                            React.createElement('div', { className: 'flex items-center justify-between' },
+                                React.createElement('span', { className: 'text-gray-600 dark:text-gray-400' }, 'Total Reviews'),
+                                React.createElement('span', { className: 'font-medium text-gray-900 dark:text-white' }, stats.totalReviews)
+                            ),
+                            React.createElement('div', { className: 'flex items-center justify-between' },
+                                React.createElement('span', { className: 'text-gray-600 dark:text-gray-400' }, 'Average Retention'),
+                                React.createElement('span', { className: 'font-medium text-gray-900 dark:text-white' }, `${stats.retentionRate}%`)
+                            )
+                        )
                     ),
-                    React.createElement('div', { className: 'bg-white dark:bg-ios.darkCard p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 text-center transition-colors' },
-                        React.createElement('div', { className: 'text-gray-300 dark:text-gray-600 mb-4' },
-                            React.createElement('i', { className: 'fa-solid fa-chart-line text-5xl' })
-                        ),
-                        React.createElement('h3', { className: 'text-gray-900 dark:text-white font-medium mb-1' }, 'Study Streak: 0 days'),
-                        React.createElement('p', { className: 'text-sm text-gray-500 dark:text-gray-400' }, 'Study every day to build your streak!')
+                    
+                    // Study Tips
+                    React.createElement('div', { 
+                        className: 'bg-gradient-to-r from-ios.blue to-blue-600 rounded-xl p-6 text-white'
+                    },
+                        React.createElement('div', { className: 'flex items-start gap-4' },
+                            React.createElement('div', { className: 'w-10 h-10 bg-white/20 rounded-full flex items-center justify-center' },
+                                React.createElement('i', { className: 'fas fa-lightbulb text-lg' })
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('h3', { className: 'text-lg font-semibold mb-2' }, 'Study Tip'),
+                                React.createElement('p', { className: 'text-sm opacity-90' }, 
+                                    'For best results, review your cards every day. Consistency is key to long-term retention!'
+                                )
+                            )
+                        )
                     )
                 )
             );
         };
-
+        
+        // Main App Component
         const App = () => {
             const [activeTab, setActiveTab] = useState('decks');
             const [selectedDeckId, setSelectedDeckId] = useState(null);
             const [isDarkMode, setIsDarkMode] = useState(() => {
-                if (typeof window !== 'undefined' && window.localStorage) {
-                    const s = localStorage.getItem('anki-theme');
-                    if (s) return s === 'dark';
+                if (typeof window !== 'undefined') {
+                    const saved = localStorage.getItem('anki-theme');
+                    if (saved) return saved === 'dark';
+                    return window.matchMedia('(prefers-color-scheme: dark)').matches;
                 }
-                return window.matchMedia('(prefers-color-scheme: dark)').matches;
+                return false;
             });
-
+            
+            // Apply dark mode class to html element
             useEffect(() => {
-                localStorage.setItem('anki-theme', isDarkMode ? 'dark' : 'light');
                 if (isDarkMode) {
                     document.documentElement.classList.add('dark');
                 } else {
                     document.documentElement.classList.remove('dark');
                 }
+                localStorage.setItem('anki-theme', isDarkMode ? 'dark' : 'light');
             }, [isDarkMode]);
-
+            
+            const toggleDarkMode = () => {
+                setIsDarkMode(!isDarkMode);
+            };
+            
             const renderContent = () => {
-                if (selectedDeckId) return React.createElement(StudySession, {
-                    deckId: selectedDeckId,
-                    onExit: () => setSelectedDeckId(null)
-                });
+                if (selectedDeckId) {
+                    return React.createElement(StudySession, {
+                        deckId: selectedDeckId,
+                        onExit: () => setSelectedDeckId(null)
+                    });
+                }
+                
                 switch (activeTab) {
-                    case 'decks': return React.createElement(DeckList, { onSelectDeck: setSelectedDeckId });
-                    case 'add': return React.createElement(AddCardForm);
-                    case 'stats': return React.createElement(Stats);
-                    default: return React.createElement(DeckList, { onSelectDeck: setSelectedDeckId });
+                    case 'decks':
+                        return React.createElement(DeckList, {
+                            onSelectDeck: setSelectedDeckId
+                        });
+                    case 'add':
+                        return React.createElement(AddCardForm);
+                    case 'stats':
+                        return React.createElement(Stats);
+                    default:
+                        return React.createElement(DeckList, {
+                            onSelectDeck: setSelectedDeckId
+                        });
                 }
             };
-
-            return React.createElement('div', { className: isDarkMode ? 'dark' : '' },
-                React.createElement(Layout, {
-                    activeTab: selectedDeckId ? 'decks' : activeTab,
-                    onTabChange: (tab) => { 
-                        setSelectedDeckId(null); 
-                        setActiveTab(tab); 
-                    },
-                    isDarkMode: isDarkMode,
-                    toggleTheme: () => setIsDarkMode(!isDarkMode)
-                }, renderContent())
-            );
+            
+            return React.createElement(Layout, {
+                activeTab: selectedDeckId ? 'decks' : activeTab,
+                onTabChange: (tab) => {
+                    if (selectedDeckId && tab !== 'decks') {
+                        setSelectedDeckId(null);
+                    }
+                    setActiveTab(tab);
+                },
+                isDarkMode: isDarkMode,
+                toggleTheme: toggleDarkMode
+            }, renderContent());
         };
-
-        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+        
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
     </script>
 </body>
 </html>
