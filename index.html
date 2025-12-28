@@ -2,21 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anki macOS - Made by ©️Muhammad Daler</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Anki macOS Pro</title>
     
-    <!-- React & ReactDOM -->
+    <!-- PWA Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+
+    <!-- Libraries -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <script>
         tailwind.config = {
-            darkMode: 'class',
+            darkMode: 'media',
             theme: {
                 extend: {
                     colors: {
@@ -24,1524 +29,685 @@
                             blue: '#007AFF',
                             green: '#34C759',
                             red: '#FF3B30',
-                            yellow: '#FF9500',
+                            orange: '#FF9500',
+                            yellow: '#FFCC00',
                             gray: '#8E8E93',
+                            gray2: '#AEAEB2',
                             bg: '#F2F2F7',
                             darkBg: '#000000',
                             card: '#FFFFFF',
-                            darkCard: '#1C1C1E'
+                            darkCard: '#1C1C1E',
+                            separator: '#C6C6C8',
+                            darkSeparator: '#38383A'
                         }
                     },
+                    boxShadow: {
+                        'native': '0 4px 12px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+                        'float': '0 8px 24px rgba(0,0,0,0.12)'
+                    },
                     fontFamily: {
-                        'sf': ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'Helvetica Neue', 'sans-serif']
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'Helvetica Neue', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- DOMPurify for security -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
-    
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
+        /* Global Reset & Typography */
         body {
-            background-color: #F2F2F7;
-            color: #000000;
-            overflow-x: hidden;
-            transition: background-color 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            overscroll-behavior-y: none; /* Pull-to-refreshni o'chiradi */
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            user-select: none; /* App kabi ishlashi uchun */
         }
         
-        html.dark body {
-            background-color: #000000;
-            color: #FFFFFF;
+        input, textarea {
+            user-select: text; /* Yozish uchun ruxsat */
         }
-        
-        /* Hide scrollbar but keep functionality */
-        ::-webkit-scrollbar {
-            width: 0;
-            height: 0;
-            background: transparent;
-        }
-        
-        /* iOS Safe Areas */
-        .safe-bottom {
-            padding-bottom: env(safe-area-inset-bottom, 20px);
-        }
-        
-        /* Card Flip Animation */
+
+        /* 3D Flip Animation */
         .card-container {
-            perspective: 1000px;
+            perspective: 1200px;
         }
-        
         .card-inner {
             position: relative;
             width: 100%;
             height: 100%;
-            transition: transform 0.6s;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
             transform-style: preserve-3d;
         }
-        
-        .card-flipped .card-inner {
+        .card-flipped {
             transform: rotateY(180deg);
         }
-        
-        .card-front, .card-back {
+        .card-face {
             position: absolute;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
+            overflow-y: auto;
         }
-        
         .card-back {
             transform: rotateY(180deg);
         }
-        
-        /* Cloze Styles */
+
+        /* Cloze Styles - Enhanced */
         .cloze-hidden {
-            color: #007AFF;
-            background: rgba(0, 122, 255, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
+            color: transparent;
+            background: #007AFF;
+            border-radius: 6px;
+            padding: 2px 8px;
             font-weight: 600;
             cursor: pointer;
-            border: 1px dashed rgba(0, 122, 255, 0.3);
+            position: relative;
+            display: inline-block;
+            min-width: 30px;
+        }
+        .cloze-hidden::after {
+            content: '...';
+            color: white;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.9em;
         }
         
         .dark .cloze-hidden {
-            color: #5AC8FA;
-            background: rgba(90, 200, 250, 0.2);
-            border-color: rgba(90, 200, 250, 0.4);
+            background: #0A84FF;
         }
-        
+
         .cloze-revealed {
             color: #34C759;
-            background: rgba(52, 199, 89, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 600;
-            text-decoration: underline;
-        }
-        
-        .dark .cloze-revealed {
-            color: #30D158;
-            background: rgba(48, 209, 88, 0.2);
+            font-weight: 700;
+            border-bottom: 2px solid rgba(52, 199, 89, 0.3);
+            padding: 0 2px;
         }
         
         /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
         @keyframes slideUp {
             from { transform: translateY(20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-        
-        @keyframes scaleIn {
-            from { transform: scale(0.95); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        
-        .animate-fadeIn {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        .animate-slideUp {
-            animation: slideUp 0.3s ease-out;
-        }
-        
-        .animate-scaleIn {
-            animation: scaleIn 0.2s ease-out;
-        }
-        
-        /* Loading Spinner */
-        .spinner {
-            border: 3px solid rgba(0, 122, 255, 0.1);
-            border-top: 3px solid #007AFF;
+        .animate-enter { animation: slideUp 0.3s ease-out; }
+
+        /* Loader */
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(128,128,128,0.2);
+            border-top-color: #007AFF;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Selection */
-        ::selection {
-            background-color: rgba(0, 122, 255, 0.2);
-        }
-        
-        .dark ::selection {
-            background-color: rgba(90, 200, 250, 0.3);
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        ::-webkit-scrollbar { width: 0; height: 0; }
     </style>
 </head>
-<body class="antialiased">
-    <div id="root"></div>
+<body class="bg-ios-bg dark:bg-black text-black dark:text-white transition-colors duration-300">
+    <div id="root" class="h-screen w-full flex flex-col overflow-hidden"></div>
 
     <script type="text/babel">
-        // ============================================
-        // CONSTANTS & UTILITIES
-        // ============================================
-        const { useState, useEffect, useRef, Fragment } = React;
+        const { useState, useEffect, useRef, useMemo, useCallback, Fragment } = React;
+
+        // ==========================================
+        // 1. HELPERS & ID GENERATOR
+        // ==========================================
         
-        // Security utility for sanitizing HTML
-        const sanitizeHTML = (html) => {
-            if (typeof html !== 'string') return '';
+        // Robust ID generator (No crypto dependency)
+        const generateId = () => {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        };
+
+        const sanitize = (text) => {
+            // Convert newlines to <br> first
+            const html = text.replace(/\n/g, '<br>');
             return DOMPurify.sanitize(html, {
-                ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'br', 'div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-                ALLOWED_ATTR: ['class', 'style', 'title']
+                ALLOWED_TAGS: ['b', 'i', 'u', 'strong', 'em', 'br', 'div', 'span', 'p', 'ul', 'li', 'code'],
+                ALLOWED_ATTR: ['class', 'style']
             });
         };
-        
-        // Get cloze indices from text
-        const getClozeIndices = (text) => {
-            if (!text) return [];
-            const regex = /{{c(\d+)::(.*?)}}/gs;
-            const indices = new Set();
-            let match;
+
+        // ==========================================
+        // 2. DATABASE (IndexedDB Singleton)
+        // ==========================================
+        const db = {
+            name: 'AnkiPro_Final',
+            version: 1,
             
-            while ((match = regex.exec(text)) !== null) {
-                const num = parseInt(match[1], 10);
-                if (!isNaN(num) && num > 0) {
-                    indices.add(num);
-                }
-            }
+            async connect() {
+                return new Promise((resolve, reject) => {
+                    const req = indexedDB.open(this.name, this.version);
+                    req.onupgradeneeded = (e) => {
+                        const d = e.target.result;
+                        if (!d.objectStoreNames.contains('decks')) d.createObjectStore('decks', { keyPath: 'id' });
+                        if (!d.objectStoreNames.contains('cards')) {
+                            const s = d.createObjectStore('cards', { keyPath: 'id' });
+                            s.createIndex('deckId', 'deckId', { unique: false });
+                        }
+                    };
+                    req.onsuccess = (e) => resolve(e.target.result);
+                    req.onerror = (e) => reject(e);
+                });
+            },
+
+            async getDecks() {
+                const conn = await this.connect();
+                return new Promise(resolve => {
+                    conn.transaction('decks', 'readonly').objectStore('decks').getAll().onsuccess = (e) => resolve(e.target.result || []);
+                });
+            },
+
+            async addDeck(name) {
+                const conn = await this.connect();
+                const deck = { id: generateId(), name, created: Date.now() };
+                return new Promise(resolve => {
+                    const tx = conn.transaction('decks', 'readwrite');
+                    tx.objectStore('decks').add(deck);
+                    tx.oncomplete = () => resolve(deck);
+                });
+            },
+
+            async deleteDeck(id) {
+                const conn = await this.connect();
+                return new Promise(resolve => {
+                    const tx = conn.transaction(['decks', 'cards'], 'readwrite');
+                    tx.objectStore('decks').delete(id);
+                    const index = tx.objectStore('cards').index('deckId');
+                    index.openCursor(IDBKeyRange.only(id)).onsuccess = (e) => {
+                        const cursor = e.target.result;
+                        if (cursor) { cursor.delete(); cursor.continue(); }
+                    };
+                    tx.oncomplete = () => resolve();
+                });
+            },
+
+            async addCard(card) {
+                const conn = await this.connect();
+                return new Promise(resolve => {
+                    const tx = conn.transaction('cards', 'readwrite');
+                    tx.objectStore('cards').add(card);
+                    tx.oncomplete = () => resolve();
+                });
+            },
+
+            async getDueCards(deckId) {
+                const conn = await this.connect();
+                return new Promise(resolve => {
+                    const tx = conn.transaction('cards', 'readonly');
+                    const index = tx.objectStore('cards').index('deckId');
+                    index.getAll(deckId).onsuccess = (e) => {
+                        const all = e.target.result || [];
+                        const now = Date.now();
+                        // Sort: Due date first
+                        const due = all.filter(c => c.due <= now).sort((a, b) => a.due - b.due);
+                        resolve(due);
+                    };
+                });
+            },
+
+            async updateCard(card) {
+                const conn = await this.connect();
+                return new Promise(resolve => {
+                    conn.transaction('cards', 'readwrite').objectStore('cards').put(card).onsuccess = () => resolve();
+                });
+            },
             
-            return Array.from(indices).sort((a, b) => a - b);
-        };
-        
-        // Generate cloze content
-        const generateClozeContent = (text, clozeNumber, isFront = true) => {
-            if (!text) return '';
-            
-            const regex = /{{c(\d+)::(.*?)}}/gs;
-            let processedText = text;
-            let match;
-            const matches = [];
-            
-            // Collect all matches
-            while ((match = regex.exec(text)) !== null) {
-                matches.push({
-                    full: match[0],
-                    number: parseInt(match[1]),
-                    content: match[2],
-                    index: match.index
+            async getStats() {
+                const conn = await this.connect();
+                return new Promise(async resolve => {
+                    const dCount = await new Promise(r => conn.transaction('decks').objectStore('decks').count().onsuccess = e => r(e.target.result));
+                    const cCount = await new Promise(r => conn.transaction('cards').objectStore('cards').count().onsuccess = e => r(e.target.result));
+                    resolve({ decks: dCount, cards: cCount });
                 });
             }
-            
-            // Process matches in reverse to maintain correct indices
-            matches.reverse().forEach((matchInfo) => {
-                const { full, number, content, index } = matchInfo;
-                
-                // Split content into answer and hint if exists
-                let answer = content;
-                let hint = '';
-                const hintIndex = content.indexOf('::');
-                
-                if (hintIndex !== -1) {
-                    answer = content.substring(0, hintIndex);
-                    hint = content.substring(hintIndex + 2);
-                }
-                
-                let replacement = '';
-                
-                if (number === clozeNumber) {
-                    if (isFront) {
-                        // Show cloze placeholder on front
-                        replacement = hint ? 
-                            `<span class="cloze-hidden" title="Click to reveal">[${hint}]</span>` :
-                            `<span class="cloze-hidden" title="Click to reveal">[...]</span>`;
-                    } else {
-                        // Show answer on back
-                        replacement = `<span class="cloze-revealed">${answer}</span>`;
+        };
+
+        // ==========================================
+        // 3. ADVANCED ALGORITHM (SM-2 ENHANCED)
+        // ==========================================
+        const scheduler = (card, rating) => {
+            // Rating: 1=Again, 2=Hard, 3=Good, 4=Easy
+            let { interval, ease, reps, phase } = card;
+            const now = Date.now();
+            const min = 60 * 1000;
+            const day = 24 * 60 * 60 * 1000;
+
+            // Phase: 'learning' | 'review'
+            // Learning Steps: 1min -> 10min -> Graduated (1 day)
+
+            let nextDue;
+
+            if (rating === 1) { // AGAIN (Forgot)
+                phase = 'learning';
+                interval = 0; // 1 min step
+                reps = 0;
+                ease = Math.max(130, ease - 20);
+                nextDue = now + min; // Due in 1 min
+            } else {
+                if (phase === 'learning') {
+                    if (rating === 2) { // Hard (Stay in learning 10min)
+                        nextDue = now + (10 * min);
+                    } else if (rating === 3) { // Good (Graduate to 1 day)
+                        phase = 'review';
+                        interval = 1;
+                        nextDue = now + day;
+                    } else if (rating === 4) { // Easy (Graduate to 4 days)
+                        phase = 'review';
+                        interval = 4;
+                        ease += 15;
+                        nextDue = now + (4 * day);
                     }
                 } else {
-                    // For other cloze numbers, show the answer
-                    replacement = answer;
-                }
-                
-                processedText = processedText.substring(0, index) + 
-                               replacement + 
-                               processedText.substring(index + full.length);
-            });
-            
-            // Replace newlines with <br>
-            processedText = processedText.replace(/\n/g, '<br>');
-            
-            return sanitizeHTML(processedText);
-        };
-        
-        // Scheduler algorithm for spaced repetition
-        const scheduleCard = (card, rating) => {
-            const now = Date.now();
-            const updatedCard = { ...card };
-            
-            // Rating: 1=Again, 2=Hard, 3=Good, 4=Easy
-            if (updatedCard.queue === 'new' || updatedCard.queue === 'learning') {
-                // Card is new or in learning phase
-                switch(rating) {
-                    case 1: // Again
-                        updatedCard.queue = 'learning';
-                        updatedCard.interval = 1 * 60 * 1000; // 1 minute
-                        updatedCard.due = now + updatedCard.interval;
-                        break;
-                    case 2: // Hard
-                        updatedCard.queue = 'learning';
-                        updatedCard.interval = 10 * 60 * 1000; // 10 minutes
-                        updatedCard.due = now + updatedCard.interval;
-                        break;
-                    case 3: // Good
-                        updatedCard.queue = 'review';
-                        updatedCard.interval = 24 * 60 * 60 * 1000; // 1 day
-                        updatedCard.ease = 2.5;
-                        updatedCard.due = now + updatedCard.interval;
-                        break;
-                    case 4: // Easy
-                        updatedCard.queue = 'review';
-                        updatedCard.interval = 4 * 24 * 60 * 60 * 1000; // 4 days
-                        updatedCard.ease = 2.5;
-                        updatedCard.due = now + updatedCard.interval;
-                        break;
-                }
-            } else {
-                // Card is in review phase
-                switch(rating) {
-                    case 1: // Again (lapse)
-                        updatedCard.queue = 'learning';
-                        updatedCard.interval = 1 * 60 * 1000; // 1 minute
-                        updatedCard.due = now + updatedCard.interval;
-                        updatedCard.ease = Math.max(1.3, updatedCard.ease - 0.2);
-                        updatedCard.lapses += 1;
-                        break;
-                    case 2: // Hard
-                        updatedCard.ease = Math.max(1.3, updatedCard.ease - 0.15);
-                        updatedCard.interval = updatedCard.interval * 1.2;
-                        updatedCard.due = now + (updatedCard.interval * 24 * 60 * 60 * 1000);
-                        break;
-                    case 3: // Good
-                        updatedCard.interval = updatedCard.interval * updatedCard.ease;
-                        updatedCard.due = now + (updatedCard.interval * 24 * 60 * 60 * 1000);
-                        break;
-                    case 4: // Easy
-                        updatedCard.ease = updatedCard.ease + 0.15;
-                        updatedCard.interval = updatedCard.interval * updatedCard.ease * 1.3;
-                        updatedCard.due = now + (updatedCard.interval * 24 * 60 * 60 * 1000);
-                        break;
-                }
-            }
-            
-            updatedCard.reps += 1;
-            updatedCard.lastReview = now;
-            
-            // Create review log
-            const log = {
-                id: crypto.randomUUID(),
-                cardId: updatedCard.id,
-                rating: rating,
-                time: now,
-                previousInterval: card.interval,
-                newInterval: updatedCard.interval,
-                ease: updatedCard.ease
-            };
-            
-            return { updatedCard, log };
-        };
-        
-        // ============================================
-        // DATABASE SERVICE
-        // ============================================
-        const DatabaseService = {
-            DB_NAME: 'AnkiMacOS',
-            DB_VERSION: 3,
-            
-            async openDatabase() {
-                return new Promise((resolve, reject) => {
-                    const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
-                    
-                    request.onerror = () => reject(request.error);
-                    request.onsuccess = () => resolve(request.result);
-                    
-                    request.onupgradeneeded = (event) => {
-                        const db = event.target.result;
-                        
-                        // Create decks store
-                        if (!db.objectStoreNames.contains('decks')) {
-                            const decksStore = db.createObjectStore('decks', { keyPath: 'id' });
-                            decksStore.createIndex('created', 'created', { unique: false });
-                        }
-                        
-                        // Create notes store
-                        if (!db.objectStoreNames.contains('notes')) {
-                            const notesStore = db.createObjectStore('notes', { keyPath: 'id' });
-                            notesStore.createIndex('deckId', 'deckId', { unique: false });
-                        }
-                        
-                        // Create cards store
-                        if (!db.objectStoreNames.contains('cards')) {
-                            const cardsStore = db.createObjectStore('cards', { keyPath: 'id' });
-                            cardsStore.createIndex('deckId', 'deckId', { unique: false });
-                            cardsStore.createIndex('due', 'due', { unique: false });
-                            cardsStore.createIndex('queue', 'queue', { unique: false });
-                        }
-                        
-                        // Create logs store
-                        if (!db.objectStoreNames.contains('logs')) {
-                            const logsStore = db.createObjectStore('logs', { keyPath: 'id' });
-                            logsStore.createIndex('cardId', 'cardId', { unique: false });
-                            logsStore.createIndex('time', 'time', { unique: false });
-                        }
-                    };
-                });
-            },
-            
-            async withTransaction(stores, mode, operation) {
-                const db = await this.openDatabase();
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(stores, mode);
-                    const result = operation(tx);
-                    
-                    tx.oncomplete = () => resolve(result);
-                    tx.onerror = () => reject(tx.error);
-                });
-            },
-            
-            // Deck operations
-            async getAllDecks() {
-                return this.withTransaction(['decks'], 'readonly', (tx) => {
-                    return new Promise((resolve) => {
-                        const store = tx.objectStore('decks');
-                        const request = store.getAll();
-                        request.onsuccess = () => resolve(request.result || []);
-                    });
-                });
-            },
-            
-            async createDeck(name) {
-                const deck = {
-                    id: crypto.randomUUID(),
-                    name: name.trim(),
-                    created: Date.now(),
-                    modified: Date.now(),
-                    cardCount: 0
-                };
-                
-                await this.withTransaction(['decks'], 'readwrite', (tx) => {
-                    tx.objectStore('decks').add(deck);
-                });
-                
-                return deck;
-            },
-            
-            async deleteDeck(deckId) {
-                // Delete deck and all associated cards and notes
-                const db = await this.openDatabase();
-                
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(['decks', 'cards', 'notes'], 'readwrite');
-                    
-                    // Delete deck
-                    tx.objectStore('decks').delete(deckId);
-                    
-                    // Delete cards
-                    const cardsStore = tx.objectStore('cards');
-                    const cardsIndex = cardsStore.index('deckId');
-                    const cardsRequest = cardsIndex.openKeyCursor(IDBKeyRange.only(deckId));
-                    
-                    cardsRequest.onsuccess = (event) => {
-                        const cursor = event.target.result;
-                        if (cursor) {
-                            cardsStore.delete(cursor.primaryKey);
-                            cursor.continue();
-                        }
-                    };
-                    
-                    // Delete notes
-                    const notesStore = tx.objectStore('notes');
-                    const notesIndex = notesStore.index('deckId');
-                    const notesRequest = notesIndex.openKeyCursor(IDBKeyRange.only(deckId));
-                    
-                    notesRequest.onsuccess = (event) => {
-                        const cursor = event.target.result;
-                        if (cursor) {
-                            notesStore.delete(cursor.primaryKey);
-                            cursor.continue();
-                        }
-                    };
-                    
-                    tx.oncomplete = () => resolve();
-                    tx.onerror = () => reject(tx.error);
-                });
-            },
-            
-            // Card operations
-            async createCard(note, cards) {
-                return this.withTransaction(['notes', 'cards', 'decks'], 'readwrite', (tx) => {
-                    return new Promise((resolve, reject) => {
-                        // Add note
-                        tx.objectStore('notes').add(note);
-                        
-                        // Add cards
-                        const cardsStore = tx.objectStore('cards');
-                        cards.forEach(card => cardsStore.add(card));
-                        
-                        // Update deck card count
-                        const decksStore = tx.objectStore('decks');
-                        const deckRequest = decksStore.get(note.deckId);
-                        
-                        deckRequest.onsuccess = () => {
-                            const deck = deckRequest.result;
-                            if (deck) {
-                                deck.cardCount = (deck.cardCount || 0) + cards.length;
-                                deck.modified = Date.now();
-                                decksStore.put(deck);
-                            }
-                        };
-                        
-                        resolve();
-                    });
-                });
-            },
-            
-            async getDueCards(deckId) {
-                return this.withTransaction(['cards'], 'readonly', (tx) => {
-                    return new Promise((resolve) => {
-                        const store = tx.objectStore('cards');
-                        const index = store.index('deckId');
-                        const request = index.getAll(deckId);
-                        
-                        request.onsuccess = () => {
-                            const allCards = request.result || [];
-                            const now = Date.now();
-                            
-                            const dueCards = allCards.filter(card => {
-                                if (card.queue === 'new') return true;
-                                return card.due <= now;
-                            }).sort((a, b) => a.due - b.due);
-                            
-                            resolve(dueCards);
-                        };
-                    });
-                });
-            },
-            
-            async updateCard(card, log) {
-                return this.withTransaction(['cards', 'logs'], 'readwrite', (tx) => {
-                    // Update card
-                    tx.objectStore('cards').put(card);
-                    
-                    // Add log if provided
-                    if (log) {
-                        tx.objectStore('logs').add(log);
+                    // Review Phase
+                    if (rating === 2) { // Hard
+                        interval = Math.max(1, interval * 1.2);
+                        ease -= 15;
+                    } else if (rating === 3) { // Good
+                        interval = Math.round(interval * (ease / 100));
+                    } else if (rating === 4) { // Easy
+                        interval = Math.round(interval * (ease / 100) * 1.3);
+                        ease += 15;
                     }
-                });
-            },
-            
-            // Stats operations
-            async getStats() {
-                return this.withTransaction(['cards', 'logs', 'decks'], 'readonly', (tx) => {
-                    return new Promise((resolve) => {
-                        const cardsStore = tx.objectStore('cards');
-                        const logsStore = tx.objectStore('logs');
-                        const decksStore = tx.objectStore('decks');
-                        
-                        const cardsCountRequest = cardsStore.count();
-                        const logsRequest = logsStore.getAll();
-                        const decksRequest = decksStore.getAll();
-                        
-                        Promise.all([
-                            new Promise(r => { cardsCountRequest.onsuccess = () => r(cardsCountRequest.result); }),
-                            new Promise(r => { logsRequest.onsuccess = () => r(logsRequest.result || []); }),
-                            new Promise(r => { decksRequest.onsuccess = () => r(decksRequest.result || []); })
-                        ]).then(([totalCards, allLogs, allDecks]) => {
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0);
-                            const todayTimestamp = today.getTime();
-                            
-                            const reviewsToday = allLogs.filter(log => 
-                                new Date(log.time).setHours(0, 0, 0, 0) === todayTimestamp
-                            ).length;
-                            
-                            const totalReviews = allLogs.length;
-                            const retentionRate = totalReviews > 0 ? 
-                                Math.round((allLogs.filter(log => log.rating >= 3).length / totalReviews) * 100) : 0;
-                            
-                            const stats = {
-                                totalCards,
-                                totalDecks: allDecks.length,
-                                reviewsToday,
-                                totalReviews,
-                                retentionRate,
-                                cardsDueToday: 0 // Will be calculated separately
-                            };
-                            
-                            resolve(stats);
-                        });
-                    });
-                });
+                    
+                    if (interval < 1) interval = 1;
+                    ease = Math.max(130, ease); // Minimum ease 130%
+                    nextDue = now + (interval * day);
+                }
+                reps += 1;
             }
+
+            return { ...card, interval, ease, reps, phase, due: nextDue, lastReview: now };
         };
-        
-        // ============================================
-        // COMPONENTS
-        // ============================================
-        
-        // Toast Notification Component
-        const Toast = ({ message, type = 'info', onClose }) => {
-            useEffect(() => {
-                const timer = setTimeout(() => {
-                    onClose();
-                }, 3000);
-                return () => clearTimeout(timer);
-            }, [onClose]);
-            
-            const bgColor = type === 'success' ? 'bg-green-500' : 
-                          type === 'error' ? 'bg-red-500' : 
-                          type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
-            
-            return React.createElement('div', {
-                className: `fixed top-4 right-4 z-50 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg animate-slideUp flex items-center justify-between min-w-64`,
-                style: { animation: 'slideUp 0.3s ease-out' }
-            }, 
-                React.createElement('span', { className: 'font-medium' }, message),
-                React.createElement('button', {
-                    onClick: onClose,
-                    className: 'ml-4 text-white hover:text-gray-200',
-                    'aria-label': 'Close'
-                }, '✕')
+
+        // ==========================================
+        // 4. COMPONENTS
+        // ==========================================
+
+        const Header = ({ title, left, right }) => (
+            <div className="h-14 bg-ios-bg/80 dark:bg-black/80 backdrop-blur-xl border-b border-ios-separator dark:border-ios-darkSeparator flex items-center justify-between px-4 sticky top-0 z-50 pt-[env(safe-area-inset-top)] transition-colors">
+                <div className="w-16 flex items-center">{left}</div>
+                <h1 className="font-semibold text-[17px] truncate tracking-tight">{title}</h1>
+                <div className="w-16 flex justify-end items-center">{right}</div>
+            </div>
+        );
+
+        const TabBar = ({ active, onChange }) => (
+            <div className="h-[83px] bg-ios-bg/80 dark:bg-ios-darkCard/90 backdrop-blur-xl border-t border-ios-separator dark:border-ios-darkSeparator flex justify-around items-start pt-2 pb-[env(safe-area-inset-bottom)] fixed bottom-0 w-full z-50 transition-colors">
+                <button onClick={() => onChange('decks')} className={`flex flex-col items-center gap-1 w-20 transition-all active:scale-95 ${active === 'decks' ? 'text-ios-blue' : 'text-ios-gray'}`}>
+                    <i className="fas fa-layer-group text-xl mb-0.5"></i>
+                    <span className="text-[10px] font-medium">Decks</span>
+                </button>
+                <button onClick={() => onChange('add')} className={`flex flex-col items-center gap-1 w-20 transition-all active:scale-95 ${active === 'add' ? 'text-ios-blue' : 'text-ios-gray'}`}>
+                    <i className="fas fa-plus-circle text-xl mb-0.5"></i>
+                    <span className="text-[10px] font-medium">Add</span>
+                </button>
+                <button onClick={() => onChange('stats')} className={`flex flex-col items-center gap-1 w-20 transition-all active:scale-95 ${active === 'stats' ? 'text-ios-blue' : 'text-ios-gray'}`}>
+                    <i className="fas fa-chart-bar text-xl mb-0.5"></i>
+                    <span className="text-[10px] font-medium">Stats</span>
+                </button>
+            </div>
+        );
+
+        // --- Decks View ---
+        const Decks = ({ onSelect }) => {
+            const [list, setList] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [modal, setModal] = useState(false);
+            const [name, setName] = useState('');
+
+            const load = async () => {
+                const data = await db.getDecks();
+                setList(data);
+                setLoading(false);
+            };
+
+            useEffect(() => { load(); }, []);
+
+            const create = async () => {
+                if(!name.trim()) return;
+                await db.addDeck(name);
+                setName('');
+                setModal(false);
+                load();
+            };
+
+            const remove = async (e, id) => {
+                e.stopPropagation();
+                if(confirm('Delete deck and all cards inside?')) {
+                    await db.deleteDeck(id);
+                    load();
+                }
+            };
+
+            return (
+                <div className="flex flex-col h-full pb-24">
+                    <Header title="Decks" right={<button onClick={() => setModal(true)} className="text-ios-blue text-2xl active:opacity-50 transition-opacity"><i className="fas fa-plus"></i></button>} />
+                    
+                    <div className="p-4 space-y-3 flex-1 overflow-y-auto">
+                        {loading ? <div className="flex justify-center mt-10"><div className="loader"></div></div> : 
+                         list.length === 0 ? <div className="text-center mt-20 text-ios-gray opacity-70"><i className="fas fa-folder-open text-4xl mb-4"></i><p>No decks found.</p></div> :
+                         list.map(d => (
+                            <div key={d.id} onClick={() => onSelect(d)} className="bg-ios-card dark:bg-ios-darkCard p-4 rounded-xl shadow-native flex justify-between items-center active:scale-[0.98] transition-all cursor-pointer group border border-transparent dark:border-ios-darkSeparator">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 bg-ios-blue/10 dark:bg-ios-blue/20 rounded-full flex items-center justify-center text-ios-blue">
+                                        <i className="fas fa-book"></i>
+                                    </div>
+                                    <span className="font-semibold text-[17px]">{d.name}</span>
+                                </div>
+                                <button onClick={(e) => remove(e, d.id)} className="w-8 h-8 flex items-center justify-center text-ios-gray2 hover:text-ios-red transition-colors">
+                                    <i className="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        ))}
+                        
+                        <div className="mt-8 text-center opacity-40">
+                            <p className="text-xs font-medium text-ios-gray">Made by Muhammad Daler</p>
+                        </div>
+                    </div>
+
+                    {modal && (
+                        <div className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center p-6 backdrop-blur-sm animate-enter">
+                            <div className="bg-ios-card dark:bg-ios-darkCard w-full max-w-sm rounded-2xl p-6 shadow-float">
+                                <h3 className="text-lg font-bold mb-4 text-center">Create New Deck</h3>
+                                <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g., English Vocabulary" className="w-full bg-ios-bg dark:bg-black p-3 rounded-xl mb-4 outline-none border-none focus:ring-2 focus:ring-ios-blue" autoFocus />
+                                <div className="flex gap-3">
+                                    <button onClick={() => setModal(false)} className="flex-1 py-3 bg-ios-bg dark:bg-gray-800 rounded-xl text-ios-blue font-semibold">Cancel</button>
+                                    <button onClick={create} className="flex-1 py-3 bg-ios-blue text-white rounded-xl font-semibold shadow-lg">Create</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             );
         };
-        
-        // Loading Spinner Component
-        const LoadingSpinner = ({ size = 'medium', color = 'blue' }) => {
-            const sizeClass = size === 'small' ? 'w-6 h-6' : 
-                            size === 'medium' ? 'w-8 h-8' : 'w-12 h-12';
-            
-            const borderColor = color === 'blue' ? 'border-ios.blue' :
-                              color === 'white' ? 'border-white' :
-                              color === 'gray' ? 'border-gray-400' : 'border-ios.blue';
-            
-            return React.createElement('div', {
-                className: `${sizeClass} spinner ${borderColor}`
-            });
-        };
-        
-        // Layout Component
-        const Layout = ({ children, activeTab, onTabChange, isDarkMode, toggleTheme }) => {
-            return React.createElement('div', {
-                className: `flex flex-col h-screen bg-ios.bg dark:bg-black transition-colors duration-300 ${isDarkMode ? 'dark' : ''}`
-            },
-                // Header
-                React.createElement('header', {
-                    className: 'h-14 bg-white dark:bg-ios.darkCard border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 sticky top-0 z-50'
-                },
-                    React.createElement('div', { className: 'w-16' }),
-                    React.createElement('div', { className: 'flex flex-col items-center' },
-                        React.createElement('h1', { 
-                            className: 'text-lg font-semibold text-gray-900 dark:text-white'
-                        }, 'Anki'),
-                        React.createElement('span', { 
-                            className: 'text-xs text-gray-500 dark:text-gray-400 mt-0.5'
-                        }, '© MUHAMMAD DALER')
-                    ),
-                    React.createElement('button', {
-                        onClick: toggleTheme,
-                        className: 'w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors',
-                        'aria-label': isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'
-                    },
-                        React.createElement('i', { 
-                            className: isDarkMode ? 'fas fa-sun text-sm' : 'fas fa-moon text-sm'
-                        })
-                    )
-                ),
-                
-                // Main Content
-                React.createElement('main', {
-                    className: 'flex-1 overflow-y-auto bg-ios.bg dark:bg-black'
-                },
-                    React.createElement('div', { className: 'max-w-3xl mx-auto h-full p-4 md:p-6' }, children)
-                ),
-                
-                // Bottom Navigation
-                React.createElement('nav', {
-                    className: 'h-16 bg-white dark:bg-ios.darkCard border-t border-gray-200 dark:border-gray-800 flex justify-around items-center safe-bottom'
-                },
-                    ['decks', 'add', 'stats'].map(tab => 
-                        React.createElement('button', {
-                            key: tab,
-                            onClick: () => onTabChange(tab),
-                            className: `flex flex-col items-center justify-center w-20 py-1 transition-all ${activeTab === tab ? 'text-ios.blue' : 'text-gray-500 dark:text-gray-400'}`,
-                            'aria-label': `${tab} tab`
-                        },
-                            React.createElement('i', {
-                                className: `fas ${
-                                    tab === 'decks' ? 'fa-layer-group' :
-                                    tab === 'add' ? 'fa-plus-circle' :
-                                    'fa-chart-simple'
-                                } text-xl mb-1`
-                            }),
-                            React.createElement('span', { 
-                                className: 'text-xs font-medium capitalize'
-                            }, tab)
-                        )
-                    )
-                )
-            );
-        };
-        
-        // Deck List Component
-        const DeckList = ({ onSelectDeck }) => {
+
+        // --- Add Card View ---
+        const AddCard = () => {
             const [decks, setDecks] = useState([]);
-            const [isCreatingDeck, setIsCreatingDeck] = useState(false);
-            const [newDeckName, setNewDeckName] = useState('');
-            const [deckToDelete, setDeckToDelete] = useState(null);
-            const [isLoading, setIsLoading] = useState(true);
-            const [toast, setToast] = useState(null);
-            
-            const loadDecks = async () => {
-                try {
-                    setIsLoading(true);
-                    const decksData = await DatabaseService.getAllDecks();
-                    setDecks(decksData);
-                } catch (error) {
-                    console.error('Error loading decks:', error);
-                    setToast({ message: 'Failed to load decks', type: 'error' });
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-            
+            const [deckId, setDeckId] = useState('');
+            const [type, setType] = useState('basic');
+            const [front, setFront] = useState('');
+            const [back, setBack] = useState('');
+            const [msg, setMsg] = useState(null);
+            const frontRef = useRef(null);
+
             useEffect(() => {
-                loadDecks();
+                db.getDecks().then(d => { setDecks(d); if(d.length) setDeckId(d[0].id); });
             }, []);
-            
-            const handleCreateDeck = async (e) => {
-                e.preventDefault();
-                if (!newDeckName.trim()) {
-                    setToast({ message: 'Please enter a deck name', type: 'error' });
-                    return;
+
+            const insertCloze = () => {
+                const el = frontRef.current;
+                if(!el) return;
+                const txt = el.value;
+                const start = el.selectionStart;
+                const end = el.selectionEnd;
+                const sel = txt.substring(start, end) || '...';
+                
+                // Find next number
+                const matches = txt.match(/{{c(\d+)::/g);
+                let next = 1;
+                if(matches) {
+                    const nums = matches.map(m => parseInt(m.match(/\d+/)[0]));
+                    next = Math.max(...nums) + 1;
                 }
                 
-                try {
-                    await DatabaseService.createDeck(newDeckName);
-                    setNewDeckName('');
-                    setIsCreatingDeck(false);
-                    setToast({ message: 'Deck created successfully', type: 'success' });
-                    loadDecks();
-                } catch (error) {
-                    console.error('Error creating deck:', error);
-                    setToast({ message: 'Failed to create deck', type: 'error' });
-                }
-            };
-            
-            const handleDeleteDeck = async () => {
-                if (!deckToDelete) return;
+                const newTxt = txt.substring(0, start) + `{{c${next}::${sel}}}` + txt.substring(end);
+                setFront(newTxt);
                 
-                try {
-                    await DatabaseService.deleteDeck(deckToDelete);
-                    setDeckToDelete(null);
-                    setToast({ message: 'Deck deleted successfully', type: 'success' });
-                    loadDecks();
-                } catch (error) {
-                    console.error('Error deleting deck:', error);
-                    setToast({ message: 'Failed to delete deck', type: 'error' });
-                }
-            };
-            
-            return React.createElement(Fragment, null,
-                // Toast notifications
-                toast && React.createElement(Toast, {
-                    message: toast.message,
-                    type: toast.type,
-                    onClose: () => setToast(null)
-                }),
-                
-                React.createElement('div', { className: 'space-y-6 animate-fadeIn' },
-                    // Header
-                    React.createElement('div', { className: 'flex justify-between items-center' },
-                        React.createElement('div', null,
-                            React.createElement('h2', { className: 'text-2xl font-bold text-gray-900 dark:text-white' }, 'Decks'),
-                            React.createElement('p', { className: 'text-sm text-gray-500 dark:text-gray-400 mt-1' }, 
-                                `${decks.length} deck${decks.length !== 1 ? 's' : ''}`
-                            )
-                        ),
-                        React.createElement('button', {
-                            onClick: () => setIsCreatingDeck(true),
-                            className: 'w-10 h-10 rounded-full bg-ios.blue text-white flex items-center justify-center hover:bg-blue-600 active:scale-95 transition-all',
-                            'aria-label': 'Create new deck'
-                        },
-                            React.createElement('i', { className: 'fas fa-plus' })
-                        )
-                    ),
-                    
-                    // Create Deck Form
-                    isCreatingDeck && React.createElement('div', {
-                        className: 'bg-white dark:bg-ios.darkCard rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800 animate-scaleIn'
-                    },
-                        React.createElement('h3', { className: 'text-lg font-semibold text-gray-900 dark:text-white mb-3' }, 'Create New Deck'),
-                        React.createElement('form', { onSubmit: handleCreateDeck },
-                            React.createElement('input', {
-                                type: 'text',
-                                value: newDeckName,
-                                onChange: (e) => setNewDeckName(e.target.value),
-                                placeholder: 'Enter deck name...',
-                                className: 'w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white mb-3 focus:outline-none focus:ring-2 focus:ring-ios.blue',
-                                autoFocus: true
-                            }),
-                            React.createElement('div', { className: 'flex gap-2' },
-                                React.createElement('button', {
-                                    type: 'submit',
-                                    className: 'flex-1 bg-ios.blue text-white py-2.5 rounded-lg font-medium hover:bg-blue-600 transition-colors'
-                                }, 'Create'),
-                                React.createElement('button', {
-                                    type: 'button',
-                                    onClick: () => setIsCreatingDeck(false),
-                                    className: 'flex-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors'
-                                }, 'Cancel')
-                            )
-                        )
-                    ),
-                    
-                    // Delete Confirmation Modal
-                    deckToDelete && React.createElement('div', {
-                        className: 'fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fadeIn'
-                    },
-                        React.createElement('div', {
-                            className: 'bg-white dark:bg-ios.darkCard rounded-xl p-6 max-w-sm w-full animate-scaleIn'
-                        },
-                            React.createElement('h3', { className: 'text-lg font-semibold text-gray-900 dark:text-white mb-2' }, 'Delete Deck'),
-                            React.createElement('p', { className: 'text-gray-600 dark:text-gray-400 mb-4' }, 
-                                'Are you sure you want to delete this deck? All cards in this deck will also be deleted.'
-                            ),
-                            React.createElement('div', { className: 'flex gap-2' },
-                                React.createElement('button', {
-                                    onClick: () => setDeckToDelete(null),
-                                    className: 'flex-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors'
-                                }, 'Cancel'),
-                                React.createElement('button', {
-                                    onClick: handleDeleteDeck,
-                                    className: 'flex-1 bg-ios.red text-white py-2.5 rounded-lg font-medium hover:bg-red-500 transition-colors'
-                                }, 'Delete')
-                            )
-                        )
-                    ),
-                    
-                    // Loading State
-                    isLoading ? React.createElement('div', { className: 'flex justify-center py-12' },
-                        React.createElement(LoadingSpinner, { size: 'large' })
-                    ) :
-                    
-                    // Empty State
-                    decks.length === 0 ? React.createElement('div', { className: 'text-center py-12' },
-                        React.createElement('div', { className: 'w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4' },
-                            React.createElement('i', { className: 'fas fa-layer-group text-3xl text-gray-400 dark:text-gray-500' })
-                        ),
-                        React.createElement('h3', { className: 'text-lg font-semibold text-gray-900 dark:text-white mb-2' }, 'No Decks Yet'),
-                        React.createElement('p', { className: 'text-gray-500 dark:text-gray-400' }, 'Create your first deck to get started')
-                    ) :
-                    
-                    // Decks List
-                    React.createElement('div', { className: 'space-y-3' },
-                        decks.map(deck => React.createElement('div', {
-                            key: deck.id,
-                            onClick: () => onSelectDeck(deck.id),
-                            className: 'bg-white dark:bg-ios.darkCard rounded-xl p-4 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 active:scale-[0.98] transition-all cursor-pointer'
-                        },
-                            React.createElement('div', { className: 'flex items-center justify-between' },
-                                React.createElement('div', { className: 'flex items-center gap-3' },
-                                    React.createElement('div', { className: 'w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center' },
-                                        React.createElement('i', { className: 'fas fa-layer-group text-lg text-ios.blue' })
-                                    ),
-                                    React.createElement('div', null,
-                                        React.createElement('h3', { className: 'font-semibold text-gray-900 dark:text-white' }, deck.name),
-                                        React.createElement('p', { className: 'text-sm text-gray-500 dark:text-gray-400' }, 
-                                            `${deck.cardCount || 0} card${deck.cardCount !== 1 ? 's' : ''}`
-                                        )
-                                    )
-                                ),
-                                React.createElement('button', {
-                                    onClick: (e) => {
-                                        e.stopPropagation();
-                                        setDeckToDelete(deck.id);
-                                    },
-                                    className: 'w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-ios.red hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors',
-                                    'aria-label': 'Delete deck'
-                                },
-                                    React.createElement('i', { className: 'fas fa-trash text-sm' })
-                                )
-                            )
-                        ))
-                    )
-                )
-            );
-        };
-        
-        // Add Card Form Component
-        const AddCardForm = () => {
-            const [decks, setDecks] = useState([]);
-            const [selectedDeckId, setSelectedDeckId] = useState('');
-            const [cardType, setCardType] = useState('basic');
-            const [frontText, setFrontText] = useState('');
-            const [backText, setBackText] = useState('');
-            const [isLoading, setIsLoading] = useState(true);
-            const [toast, setToast] = useState(null);
-            const frontTextareaRef = useRef(null);
-            
-            const loadDecks = async () => {
-                try {
-                    setIsLoading(true);
-                    const decksData = await DatabaseService.getAllDecks();
-                    setDecks(decksData);
-                    if (decksData.length > 0) {
-                        setSelectedDeckId(decksData[0].id);
-                    }
-                } catch (error) {
-                    console.error('Error loading decks:', error);
-                    setToast({ message: 'Failed to load decks', type: 'error' });
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-            
-            useEffect(() => {
-                loadDecks();
-            }, []);
-            
-            const insertClozeSyntax = () => {
-                if (!frontTextareaRef.current) return;
-                
-                const textarea = frontTextareaRef.current;
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-                const text = textarea.value;
-                const selectedText = text.substring(start, end);
-                
-                // Find existing cloze numbers
-                const existingIndices = getClozeIndices(text);
-                const nextClozeNumber = existingIndices.length > 0 ? Math.max(...existingIndices) + 1 : 1;
-                
-                const clozeSyntax = selectedText ? 
-                    `{{c${nextClozeNumber}::${selectedText}}}` : 
-                    `{{c${nextClozeNumber}::...}}`;
-                
-                const newText = text.substring(0, start) + clozeSyntax + text.substring(end);
-                setFrontText(newText);
-                
-                // Set cursor position after insertion
                 setTimeout(() => {
-                    textarea.focus();
-                    const newCursorPos = start + clozeSyntax.length;
-                    textarea.setSelectionRange(newCursorPos, newCursorPos);
+                    el.focus();
+                    const newCursor = start + 5 + next.toString().length + sel.length + 2; // Approximate cursor placement
+                    el.setSelectionRange(newCursor, newCursor);
                 }, 10);
             };
-            
-            const handleSubmit = async (e) => {
-                e.preventDefault();
-                
-                if (!selectedDeckId) {
-                    setToast({ message: 'Please select a deck', type: 'error' });
+
+            const save = async () => {
+                if(!deckId || !front.trim()) {
+                    setMsg({txt: "Please select a deck and fill the front field.", err: true});
+                    setTimeout(() => setMsg(null), 3000);
                     return;
                 }
-                
-                if (!frontText.trim()) {
-                    setToast({ message: 'Front text is required', type: 'error' });
-                    return;
-                }
-                
-                if (cardType === 'cloze') {
-                    const clozeIndices = getClozeIndices(frontText);
-                    if (clozeIndices.length === 0) {
-                        setToast({ message: 'No cloze deletions found. Use {{c1::...}} syntax.', type: 'error' });
+
+                const base = {
+                    deckId,
+                    type,
+                    created: Date.now(),
+                    due: Date.now(),
+                    interval: 0,
+                    ease: 250, // 250%
+                    reps: 0,
+                    phase: 'learning'
+                };
+
+                if(type === 'basic') {
+                    await db.addCard({ ...base, id: generateId(), front: front, back: back });
+                } else {
+                    const regex = /{{c(\d+)::.*?}}/g;
+                    const matches = [...front.matchAll(regex)];
+                    const ids = [...new Set(matches.map(m => m[1]))];
+                    
+                    if(ids.length === 0) {
+                        setMsg({txt: "No cloze found. Use the {...} button.", err: true});
+                        setTimeout(() => setMsg(null), 3000);
                         return;
                     }
-                }
-                
-                try {
-                    const noteId = crypto.randomUUID();
-                    const now = Date.now();
-                    
-                    const note = {
-                        id: noteId,
-                        deckId: selectedDeckId,
-                        type: cardType,
-                        front: frontText,
-                        back: backText,
-                        created: now,
-                        modified: now
-                    };
-                    
-                    const cards = [];
-                    
-                    if (cardType === 'basic') {
-                        // Create a single basic card
-                        const cardId = crypto.randomUUID();
-                        cards.push({
-                            id: cardId,
-                            noteId: noteId,
-                            deckId: selectedDeckId,
-                            type: 'basic',
-                            front: sanitizeHTML(frontText.replace(/\n/g, '<br>')),
-                            back: sanitizeHTML(backText.replace(/\n/g, '<br>')),
-                            queue: 'new',
-                            due: now,
-                            interval: 0,
-                            ease: 2.5,
-                            reps: 0,
-                            lapses: 0,
-                            created: now
-                        });
-                    } else if (cardType === 'cloze') {
-                        // Create multiple cloze cards (one for each cloze deletion)
-                        const clozeIndices = getClozeIndices(frontText);
-                        
-                        clozeIndices.forEach(clozeNumber => {
-                            const cardId = crypto.randomUUID();
-                            const frontContent = generateClozeContent(frontText, clozeNumber, true);
-                            const backContent = generateClozeContent(frontText, clozeNumber, false);
-                            
-                            let fullBackContent = backContent;
-                            if (backText.trim()) {
-                                fullBackContent += `<div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">${sanitizeHTML(backText.replace(/\n/g, '<br>'))}</div>`;
-                            }
-                            
-                            cards.push({
-                                id: cardId,
-                                noteId: noteId,
-                                deckId: selectedDeckId,
-                                type: 'cloze',
-                                clozeNumber: clozeNumber,
-                                front: frontContent,
-                                back: fullBackContent,
-                                queue: 'new',
-                                due: now,
-                                interval: 0,
-                                ease: 2.5,
-                                reps: 0,
-                                lapses: 0,
-                                created: now
-                            });
+
+                    for(let cid of ids) {
+                        await db.addCard({ 
+                            ...base, 
+                            id: generateId(), 
+                            front: front, 
+                            back: back,
+                            clozeId: cid 
                         });
                     }
-                    
-                    await DatabaseService.createCard(note, cards);
-                    
-                    setToast({ 
-                        message: `Card${cards.length > 1 ? 's' : ''} created successfully!`, 
-                        type: 'success' 
-                    });
-                    
-                    setFrontText('');
-                    setBackText('');
-                    
-                    if (frontTextareaRef.current) {
-                        frontTextareaRef.current.focus();
-                    }
-                } catch (error) {
-                    console.error('Error creating card:', error);
-                    setToast({ message: 'Failed to create card', type: 'error' });
                 }
+
+                setMsg({txt: "Card Added Successfully!", err: false});
+                setFront('');
+                setBack('');
+                setTimeout(() => setMsg(null), 2000);
             };
-            
-            return React.createElement(Fragment, null,
-                toast && React.createElement(Toast, {
-                    message: toast.message,
-                    type: toast.type,
-                    onClose: () => setToast(null)
-                }),
-                
-                React.createElement('div', { className: 'space-y-6 animate-fadeIn' },
-                    // Header
-                    React.createElement('div', { className: 'flex justify-between items-center' },
-                        React.createElement('h2', { className: 'text-2xl font-bold text-gray-900 dark:text-white' }, 'Add Card'),
-                        isLoading && React.createElement(LoadingSpinner, { size: 'small' })
-                    ),
+
+            return (
+                <div className="flex flex-col h-full pb-24">
+                    <Header title="Add Card" />
+                    {msg && <div className={`fixed top-20 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-sm font-bold shadow-float z-[100] animate-enter ${msg.err ? 'bg-ios-red' : 'bg-ios-green'}`}>{msg.txt}</div>}
                     
-                    // Form
-                    React.createElement('form', { 
-                        onSubmit: handleSubmit,
-                        className: 'space-y-6'
-                    },
-                        // Deck Selection
-                        React.createElement('div', { className: 'space-y-2' },
-                            React.createElement('label', { 
-                                className: 'text-sm font-medium text-gray-700 dark:text-gray-300'
-                            }, 'Deck'),
-                            React.createElement('select', {
-                                value: selectedDeckId,
-                                onChange: (e) => setSelectedDeckId(e.target.value),
-                                disabled: decks.length === 0,
-                                className: 'w-full bg-white dark:bg-ios.darkCard border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-ios.blue disabled:opacity-50'
-                            },
-                                decks.length === 0 ? 
-                                React.createElement('option', { value: '' }, 'No decks available') :
-                                decks.map(deck => 
-                                    React.createElement('option', { key: deck.id, value: deck.id }, deck.name)
-                                )
-                            )
-                        ),
-                        
-                        // Card Type Selection
-                        React.createElement('div', { className: 'space-y-2' },
-                            React.createElement('label', { 
-                                className: 'text-sm font-medium text-gray-700 dark:text-gray-300'
-                            }, 'Card Type'),
-                            React.createElement('div', { className: 'grid grid-cols-2 gap-2' },
-                                React.createElement('button', {
-                                    type: 'button',
-                                    onClick: () => setCardType('basic'),
-                                    className: `py-3 rounded-lg font-medium transition-colors ${cardType === 'basic' ? 'bg-ios.blue text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`,
-                                    'aria-label': 'Basic card type'
-                                }, 'Basic'),
-                                React.createElement('button', {
-                                    type: 'button',
-                                    onClick: () => setCardType('cloze'),
-                                    className: `py-3 rounded-lg font-medium transition-colors ${cardType === 'cloze' ? 'bg-ios.blue text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`,
-                                    'aria-label': 'Cloze card type'
-                                }, 'Cloze')
-                            )
-                        ),
-                        
-                        // Front Text
-                        React.createElement('div', { className: 'space-y-2' },
-                            React.createElement('div', { className: 'flex justify-between items-center' },
-                                React.createElement('label', { 
-                                    className: 'text-sm font-medium text-gray-700 dark:text-gray-300'
-                                }, cardType === 'cloze' ? 'Text (with cloze deletions)' : 'Front'),
-                                cardType === 'cloze' && React.createElement('button', {
-                                    type: 'button',
-                                    onClick: insertClozeSyntax,
-                                    className: 'text-sm bg-blue-50 dark:bg-blue-900/30 text-ios.blue dark:text-blue-400 px-3 py-1.5 rounded-md font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors'
-                                },
-                                    React.createElement('i', { className: 'fas fa-code mr-1.5' }),
-                                    'Insert Cloze'
-                                )
-                            ),
-                            React.createElement('textarea', {
-                                ref: frontTextareaRef,
-                                value: frontText,
-                                onChange: (e) => setFrontText(e.target.value),
-                                placeholder: cardType === 'cloze' ? 
-                                    'Example: The {{c1::capital}} of France is {{c2::Paris}}.' :
-                                    'Enter the question or front text...',
-                                rows: 4,
-                                className: 'w-full bg-white dark:bg-ios.darkCard border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-ios.blue resize-none'
-                            }),
-                            cardType === 'cloze' && frontText && React.createElement('p', { 
-                                className: 'text-xs text-gray-500 dark:text-gray-400'
-                            }, 
-                                `${getClozeIndices(frontText).length} cloze deletion${getClozeIndices(frontText).length !== 1 ? 's' : ''} found`
-                            )
-                        ),
-                        
-                        // Back Text
-                        React.createElement('div', { className: 'space-y-2' },
-                            React.createElement('label', { 
-                                className: 'text-sm font-medium text-gray-700 dark:text-gray-300'
-                            }, 'Back (Additional Info)'),
-                            React.createElement('textarea', {
-                                value: backText,
-                                onChange: (e) => setBackText(e.target.value),
-                                placeholder: 'Enter the answer or additional information...',
-                                rows: 3,
-                                className: 'w-full bg-white dark:bg-ios.darkCard border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-ios.blue resize-none'
-                            })
-                        ),
-                        
-                        // Submit Button
-                        React.createElement('button', {
-                            type: 'submit',
-                            disabled: decks.length === 0,
-                            className: 'w-full bg-ios.blue text-white py-3.5 rounded-lg font-medium hover:bg-blue-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed'
-                        }, 'Add Card')
-                    ),
-                    
-                    // Help Text
-                    cardType === 'cloze' && React.createElement('div', { 
-                        className: 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4'
-                    },
-                        React.createElement('h4', { 
-                            className: 'text-sm font-medium text-ios.blue dark:text-blue-400 mb-2'
-                        }, 'Cloze Deletion Help'),
-                        React.createElement('ul', { className: 'text-xs text-gray-600 dark:text-gray-400 space-y-1' },
-                            React.createElement('li', null, '• Use {{c1::answer}} to create a cloze deletion'),
-                            React.createElement('li', null, '• Use {{c1::answer::hint}} to add an optional hint'),
-                            React.createElement('li', null, '• Multiple cloze deletions will create multiple cards'),
-                            React.createElement('li', null, '• Number cloze deletions sequentially: c1, c2, c3...')
-                        )
-                    )
-                )
+                    <div className="p-4 space-y-6 overflow-y-auto flex-1">
+                        <div className="bg-ios-card dark:bg-ios-darkCard rounded-xl p-4 shadow-native">
+                            <label className="text-xs font-bold text-ios-gray uppercase mb-2 block tracking-wider">Target Deck</label>
+                            <select value={deckId} onChange={e => setDeckId(e.target.value)} className="w-full bg-ios-bg dark:bg-black p-3 rounded-xl outline-none mb-4 appearance-none">
+                                {decks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                            </select>
+
+                            <label className="text-xs font-bold text-ios-gray uppercase mb-2 block tracking-wider">Card Type</label>
+                            <div className="flex bg-ios-bg dark:bg-black p-1 rounded-xl">
+                                <button onClick={() => setType('basic')} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${type==='basic' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-ios-gray'}`}>Basic</button>
+                                <button onClick={() => setType('cloze')} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${type==='cloze' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-ios-gray'}`}>Cloze</button>
+                            </div>
+                        </div>
+
+                        <div className="bg-ios-card dark:bg-ios-darkCard rounded-xl p-4 shadow-native space-y-4">
+                            <div className="relative">
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="text-xs font-bold text-ios-gray uppercase tracking-wider">Front</label>
+                                    {type === 'cloze' && <button onClick={insertCloze} className="text-xs bg-ios-blue text-white px-3 py-1 rounded-full font-bold shadow-sm active:scale-95 transition-transform">{`{...}`}</button>}
+                                </div>
+                                <textarea ref={frontRef} value={front} onChange={e => setFront(e.target.value)} className="w-full bg-transparent border-b border-ios-separator dark:border-ios-darkSeparator min-h-[100px] outline-none resize-none pb-2 text-[17px] leading-relaxed" placeholder="Type your question here..." />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-ios-gray uppercase mb-2 block tracking-wider">Back (Extra)</label>
+                                <textarea value={back} onChange={e => setBack(e.target.value)} className="w-full bg-transparent min-h-[60px] outline-none resize-none text-[17px] leading-relaxed" placeholder="Extra notes (optional)..." />
+                            </div>
+                        </div>
+
+                        <button onClick={save} className="w-full bg-ios-blue text-white py-4 rounded-xl font-bold text-[17px] shadow-lg active:scale-[0.98] transition-transform">
+                            Add to Deck
+                        </button>
+                    </div>
+                </div>
             );
         };
-        
-        // Study Session Component
-        const StudySession = ({ deckId, onExit }) => {
+
+        // --- Study View ---
+        const Study = ({ deck, onBack }) => {
             const [cards, setCards] = useState([]);
-            const [currentCardIndex, setCurrentCardIndex] = useState(0);
-            const [isCardFlipped, setIsCardFlipped] = useState(false);
-            const [isLoading, setIsLoading] = useState(true);
-            const [toast, setToast] = useState(null);
-            const [currentDeckName, setCurrentDeckName] = useState('');
-            
-            const loadCards = async () => {
-                try {
-                    setIsLoading(true);
-                    const dueCards = await DatabaseService.getDueCards(deckId);
-                    setCards(dueCards);
-                    
-                    // Get deck name
-                    const decks = await DatabaseService.getAllDecks();
-                    const deck = decks.find(d => d.id === deckId);
-                    if (deck) {
-                        setCurrentDeckName(deck.name);
-                    }
-                } catch (error) {
-                    console.error('Error loading cards:', error);
-                    setToast({ message: 'Failed to load cards', type: 'error' });
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-            
+            const [index, setIndex] = useState(0);
+            const [flipped, setFlipped] = useState(false);
+            const [loading, setLoading] = useState(true);
+
             useEffect(() => {
-                loadCards();
-            }, [deckId]);
-            
-            const handleCardRate = async (rating) => {
-                if (cards.length === 0) return;
+                db.getDueCards(deck.id).then(c => { setCards(c); setLoading(false); });
+            }, [deck]);
+
+            const rate = async (r) => {
+                const card = cards[index];
+                const updated = scheduler(card, r);
+                await db.updateCard(updated);
                 
-                const currentCard = cards[currentCardIndex];
-                
-                try {
-                    const { updatedCard, log } = scheduleCard(currentCard, rating);
-                    await DatabaseService.updateCard(updatedCard, log);
-                    
-                    // Remove the reviewed card
-                    const newCards = cards.filter((_, index) => index !== currentCardIndex);
-                    setCards(newCards);
-                    
-                    // Reset flip state
-                    setIsCardFlipped(false);
-                    
-                    // If there are no more cards, show completion message
-                    if (newCards.length === 0) {
-                        setToast({ message: 'All cards reviewed!', type: 'success' });
-                    } else {
-                        // Adjust index if needed
-                        if (currentCardIndex >= newCards.length) {
-                            setCurrentCardIndex(newCards.length - 1);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error updating card:', error);
-                    setToast({ message: 'Failed to update card', type: 'error' });
-                }
-            };
-            
-            const handleRevealCloze = (e) => {
-                if (e.target.classList.contains('cloze-hidden')) {
-                    e.target.classList.remove('cloze-hidden');
-                    e.target.classList.add('cloze-revealed');
-                    e.target.textContent = e.target.getAttribute('data-answer') || 'Answer';
-                }
-            };
-            
-            if (isLoading) {
-                return React.createElement('div', { className: 'flex flex-col items-center justify-center h-full' },
-                    React.createElement(LoadingSpinner, { size: 'large' }),
-                    React.createElement('p', { className: 'text-gray-500 dark:text-gray-400 mt-4' }, 'Loading cards...')
-                );
-            }
-            
-            if (cards.length === 0) {
-                return React.createElement('div', { className: 'flex flex-col items-center justify-center h-full text-center p-6' },
-                    React.createElement('div', { className: 'w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4' },
-                        React.createElement('i', { className: 'fas fa-check text-3xl text-green-600 dark:text-green-400' })
-                    ),
-                    React.createElement('h3', { className: 'text-xl font-semibold text-gray-900 dark:text-white mb-2' }, 'All Done!'),
-                    React.createElement('p', { className: 'text-gray-500 dark:text-gray-400 mb-6' }, 'No more cards to review today.'),
-                    React.createElement('button', {
-                        onClick: onExit,
-                        className: 'bg-ios.blue text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 active:scale-95 transition-all'
-                    }, 'Back to Decks')
-                );
-            }
-            
-            const currentCard = cards[currentCardIndex];
-            
-            return React.createElement(Fragment, null,
-                toast && React.createElement(Toast, {
-                    message: toast.message,
-                    type: toast.type,
-                    onClose: () => setToast(null)
-                }),
-                
-                React.createElement('div', { className: 'flex flex-col h-full' },
-                    // Header
-                    React.createElement('div', { className: 'flex items-center justify-between mb-6' },
-                        React.createElement('button', {
-                            onClick: onExit,
-                            className: 'flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors',
-                            'aria-label': 'Back to decks'
-                        },
-                            React.createElement('i', { className: 'fas fa-chevron-left mr-2' }),
-                            'Decks'
-                        ),
-                        React.createElement('div', { className: 'text-center' },
-                            React.createElement('h2', { className: 'font-semibold text-gray-900 dark:text-white' }, currentDeckName),
-                            React.createElement('p', { className: 'text-sm text-gray-500 dark:text-gray-400' }, 
-                                `${cards.length} card${cards.length !== 1 ? 's' : ''} remaining`
-                            )
-                        ),
-                        React.createElement('div', { className: 'w-10' }) // Spacer for alignment
-                    ),
-                    
-                    // Card
-                    React.createElement('div', {
-                        className: `card-container flex-1 mb-6 ${isCardFlipped ? 'card-flipped' : ''}`
-                    },
-                        React.createElement('div', {
-                            className: 'card-inner w-full h-full',
-                            onClick: () => !isCardFlipped && setIsCardFlipped(true)
-                        },
-                            // Front of card
-                            React.createElement('div', {
-                                className: 'card-front bg-white dark:bg-ios.darkCard rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8 flex flex-col items-center justify-center h-full',
-                                onClick: handleRevealCloze,
-                                dangerouslySetInnerHTML: { __html: currentCard.front }
-                            }),
-                            
-                            // Back of card
-                            React.createElement('div', {
-                                className: 'card-back bg-white dark:bg-ios.darkCard rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8 flex flex-col items-center justify-center h-full overflow-y-auto',
-                                onClick: handleRevealCloze,
-                                dangerouslySetInnerHTML: { __html: currentCard.back }
-                            })
-                        )
-                    ),
-                    
-                    // Rating Buttons (only shown when card is flipped)
-                    isCardFlipped && React.createElement('div', { 
-                        className: 'grid grid-cols-4 gap-3 animate-fadeIn'
-                    },
-                        [
-                            { rating: 1, label: 'Again', color: 'red', time: '1m' },
-                            { rating: 2, label: 'Hard', color: 'yellow', time: '10m' },
-                            { rating: 3, label: 'Good', color: 'green', time: '1d' },
-                            { rating: 4, label: 'Easy', color: 'blue', time: '4d' }
-                        ].map(({ rating, label, color, time }) => 
-                            React.createElement('button', {
-                                key: rating,
-                                onClick: () => handleCardRate(rating),
-                                className: `bg-white dark:bg-ios.darkCard border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex flex-col items-center hover:bg-gray-50 dark:hover:bg-gray-900 active:scale-95 transition-all`
-                            },
-                                React.createElement('span', { 
-                                    className: `text-sm font-semibold text-ios.${color} mb-1`
-                                }, label),
-                                React.createElement('span', { 
-                                    className: 'text-xs text-gray-500 dark:text-gray-400'
-                                }, time)
-                            )
-                        )
-                    ),
-                    
-                    // Flip Hint (only shown when card is not flipped)
-                    !isCardFlipped && React.createElement('p', {
-                        className: 'text-center text-sm text-gray-500 dark:text-gray-400 animate-fadeIn'
-                    }, 'Tap card to reveal answer')
-                )
-            );
-        };
-        
-        // Stats Component
-        const Stats = () => {
-            const [stats, setStats] = useState({
-                totalCards: 0,
-                totalDecks: 0,
-                reviewsToday: 0,
-                totalReviews: 0,
-                retentionRate: 0
-            });
-            const [isLoading, setIsLoading] = useState(true);
-            
-            const loadStats = async () => {
-                try {
-                    setIsLoading(true);
-                    const statsData = await DatabaseService.getStats();
-                    setStats(statsData);
-                } catch (error) {
-                    console.error('Error loading stats:', error);
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-            
-            useEffect(() => {
-                loadStats();
-            }, []);
-            
-            const statCards = [
-                { label: 'Total Cards', value: stats.totalCards, icon: 'fa-layer-group', color: 'blue' },
-                { label: 'Total Decks', value: stats.totalDecks, icon: 'fa-folder', color: 'green' },
-                { label: 'Reviews Today', value: stats.reviewsToday, icon: 'fa-check-circle', color: 'yellow' },
-                { label: 'Retention Rate', value: `${stats.retentionRate}%`, icon: 'fa-brain', color: 'purple' }
-            ];
-            
-            return React.createElement('div', { className: 'space-y-6 animate-fadeIn' },
-                // Header
-                React.createElement('div', null,
-                    React.createElement('h2', { className: 'text-2xl font-bold text-gray-900 dark:text-white' }, 'Statistics'),
-                    React.createElement('p', { className: 'text-gray-500 dark:text-gray-400 mt-1' }, 'Track your learning progress')
-                ),
-                
-                // Loading State
-                isLoading ? React.createElement('div', { className: 'flex justify-center py-12' },
-                    React.createElement(LoadingSpinner, { size: 'large' })
-                ) :
-                
-                React.createElement(Fragment, null,
-                    // Stats Grid
-                    React.createElement('div', { className: 'grid grid-cols-2 gap-4' },
-                        statCards.map((stat, index) => 
-                            React.createElement('div', {
-                                key: index,
-                                className: 'bg-white dark:bg-ios.darkCard rounded-xl p-6 border border-gray-200 dark:border-gray-800'
-                            },
-                                React.createElement('div', { className: 'flex items-center justify-between mb-4' },
-                                    React.createElement('div', { 
-                                        className: `w-10 h-10 bg-${stat.color}-50 dark:bg-${stat.color}-900/30 rounded-lg flex items-center justify-center`
-                                    },
-                                        React.createElement('i', { 
-                                            className: `fas ${stat.icon} text-lg text-ios.${stat.color}`
-                                        })
-                                    )
-                                ),
-                                React.createElement('div', { className: 'text-3xl font-bold text-gray-900 dark:text-white mb-1' }, 
-                                    stat.value
-                                ),
-                                React.createElement('p', { className: 'text-sm text-gray-500 dark:text-gray-400' }, 
-                                    stat.label
-                                )
-                            )
-                        )
-                    ),
-                    
-                    // Study Activity
-                    React.createElement('div', { className: 'bg-white dark:bg-ios.darkCard rounded-xl p-6 border border-gray-200 dark:border-gray-800' },
-                        React.createElement('h3', { className: 'text-lg font-semibold text-gray-900 dark:text-white mb-4' }, 'Study Activity'),
-                        React.createElement('div', { className: 'space-y-4' },
-                            React.createElement('div', { className: 'flex items-center justify-between' },
-                                React.createElement('span', { className: 'text-gray-600 dark:text-gray-400' }, 'Total Reviews'),
-                                React.createElement('span', { className: 'font-medium text-gray-900 dark:text-white' }, stats.totalReviews)
-                            ),
-                            React.createElement('div', { className: 'flex items-center justify-between' },
-                                React.createElement('span', { className: 'text-gray-600 dark:text-gray-400' }, 'Average Retention'),
-                                React.createElement('span', { className: 'font-medium text-gray-900 dark:text-white' }, `${stats.retentionRate}%`)
-                            )
-                        )
-                    ),
-                    
-                    // Study Tips
-                    React.createElement('div', { 
-                        className: 'bg-gradient-to-r from-ios.blue to-blue-600 rounded-xl p-6 text-white'
-                    },
-                        React.createElement('div', { className: 'flex items-start gap-4' },
-                            React.createElement('div', { className: 'w-10 h-10 bg-white/20 rounded-full flex items-center justify-center' },
-                                React.createElement('i', { className: 'fas fa-lightbulb text-lg' })
-                            ),
-                            React.createElement('div', null,
-                                React.createElement('h3', { className: 'text-lg font-semibold mb-2' }, 'Study Tip'),
-                                React.createElement('p', { className: 'text-sm opacity-90' }, 
-                                    'For best results, review your cards every day. Consistency is key to long-term retention!'
-                                )
-                            )
-                        )
-                    )
-                )
-            );
-        };
-        
-        // Main App Component
-        const App = () => {
-            const [activeTab, setActiveTab] = useState('decks');
-            const [selectedDeckId, setSelectedDeckId] = useState(null);
-            const [isDarkMode, setIsDarkMode] = useState(() => {
-                if (typeof window !== 'undefined') {
-                    const saved = localStorage.getItem('anki-theme');
-                    if (saved) return saved === 'dark';
-                    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-                }
-                return false;
-            });
-            
-            // Apply dark mode class to html element
-            useEffect(() => {
-                if (isDarkMode) {
-                    document.documentElement.classList.add('dark');
+                setFlipped(false);
+                if(index < cards.length - 1) {
+                    setTimeout(() => setIndex(i => i + 1), 250);
                 } else {
-                    document.documentElement.classList.remove('dark');
-                }
-                localStorage.setItem('anki-theme', isDarkMode ? 'dark' : 'light');
-            }, [isDarkMode]);
-            
-            const toggleDarkMode = () => {
-                setIsDarkMode(!isDarkMode);
-            };
-            
-            const renderContent = () => {
-                if (selectedDeckId) {
-                    return React.createElement(StudySession, {
-                        deckId: selectedDeckId,
-                        onExit: () => setSelectedDeckId(null)
-                    });
-                }
-                
-                switch (activeTab) {
-                    case 'decks':
-                        return React.createElement(DeckList, {
-                            onSelectDeck: setSelectedDeckId
-                        });
-                    case 'add':
-                        return React.createElement(AddCardForm);
-                    case 'stats':
-                        return React.createElement(Stats);
-                    default:
-                        return React.createElement(DeckList, {
-                            onSelectDeck: setSelectedDeckId
-                        });
+                    setCards([]);
                 }
             };
-            
-            return React.createElement(Layout, {
-                activeTab: selectedDeckId ? 'decks' : activeTab,
-                onTabChange: (tab) => {
-                    if (selectedDeckId && tab !== 'decks') {
-                        setSelectedDeckId(null);
+
+            const renderCloze = (text, targetId, isBack) => {
+                // Regex handles hints: {{c1::Answer::Hint}}
+                return sanitize(text).replace(/{{c(\d+)::(.*?)(?:::(.*?))?}}/g, (match, id, answer, hint) => {
+                    // Logic: If this is the target Cloze ID (e.g. c1)
+                    if(id === targetId) {
+                        if(isBack) return `<span class="cloze-revealed">${answer}</span>`;
+                        return `<span class="cloze-hidden" title="${hint || ''}">${hint || ''}</span>`;
                     }
-                    setActiveTab(tab);
-                },
-                isDarkMode: isDarkMode,
-                toggleTheme: toggleDarkMode
-            }, renderContent());
+                    // For other clozes (c2, c3), we usually show the answer in context or keep them hidden?
+                    // Anki standard: Only target is hidden, others are shown.
+                    return `<strong>${answer}</strong>`;
+                });
+            };
+
+            if(loading) return <div className="h-full flex items-center justify-center"><div className="loader"></div></div>;
+
+            if(cards.length === 0) return (
+                <div className="h-full flex flex-col items-center justify-center p-6 bg-ios-bg dark:bg-black text-center animate-enter">
+                    <div className="w-24 h-24 bg-ios-green/20 rounded-full flex items-center justify-center mb-6 shadow-sm"><i className="fas fa-check text-4xl text-ios-green"></i></div>
+                    <h2 className="text-3xl font-bold mb-3">All Caught Up!</h2>
+                    <p className="text-ios-gray text-lg mb-8">You have no more cards to review.</p>
+                    <button onClick={onBack} className="bg-ios-card dark:bg-ios-darkCard text-ios-blue font-semibold px-10 py-4 rounded-xl shadow-native active:scale-95 transition-transform">Return to Decks</button>
+                </div>
+            );
+
+            const active = cards[index];
+            const isCloze = active.type === 'cloze';
+
+            return (
+                <div className="flex flex-col h-full bg-ios-bg dark:bg-black">
+                    <Header title={`${index + 1} / ${cards.length}`} left={<button onClick={onBack} className="text-ios-blue flex items-center gap-1 font-medium"><i className="fas fa-chevron-left"></i> Back</button>} />
+                    
+                    <div className="flex-1 p-4 relative flex flex-col justify-center card-container">
+                        <div className={`card-inner w-full min-h-[400px] flex-1 cursor-pointer ${flipped ? 'card-flipped' : ''}`} onClick={() => !flipped && setFlipped(true)}>
+                            
+                            {/* FRONT FACE */}
+                            <div className="card-face bg-ios-card dark:bg-ios-darkCard rounded-3xl shadow-float p-8 flex flex-col items-center justify-center text-center border border-transparent dark:border-ios-darkSeparator">
+                                <div className="text-2xl md:text-3xl font-medium leading-relaxed max-w-full break-words">
+                                    {isCloze 
+                                        ? <div dangerouslySetInnerHTML={{__html: renderCloze(active.front, active.clozeId, false)}} /> 
+                                        : <div dangerouslySetInnerHTML={{__html: sanitize(active.front)}} />
+                                    }
+                                </div>
+                                <div className="mt-8 text-sm text-ios-gray uppercase font-bold tracking-widest opacity-60">Tap to show answer</div>
+                            </div>
+
+                            {/* BACK FACE */}
+                            <div className="card-face card-back bg-ios-card dark:bg-ios-darkCard rounded-3xl shadow-float p-8 flex flex-col items-center justify-center text-center border border-transparent dark:border-ios-darkSeparator">
+                                <div className="text-xl opacity-60 mb-6 pb-6 border-b border-ios-separator dark:border-ios-darkSeparator w-full">
+                                    {isCloze 
+                                        ? <div dangerouslySetInnerHTML={{__html: renderCloze(active.front, active.clozeId, true)}} /> 
+                                        : <div dangerouslySetInnerHTML={{__html: sanitize(active.front)}} />
+                                    }
+                                </div>
+                                <div className="text-2xl md:text-3xl font-semibold leading-relaxed">
+                                    <div dangerouslySetInnerHTML={{__html: sanitize(active.back)}} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* CONTROLS */}
+                    <div className="bg-ios-bg/90 dark:bg-black/90 backdrop-blur-xl border-t border-ios-separator dark:border-ios-darkSeparator pb-[env(safe-area-inset-bottom)] px-4 py-4">
+                        {!flipped ? (
+                            <button onClick={() => setFlipped(true)} className="w-full bg-ios-blue text-white h-14 rounded-2xl font-bold text-lg shadow-lg active:scale-[0.98] transition-transform">Show Answer</button>
+                        ) : (
+                            <div className="grid grid-cols-4 gap-3 w-full">
+                                <button onClick={() => rate(1)} className="flex flex-col items-center justify-center bg-ios-red/10 h-16 rounded-2xl active:scale-95 transition-transform"><span className="text-ios-red font-bold text-sm">Again</span><span className="text-[10px] text-ios-gray mt-1">1m</span></button>
+                                <button onClick={() => rate(2)} className="flex flex-col items-center justify-center bg-ios-orange/10 h-16 rounded-2xl active:scale-95 transition-transform"><span className="text-ios-orange font-bold text-sm">Hard</span><span className="text-[10px] text-ios-gray mt-1">10m</span></button>
+                                <button onClick={() => rate(3)} className="flex flex-col items-center justify-center bg-ios-green/10 h-16 rounded-2xl active:scale-95 transition-transform"><span className="text-ios-green font-bold text-sm">Good</span><span className="text-[10px] text-ios-gray mt-1">1d</span></button>
+                                <button onClick={() => rate(4)} className="flex flex-col items-center justify-center bg-ios-blue/10 h-16 rounded-2xl active:scale-95 transition-transform"><span className="text-ios-blue font-bold text-sm">Easy</span><span className="text-[10px] text-ios-gray mt-1">4d</span></button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
         };
-        
-        // Render the app
+
+        // --- Stats View ---
+        const Stats = () => {
+            const [data, setData] = useState({decks: 0, cards: 0});
+            useEffect(() => { db.getStats().then(setData); }, []);
+            return (
+                <div className="flex flex-col h-full bg-ios-bg dark:bg-black">
+                    <Header title="Statistics" />
+                    <div className="p-4 grid grid-cols-2 gap-4">
+                        <div className="bg-ios-card dark:bg-ios-darkCard p-6 rounded-2xl shadow-native flex flex-col items-center">
+                            <span className="text-4xl font-bold mb-2 text-ios-blue">{data.decks}</span>
+                            <span className="text-xs text-ios-gray uppercase font-bold tracking-wider">Total Decks</span>
+                        </div>
+                        <div className="bg-ios-card dark:bg-ios-darkCard p-6 rounded-2xl shadow-native flex flex-col items-center">
+                            <span className="text-4xl font-bold mb-2 text-ios-green">{data.cards}</span>
+                            <span className="text-xs text-ios-gray uppercase font-bold tracking-wider">Total Cards</span>
+                        </div>
+                    </div>
+                    
+                    <div className="mt-auto mb-24 text-center opacity-40">
+                         <p className="text-xs font-medium text-ios-gray">Made by Muhammad Daler</p>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Main App ---
+        const App = () => {
+            const [tab, setTab] = useState('decks');
+            const [activeDeck, setActiveDeck] = useState(null);
+
+            useEffect(() => {
+                if(window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                }
+            }, []);
+
+            if(activeDeck) return <Study deck={activeDeck} onBack={() => setActiveDeck(null)} />;
+
+            return (
+                <Fragment>
+                    <div className="flex-1 overflow-hidden relative">
+                        {tab === 'decks' && <Decks onSelect={setActiveDeck} />}
+                        {tab === 'add' && <AddCard />}
+                        {tab === 'stats' && <Stats />}
+                    </div>
+                    <TabBar active={tab} onChange={setTab} />
+                </Fragment>
+            );
+        };
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(App));
+        root.render(<App />);
     </script>
 </body>
 </html>
