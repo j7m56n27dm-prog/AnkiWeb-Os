@@ -1,2371 +1,2882 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Anki macOS Pro</title>
-<!-- PWA Settings -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<meta name="description" content="Professional flashcard app with spaced repetition">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3395/3395431.png">
-<link rel="manifest" href="manifest.json">
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- Libraries -->
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script>
-tailwind.config = {
-darkMode: 'class',
-theme: {
-extend: {
-colors: {
-ios: {
-blue: '#007AFF',
-green: '#34C759',
-red: '#FF3B30',
-orange: '#FF9500',
-yellow: '#FFCC00',
-gray: '#8E8E93',
-gray2: '#AEAEB2',
-gray3: '#C7C7CC',
-gray4: '#D1D1D6',
-gray5: '#E5E5EA',
-gray6: '#F2F2F7',
-bg: '#F2F2F7',
-darkBg: '#000000',
-darkBg2: '#1C1C1E',
-card: '#FFFFFF',
-darkCard: '#1C1C1E',
-separator: '#C6C6C8',
-darkSeparator: '#38383A',
-shadow: 'rgba(0, 0, 0, 0.06)',
-darkShadow: 'rgba(0, 0, 0, 0.3)'
-}
-},
-boxShadow: {
-'native': '0 4px 12px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
-'native-dark': '0 4px 12px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)',
-'float': '0 8px 24px rgba(0,0,0,0.12)',
-'float-dark': '0 8px 24px rgba(0,0,0,0.4)',
-'inset': 'inset 0 1px 0 rgba(255,255,255,0.1)',
-'inset-dark': 'inset 0 1px 0 rgba(255,255,255,0.05)'
-},
-fontFamily: {
-sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Helvetica Neue', 'sans-serif'],
-},
-fontSize: {
-'ios-large': '34px',
-'ios-title1': '28px',
-'ios-title2': '22px',
-'ios-title3': '20px',
-'ios-headline': '17px',
-'ios-body': '17px',
-'ios-callout': '16px',
-'ios-subhead': '15px',
-'ios-footnote': '13px',
-'ios-caption1': '12px',
-'ios-caption2': '11px'
-},
-transitionProperty: {
-'all': 'all',
-},
-animation: {
-'fade-in': 'fadeIn 0.3s ease-out',
-'slide-up': 'slideUp 0.3s ease-out',
-'slide-down': 'slideDown 0.3s ease-out',
-'scale': 'scale 0.2s ease-out',
-'bounce-subtle': 'bounceSubtle 0.5s ease-out'
-},
-keyframes: {
-fadeIn: {
-'0%': { opacity: 0 },
-'100%': { opacity: 1 }
-},
-slideUp: {
-'0%': { transform: 'translateY(20px)', opacity: 0 },
-'100%': { transform: 'translateY(0)', opacity: 1 }
-},
-slideDown: {
-'0%': { transform: 'translateY(-20px)', opacity: 0 },
-'100%': { transform: 'translateY(0)', opacity: 1 }
-},
-scale: {
-'0%': { transform: 'scale(0.95)', opacity: 0 },
-'100%': { transform: 'scale(1)', opacity: 1 }
-},
-bounceSubtle: {
-'0%, 100%': { transform: 'translateY(0)' },
-'50%': { transform: 'translateY(-5px)' }
-},
-spin: {
-'0%': { transform: 'rotate(0deg)' },
-'100%': { transform: 'rotate(360deg)' }
-}
-}
-}
-},
-plugins: [
-function({ addUtilities }) {
-addUtilities({
-'.text-truncate': {
-'overflow': 'hidden',
-'text-overflow': 'ellipsis',
-'white-space': 'nowrap',
-},
-'.word-break': {
-'word-break': 'break-word',
-},
-'.backdrop-blur-ios': {
-'backdrop-filter': 'blur(20px)',
-'-webkit-backdrop-filter': 'blur(20px)'
-},
-'.ios-press': {
-'transition': 'transform 0.1s, opacity 0.1s',
-},
-'.ios-press:active': {
-'transform': 'scale(0.97)',
-'opacity': '0.7'
-}
-});
-}
-]
-}
-</script>
-<style>
-/* Global Reset & Typography */
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
--webkit-font-smoothing: antialiased;
--moz-osx-font-smoothing: grayscale;
-}
-html {
-height: 100%;
-overflow: hidden;
-}
-body {
--webkit-tap-highlight-color: transparent;
--webkit-touch-callout: none;
-overscroll-behavior-y: none;
-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-background-color: #F2F2F7;
-color: #000000;
-height: 100vh;
-height: -webkit-fill-available;
-overflow: hidden;
-transition: background-color 0.3s ease, color 0.3s ease;
-position: fixed;
-width: 100%;
-}
-body.dark {
-background-color: #000000;
-color: #FFFFFF;
-}
-body * {
-user-select: none;
--webkit-user-select: none;
-}
-input, textarea, [contenteditable] {
-user-select: text;
--webkit-user-select: text;
-}
-/* iOS-like Scroll Behavior */
-.scroll-area {
--webkit-overflow-scrolling: touch;
-scroll-behavior: smooth;
-}
-/* 3D Flip Animation */
-.card-container {
-perspective: 1200px;
-width: 100%;
-height: 100%;
-}
-.card-inner {
-position: relative;
-width: 100%;
-height: 100%;
-transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-transform-style: preserve-3d;
-}
-.card-flipped {
-transform: rotateY(180deg);
-}
-.card-face {
-position: absolute;
-width: 100%;
-height: 100%;
-backface-visibility: hidden;
--webkit-backface-visibility: hidden;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-padding: 2rem;
-overflow-y: auto;
--webkit-overflow-scrolling: touch;
-border-radius: 16px;
-}
-.card-back {
-transform: rotateY(180deg);
-}
-/* Cloze Styles */
-.cloze-hidden {
-color: transparent;
-background: #007AFF;
-border-radius: 6px;
-padding: 2px 8px;
-font-weight: 600;
-cursor: pointer;
-position: relative;
-display: inline-block;
-min-width: 30px;
-user-select: none;
--webkit-user-select: none;
-margin: 0 2px;
-}
-.cloze-hidden::after {
-content: '...';
-color: white;
-position: absolute;
-left: 50%;
-top: 50%;
-transform: translate(-50%, -50%);
-font-size: 0.9em;
-font-weight: bold;
-}
-body.dark .cloze-hidden {
-background: #0A84FF;
-}
-.cloze-revealed {
-color: #34C759;
-font-weight: 700;
-border-bottom: 2px solid rgba(52, 199, 89, 0.3);
-padding: 0 2px;
-margin: 0 2px;
-background: rgba(52, 199, 89, 0.1);
-border-radius: 4px;
-}
-.cloze-hint {
-font-size: 0.8em;
-color: #8E8E93;
-font-style: italic;
-margin-left: 4px;
-}
-body.dark .cloze-hint {
-color: #AEAEB2;
-}
-/* Loader animation */
-.loader {
-width: 24px;
-height: 24px;
-border: 3px solid rgba(128, 128, 128, 0.2);
-border-top-color: #007AFF;
-border-radius: 50%;
-animation: spin 0.8s linear infinite;
-}
-body.dark .loader {
-border-top-color: #0A84FF;
-}
-/* Custom scrollbar */
-::-webkit-scrollbar {
-width: 6px;
-height: 6px;
-}
-::-webkit-scrollbar-track {
-background: transparent;
-}
-::-webkit-scrollbar-thumb {
-background: #C6C6C8;
-border-radius: 10px;
-}
-body.dark ::-webkit-scrollbar-thumb {
-background: #38383A;
-}
-/* Safe area support */
-@supports (padding: max(0px)) {
-.safe-area-top {
-padding-top: max(12px, env(safe-area-inset-top));
-}
-.safe-area-bottom {
-padding-bottom: max(20px, env(safe-area-inset-bottom));
-}
-.safe-area-left {
-padding-left: max(16px, env(safe-area-inset-left));
-}
-.safe-area-right {
-padding-right: max(16px, env(safe-area-inset-right));
-}
-}
-/* Animation classes */
-.fade-in {
-animation: fadeIn 0.3s ease-out;
-}
-.slide-up {
-animation: slideUp 0.3s ease-out;
-}
-.slide-down {
-animation: slideDown 0.3s ease-out;
-}
-.scale {
-animation: scale 0.2s ease-out;
-}
-/* iOS-like button active states */
-.ios-button {
-transition: transform 0.1s, opacity 0.1s;
-}
-.ios-button:active {
-transform: scale(0.97);
-opacity: 0.7;
-}
-/* Focus states for accessibility */
-button:focus-visible, input:focus-visible, textarea:focus-visible {
-outline: 2px solid #007AFF;
-outline-offset: 2px;
-}
-body.dark button:focus-visible,
-body.dark input:focus-visible,
-body.dark textarea:focus-visible {
-outline: 2px solid #64B5FF;
-}
-/* Prevent image dragging */
-img {
--webkit-user-drag: none;
-user-drag: none;
-pointer-events: none;
-}
-/* iOS-like selection */
-::selection {
-background-color: rgba(0, 122, 255, 0.3);
-}
-body.dark ::selection {
-background-color: rgba(10, 132, 255, 0.3);
-}
-/* iOS-like modal backdrop */
-.modal-backdrop {
-background: rgba(0, 0, 0, 0.4);
-backdrop-filter: blur(20px);
--webkit-backdrop-filter: blur(20px);
-}
-body.dark .modal-backdrop {
-background: rgba(0, 0, 0, 0.6);
-}
-/* Card shadow elevations */
-.elevation-1 {
-box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-}
-.elevation-2 {
-box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-}
-.elevation-3 {
-box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-}
-/* Text rendering */
-.text-rendering-optimizeLegibility {
-text-rendering: optimizeLegibility;
-}
-/* Hide number input spinners */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
--webkit-appearance: none;
-margin: 0;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Anki macOS Pro</title>
+    
+    <!-- PWA Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="description" content="Professional flashcard app with spaced repetition">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3395/3395431.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ios: {
+                            blue: '#007AFF',
+                            green: '#34C759',
+                            red: '#FF3B30',
+                            orange: '#FF9500',
+                            yellow: '#FFCC00',
+                            gray: '#8E8E93',
+                            gray2: '#AEAEB2',
+                            gray3: '#C7C7CC',
+                            gray4: '#D1D1D6',
+                            gray5: '#E5E5EA',
+                            gray6: '#F2F2F7',
+                            bg: '#F2F2F7',
+                            darkBg: '#000000',
+                            darkBg2: '#1C1C1E',
+                            card: '#FFFFFF',
+                            darkCard: '#1C1C1E',
+                            separator: '#C6C6C8',
+                            darkSeparator: '#38383A',
+                            shadow: 'rgba(0, 0, 0, 0.06)',
+                            darkShadow: 'rgba(0, 0, 0, 0.3)'
+                        }
+                    },
+                    boxShadow: {
+                        'native': '0 4px 12px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+                        'native-dark': '0 4px 12px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)',
+                        'float': '0 8px 24px rgba(0,0,0,0.12)',
+                        'float-dark': '0 8px 24px rgba(0,0,0,0.4)',
+                        'inset': 'inset 0 1px 0 rgba(255,255,255,0.1)',
+                        'inset-dark': 'inset 0 1px 0 rgba(255,255,255,0.05)'
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Helvetica Neue', 'sans-serif'],
+                    },
+                    fontSize: {
+                        'ios-large': '34px',
+                        'ios-title1': '28px',
+                        'ios-title2': '22px',
+                        'ios-title3': '20px',
+                        'ios-headline': '17px',
+                        'ios-body': '17px',
+                        'ios-callout': '16px',
+                        'ios-subhead': '15px',
+                        'ios-footnote': '13px',
+                        'ios-caption1': '12px',
+                        'ios-caption2': '11px'
+                    },
+                    transitionProperty: {
+                        'all': 'all',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'scale': 'scale 0.2s ease-out',
+                        'bounce-subtle': 'bounceSubtle 0.5s ease-out'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: 0 },
+                            '100%': { opacity: 1 }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: 0 },
+                            '100%': { transform: 'translateY(0)', opacity: 1 }
+                        },
+                        slideDown: {
+                            '0%': { transform: 'translateY(-20px)', opacity: 0 },
+                            '100%': { transform: 'translateY(0)', opacity: 1 }
+                        },
+                        scale: {
+                            '0%': { transform: 'scale(0.95)', opacity: 0 },
+                            '100%': { transform: 'scale(1)', opacity: 1 }
+                        },
+                        bounceSubtle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' }
+                        },
+                        spin: {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg)' }
+                        }
+                    }
+                }
+            },
+            plugins: [
+                function({ addUtilities }) {
+                    addUtilities({
+                        '.text-truncate': {
+                            'overflow': 'hidden',
+                            'text-overflow': 'ellipsis',
+                            'white-space': 'nowrap',
+                        },
+                        '.word-break': {
+                            'word-break': 'break-word',
+                        },
+                        '.backdrop-blur-ios': {
+                            'backdrop-filter': 'blur(20px)',
+                            '-webkit-backdrop-filter': 'blur(20px)'
+                        },
+                        '.ios-press': {
+                            'transition': 'transform 0.1s, opacity 0.1s',
+                        },
+                        '.ios-press:active': {
+                            'transform': 'scale(0.97)',
+                            'opacity': '0.7'
+                        },
+                        '.touch-min-44': {
+                            'min-width': '44px',
+                            'min-height': '44px',
+                            'display': 'flex',
+                            'align-items': 'center',
+                            'justify-content': 'center'
+                        }
+                    });
+                }
+            ]
+        }
+    </script>
+    
+    <style>
+        /* Global Reset & Typography */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        body {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            overscroll-behavior-y: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+            background-color: #F2F2F7;
+            color: #000000;
+            height: 100vh;
+            height: -webkit-fill-available;
+            overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            width: 100%;
+        }
+        
+        body.dark {
+            background-color: #000000;
+            color: #FFFFFF;
+        }
+        
+        body * {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        input, textarea, [contenteditable] {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        
+        /* iOS-like Scroll Behavior */
+        .scroll-area {
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+        
+        /* 3D Flip Animation */
+        .card-container {
+            perspective: 1200px;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        
+        .card-flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 16px;
+        }
+        
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        
+        /* Cloze Styles */
+        .cloze-hidden {
+            color: transparent;
+            background: #007AFF;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+            min-width: 44px;
+            min-height: 32px;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0 2px;
+            outline: none;
+        }
+        
+        .cloze-hidden::after {
+            content: '...';
+            color: white;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        body.dark .cloze-hidden {
+            background: #0A84FF;
+        }
+        
+        .cloze-revealed {
+            color: #34C759;
+            font-weight: 700;
+            border-bottom: 2px solid rgba(52, 199, 89, 0.3);
+            padding: 0 2px;
+            margin: 0 2px;
+            background: rgba(52, 199, 89, 0.1);
+            border-radius: 4px;
+        }
+        
+        .cloze-hint {
+            font-size: 0.8em;
+            color: #8E8E93;
+            font-style: italic;
+            margin-left: 4px;
+        }
+        
+        body.dark .cloze-hint {
+            color: #AEAEB2;
+        }
+        
+        /* Loader animation */
+        .loader {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(128, 128, 128, 0.2);
+            border-top-color: #007AFF;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        body.dark .loader {
+            border-top-color: #0A84FF;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #C6C6C8;
+            border-radius: 10px;
+        }
+        
+        body.dark ::-webkit-scrollbar-thumb {
+            background: #38383A;
+        }
+        
+        /* Safe area support */
+        @supports (padding: max(0px)) {
+            .safe-area-top {
+                padding-top: max(12px, env(safe-area-inset-top));
+            }
+            
+            .safe-area-bottom {
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+            
+            .safe-area-left {
+                padding-left: max(16px, env(safe-area-inset-left));
+            }
+            
+            .safe-area-right {
+                padding-right: max(16px, env(safe-area-inset-right));
+            }
+        }
+        
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .slide-down {
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .scale {
+            animation: scale 0.2s ease-out;
+        }
+        
+        /* iOS-like button active states */
+        .ios-button {
+            transition: transform 0.1s, opacity 0.1s;
+        }
+        
+        .ios-button:active {
+            transform: scale(0.97);
+            opacity: 0.7;
+        }
+        
+        /* Focus states for accessibility */
+        button:focus-visible, input:focus-visible, textarea:focus-visible {
+            outline: 2px solid #007AFF;
+            outline-offset: 2px;
+        }
+        
+        body.dark button:focus-visible, 
+        body.dark input:focus-visible, 
+        body.dark textarea:focus-visible {
+            outline: 2px solid #64B5FF;
+        }
+        
+        /* Prevent image dragging */
+        img {
+            -webkit-user-drag: none;
+            user-drag: none;
+            pointer-events: none;
+        }
+        
+        /* iOS-like selection */
+        ::selection {
+            background-color: rgba(0, 122, 255, 0.3);
+        }
+        
+        body.dark ::selection {
+            background-color: rgba(10, 132, 255, 0.3);
+        }
+        
+        /* iOS-like modal backdrop */
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        body.dark .modal-backdrop {
+            background: rgba(0, 0, 0, 0.6);
+        }
+        
+        /* Card shadow elevations */
+        .elevation-1 {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+        
+        .elevation-2 {
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+        }
+        
+        .elevation-3 {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+        }
+        
+        /* Text rendering */
+        .text-rendering-optimizeLegibility {
+            text-rendering: optimizeLegibility;
+        }
+        
+        /* Hide number input spinners */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        /* Keyboard focus */
+        .keyboard-focus:focus {
+            outline: 2px solid #007AFF;
+            outline-offset: 2px;
+        }
+        
+        /* Virtual keyboard adjustments */
+        @media (max-height: 500px) {
+            .card-face {
+                padding: 1rem;
+            }
+            
+            .study-controls {
+                padding: 0.5rem;
+            }
+        }
+    </style>
 </head>
 <body class="transition-colors duration-300">
-<div id="root" class="h-full w-full flex flex-col overflow-hidden"></div>
-<script type="text/babel">
-// ==========================================
-// 1. CORE UTILITIES & HELPERS
-// ==========================================
-const { useState, useEffect, useRef, useMemo, useCallback, useContext, createContext, Fragment } = React;
-// Create context for theme management
-const ThemeContext = createContext({
-isDark: false,
-toggleTheme: () => {}
-});
-// Robust ID generator
-const generateId = () => {
-return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-};
-// Enhanced HTML sanitization using DOMPurify with strict settings
-const sanitize = (text) => {
-if (!text || typeof text !== 'string') return '';
-// Convert newlines to <br> first
-const htmlWithLineBreaks = text.replace(/\n/g, '<br>');
-// Configure DOMPurify with strict settings for production
-const clean = DOMPurify.sanitize(htmlWithLineBreaks, {
-ALLOWED_TAGS: ['b', 'i', 'u', 'strong', 'em', 'br', 'div', 'span', 'p', 'ul', 'ol', 'li', 'code', 'pre', 'blockquote', 'strike', 'mark', 'sub', 'sup'],
-ALLOWED_ATTR: ['class', 'title'],
-FORBID_ATTR: ['style', 'onerror', 'onload', 'onclick', 'onmouseover'],
-FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'select', 'button', 'link', 'meta', 'base'],
-USE_PROFILES: { html: true },
-RETURN_DOM_FRAGMENT: false,
-ALLOW_DATA_ATTR: false,
-ALLOW_ARIA_ATTR: false,
-SAFE_FOR_TEMPLATES: true,
-WHOLE_DOCUMENT: false,
-RETURN_DOM: false,
-RETURN_DOM_IMPORT: false
-});
-return clean;
-};
-// Format timestamp to human-readable date
-const formatDate = (timestamp) => {
-const date = new Date(timestamp);
-return date.toLocaleDateString(navigator.language, {
-year: 'numeric',
-month: 'short',
-day: 'numeric'
-});
-};
-// Format time to human-readable format
-const formatTime = (timestamp) => {
-const date = new Date(timestamp);
-return date.toLocaleTimeString(navigator.language, {
-hour: '2-digit',
-minute: '2-digit'
-});
-};
-// Parse cloze deletions from text
-const parseClozeDeletions = (text) => {
-if (!text) return [];
-const regex = /{{c(\d+)::(.*?)(?:::(.*?))?}}/g;
-const deletions = [];
-let match;
-while ((match = regex.exec(text)) !== null) {
-deletions.push({
-id: match[1],
-content: match[2] || '',
-hint: match[3] || ''
-});
-}
-return deletions;
-};
-// Extract unique cloze IDs from text
-const extractClozeIds = (text) => {
-const regex = /{{c(\d+)::/g;
-const ids = new Set();
-let match;
-while ((match = regex.exec(text)) !== null) {
-ids.add(match[1]);
-}
-return Array.from(ids);
-};
-// ==========================================
-// 2. DATABASE (IndexedDB Wrapper) - IMPROVED
-// ==========================================
-class Database {
-constructor() {
-this.name = 'AnkiPro_v3';
-this.version = 3;
-this.db = null;
-this.initialized = false;
-}
-async init() {
-if (this.initialized && this.db) return this.db;
-return new Promise((resolve, reject) => {
-const request = indexedDB.open(this.name, this.version);
-request.onupgradeneeded = (event) => {
-const db = event.target.result;
-this.db = db;
-// Create object stores if they don't exist
-if (!db.objectStoreNames.contains('decks')) {
-const deckStore = db.createObjectStore('decks', { keyPath: 'id' });
-deckStore.createIndex('created', 'created', { unique: false });
-deckStore.createIndex('updated', 'updated', { unique: false });
-}
-if (!db.objectStoreNames.contains('cards')) {
-const cardStore = db.createObjectStore('cards', { keyPath: 'id' });
-cardStore.createIndex('deckId', 'deckId', { unique: false });
-cardStore.createIndex('due', 'due', { unique: false });
-cardStore.createIndex('created', 'created', { unique: false });
-cardStore.createIndex('phase', 'phase', { unique: false });
-cardStore.createIndex('type', 'type', { unique: false });
-cardStore.createIndex('clozeId', 'clozeId', { unique: false });
-}
-if (!db.objectStoreNames.contains('reviews')) {
-const reviewStore = db.createObjectStore('reviews', { keyPath: 'id' });
-reviewStore.createIndex('cardId', 'cardId', { unique: false });
-reviewStore.createIndex('timestamp', 'timestamp', { unique: false });
-reviewStore.createIndex('rating', 'rating', { unique: false });
-}
-if (!db.objectStoreNames.contains('settings')) {
-const settingsStore = db.createObjectStore('settings', { keyPath: 'key' });
-}
-};
-request.onsuccess = (event) => {
-this.db = event.target.result;
-this.initialized = true;
-resolve(this.db);
-};
-request.onerror = (event) => {
-console.error('Database error:', event.target.error);
-reject(new Error('Failed to open database'));
-};
-});
-}
-async withStore(storeName, mode = 'readonly', callback) {
-try {
-await this.init();
-const transaction = this.db.transaction(storeName, mode);
-const store = transaction.objectStore(storeName);
-return await new Promise((resolve, reject) => {
-const result = callback(store);
-transaction.oncomplete = () => {
-resolve(result);
-};
-transaction.onerror = (event) => {
-console.error('Transaction error:', event.target.error);
-reject(event.target.error);
-};
-});
-} catch (error) {
-console.error(`Database operation failed for ${storeName}:`, error);
-throw error;
-}
-}
-async withStores(storeNames, mode = 'readonly', callback) {
-try {
-await this.init();
-const transaction = this.db.transaction(storeNames, mode);
-const stores = {};
-storeNames.forEach(name => {
-stores[name] = transaction.objectStore(name);
-});
-return await new Promise((resolve, reject) => {
-const result = callback(stores);
-transaction.oncomplete = () => {
-resolve(result);
-};
-transaction.onerror = (event) => {
-console.error('Transaction error:', event.target.error);
-reject(event.target.error);
-};
-});
-} catch (error) {
-console.error(`Database operation failed for ${storeNames}:`, error);
-throw error;
-}
-}
-async getDecks() {
-try {
-return await this.withStore('decks', 'readonly', async (store) => {
-return new Promise((resolve) => {
-const request = store.getAll();
-request.onsuccess = () => resolve(request.result || []);
-request.onerror = () => resolve([]);
-});
-});
-} catch (error) {
-console.error('Error getting decks:', error);
-return [];
-}
-}
-async addDeck(name) {
-if (!name || name.trim().length === 0) {
-throw new Error('Deck name cannot be empty');
-}
-const deck = {
-id: generateId(),
-name: name.trim(),
-created: Date.now(),
-updated: Date.now(),
-cardCount: 0,
-dueCount: 0
-};
-await this.withStore('decks', 'readwrite', async (store) => {
-return new Promise((resolve, reject) => {
-const request = store.add(deck);
-request.onsuccess = () => resolve(deck);
-request.onerror = (e) => reject(e.target.error);
-});
-});
-return deck;
-}
-async updateDeck(deck) {
-deck.updated = Date.now();
-await this.withStore('decks', 'readwrite', async (store) => {
-return new Promise((resolve, reject) => {
-const request = store.put(deck);
-request.onsuccess = () => resolve();
-request.onerror = (e) => reject(e.target.error);
-});
-});
-}
-async deleteDeck(deckId) {
-// First, get all cards in this deck
-const cards = await this.getCardsByDeck(deckId);
-// Delete deck and all its cards in a transaction
-await this.withStores(['decks', 'cards', 'reviews'], 'readwrite', async (stores) => {
-const deckStore = stores.decks;
-const cardStore = stores.cards;
-const reviewStore = stores.reviews;
-// Delete deck
-deckStore.delete(deckId);
-// Delete all cards in the deck
-cards.forEach(card => {
-cardStore.delete(card.id);
-// Also delete related reviews
-const reviewIndex = reviewStore.index('cardId');
-const range = IDBKeyRange.only(card.id);
-reviewIndex.openCursor(range).onsuccess = function(event) {
-const cursor = event.target.result;
-if (cursor) {
-reviewStore.delete(cursor.primaryKey);
-cursor.continue();
-}
-};
-});
-return Promise.resolve();
-});
-// Update all decks after deletion
-const allDecks = await this.getDecks();
-allDecks.forEach(deck => {
-this.updateDeckCardCount(deck.id);
-});
-}
-async addCard(cardData) {
-if (!cardData.deckId) {
-throw new Error('Card must belong to a deck');
-}
-const card = {
-id: generateId(),
-created: Date.now(),
-updated: Date.now(),
-due: Date.now(), // Due immediately
-interval: 0,
-ease: 250, // 250%
-reps: 0,
-lapses: 0,
-phase: 'learning',
-lastReview: null,
-...cardData
-};
-await this.withStore('cards', 'readwrite', async (store) => {
-return new Promise((resolve, reject) => {
-const request = store.add(card);
-request.onsuccess = () => resolve(card);
-request.onerror = (e) => reject(e.target.error);
-});
-});
-// Update deck card count
-await this.updateDeckCardCount(card.deckId);
-return card;
-}
-async updateCard(card) {
-card.updated = Date.now();
-await this.withStore('cards', 'readwrite', async (store) => {
-return new Promise((resolve, reject) => {
-const request = store.put(card);
-request.onsuccess = () => resolve();
-request.onerror = (e) => reject(e.target.error);
-});
-});
-}
-async getCardById(id) {
-return await this.withStore('cards', 'readonly', async (store) => {
-return new Promise((resolve) => {
-const request = store.get(id);
-request.onsuccess = () => resolve(request.result || null);
-request.onerror = () => resolve(null);
-});
-});
-}
-async getDueCards(deckId, limit = 100) {
-return await this.withStore('cards', 'readonly', async (store) => {
-return new Promise((resolve) => {
-const index = store.index('deckId');
-const range = IDBKeyRange.only(deckId);
-const request = index.openCursor(range);
-const now = Date.now();
-const dueCards = [];
-request.onsuccess = (event) => {
-const cursor = event.target.result;
-if (cursor) {
-const card = cursor.value;
-if (card.due <= now && dueCards.length < limit) {
-dueCards.push(card);
-}
-cursor.continue();
-} else {
-// Sort by due date (oldest first)
-dueCards.sort((a, b) => a.due - b.due);
-resolve(dueCards);
-}
-};
-request.onerror = () => resolve([]);
-});
-});
-}
-async getCardsByDeck(deckId) {
-return await this.withStore('cards', 'readonly', async (store) => {
-return new Promise((resolve) => {
-const index = store.index('deckId');
-const request = index.getAll(deckId);
-request.onsuccess = () => resolve(request.result || []);
-request.onerror = () => resolve([]);
-});
-});
-}
-async updateDeckCardCount(deckId) {
-const cards = await this.getCardsByDeck(deckId);
-const dueCards = cards.filter(card => card.due <= Date.now());
-const deck = await this.withStore('decks', 'readonly', async (store) => {
-return new Promise((resolve) => {
-const request = store.get(deckId);
-request.onsuccess = () => resolve(request.result);
-request.onerror = () => resolve(null);
-});
-});
-if (deck) {
-deck.cardCount = cards.length;
-deck.dueCount = dueCards.length;
-deck.updated = Date.now();
-await this.withStore('decks', 'readwrite', async (store) => {
-return new Promise((resolve) => {
-const request = store.put(deck);
-request.onsuccess = () => resolve();
-request.onerror = () => resolve();
-});
-});
-}
-}
-async getStats() {
-const [decks, cards] = await Promise.all([
-this.getDecks(),
-this.withStore('cards', 'readonly', async (store) => {
-return new Promise(resolve => {
-const request = store.getAll();
-request.onsuccess = () => resolve(request.result || []);
-request.onerror = () => resolve([]);
-});
-})
-]);
-const now = Date.now();
-const dueCards = cards.filter(card => card.due <= now);
-const learningCards = cards.filter(card => card.phase === 'learning');
-const reviewCards = cards.filter(card => card.phase === 'review');
-// Calculate total reviews today
-const todayStart = new Date();
-todayStart.setHours(0, 0, 0, 0);
-const todayEnd = new Date();
-todayEnd.setHours(23, 59, 59, 999);
-const todayReviews = await this.withStore('reviews', 'readonly', async (store) => {
-return new Promise(resolve => {
-const index = store.index('timestamp');
-const range = IDBKeyRange.bound(todayStart.getTime(), todayEnd.getTime());
-const request = index.count(range);
-request.onsuccess = () => resolve(request.result);
-request.onerror = () => resolve(0);
-});
-});
-return {
-decks: decks.length,
-cards: cards.length,
-due: dueCards.length,
-learning: learningCards.length,
-review: reviewCards.length,
-todayReviews: todayReviews
-};
-}
-async clearAllData() {
-await this.withStores(['decks', 'cards', 'reviews', 'settings'], 'readwrite', async (stores) => {
-stores.decks.clear();
-stores.cards.clear();
-stores.reviews.clear();
-stores.settings.clear();
-});
-}
-}
-// Create a singleton database instance
-const db = new Database();
-// ==========================================
-// 3. SCHEDULING ALGORITHM (Enhanced SM-2)
-// ==========================================
-const scheduler = (card, rating, now = Date.now()) => {
-if (!card) throw new Error('Card is required');
-if (![1, 2, 3, 4].includes(rating)) throw new Error('Invalid rating');
-const updatedCard = { ...card };
-const minute = 60 * 1000;
-const hour = 60 * minute;
-const day = 24 * hour;
-// Record the review
-const review = {
-id: generateId(),
-cardId: card.id,
-timestamp: now,
-rating: rating,
-previousInterval: card.interval,
-previousEase: card.ease,
-previousPhase: card.phase
-};
-// Save review to database (async, don't await)
-db.withStore('reviews', 'readwrite', async (store) => {
-store.add(review);
-}).catch(console.error);
-// Handle "Again" (rating 1)
-if (rating === 1) {
-updatedCard.lapses += 1;
-updatedCard.ease = Math.max(130, updatedCard.ease - 20);
-if (updatedCard.phase === 'learning') {
-updatedCard.interval = 0;
-updatedCard.due = now + minute; // 1 minute
-} else if (updatedCard.phase === 'review') {
-updatedCard.phase = 'relearning';
-updatedCard.interval = 0;
-updatedCard.reps = 0;
-updatedCard.due = now + minute; // 1 minute
-} else { // relearning
-updatedCard.interval = 0;
-updatedCard.due = now + minute; // 1 minute
-}
-}
-// Handle other ratings
-else {
-if (updatedCard.phase === 'learning' || updatedCard.phase === 'relearning') {
-// Learning/relearning phase
-if (rating === 2) { // Hard
-updatedCard.interval = 10 * minute; // 10 minutes
-updatedCard.due = now + updatedCard.interval;
-}
-else if (rating === 3) { // Good
-updatedCard.phase = 'review';
-updatedCard.interval = 1 * day; // 1 day
-updatedCard.due = now + updatedCard.interval;
-updatedCard.reps += 1;
-}
-else if (rating === 4) { // Easy
-updatedCard.phase = 'review';
-updatedCard.interval = 4 * day; // 4 days
-updatedCard.ease += 15;
-updatedCard.due = now + updatedCard.interval;
-updatedCard.reps += 1;
-}
-}
-else {
-// Review phase
-updatedCard.reps += 1;
-if (rating === 2) { // Hard
-updatedCard.interval = Math.max(1 * day, Math.round(updatedCard.interval * 0.6));
-updatedCard.ease = Math.max(130, updatedCard.ease - 10);
-}
-else if (rating === 3) { // Good
-updatedCard.interval = Math.round(updatedCard.interval * (updatedCard.ease / 100));
-}
-else if (rating === 4) { // Easy
-updatedCard.interval = Math.round(updatedCard.interval * (updatedCard.ease / 100) * 1.3);
-updatedCard.ease += 15;
-}
-// Ensure minimum interval of 1 day in review phase
-updatedCard.interval = Math.max(1 * day, updatedCard.interval);
-updatedCard.ease = Math.max(130, Math.min(500, updatedCard.ease));
-updatedCard.due = now + updatedCard.interval;
-}
-}
-updatedCard.lastReview = now;
-updatedCard.updated = now;
-return updatedCard;
-};
-// Calculate next intervals for display
-const calculateNextIntervals = (card) => {
-const minute = 60 * 1000;
-const day = 24 * 60 * 60 * 1000;
-if (card.phase === 'learning' || card.phase === 'relearning') {
-return {
-again: 1 * minute,
-hard: 10 * minute,
-good: 1 * day,
-easy: 4 * day
-};
-} else {
-// For review phase, calculate based on current card state
-const intervals = {
-again: 1 * minute,
-hard: Math.max(1 * day, Math.round(card.interval * 0.6)),
-good: Math.round(card.interval * (card.ease / 100)),
-easy: Math.round(card.interval * (card.ease / 100) * 1.3)
-};
-return intervals;
-}
-};
-// Format interval for display
-const formatInterval = (ms) => {
-const minute = 60 * 1000;
-const hour = 60 * minute;
-const day = 24 * hour;
-if (ms < hour) {
-return Math.round(ms / minute) + 'm';
-} else if (ms < day) {
-return Math.round(ms / hour) + 'h';
-} else {
-return Math.round(ms / day) + 'd';
-}
-};
-// ==========================================
-// 4. COMPONENTS
-// ==========================================
-// Theme Provider Component
-const ThemeProvider = ({ children }) => {
-const [isDark, setIsDark] = useState(() => {
-const saved = localStorage.getItem('theme');
-if (saved) {
-return saved === 'dark';
-}
-return window.matchMedia('(prefers-color-scheme: dark)').matches;
-});
-useEffect(() => {
-if (isDark) {
-document.body.classList.add('dark');
-} else {
-document.body.classList.remove('dark');
-}
-localStorage.setItem('theme', isDark ? 'dark' : 'light');
-}, [isDark]);
-useEffect(() => {
-const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-const handleChange = (e) => {
-const saved = localStorage.getItem('theme');
-if (!saved) {
-setIsDark(e.matches);
-}
-};
-mediaQuery.addEventListener('change', handleChange);
-return () => mediaQuery.removeEventListener('change', handleChange);
-}, []);
-const toggleTheme = useCallback(() => setIsDark(prev => !prev), []);
-return (
-<ThemeContext.Provider value={{ isDark, toggleTheme }}>
-{children}
-</ThemeContext.Provider>
-);
-};
-// Header Component
-const Header = ({ title, left = null, right = null, onBack = null }) => {
-const { isDark } = useContext(ThemeContext);
-return (
-<div className={`h-16 w-full flex items-center justify-between px-4 sticky top-0 z-50 safe-area-top backdrop-blur-ios ${
-isDark
-? 'bg-black/80 border-b border-ios-darkSeparator'
-: 'bg-ios-bg/90 border-b border-ios-separator'
-}`}>
-<div className="w-16 flex items-center justify-start">
-{onBack && (
-<button
-onClick={onBack}
-className="w-10 h-10 rounded-full flex items-center justify-center ios-button"
-aria-label="Back"
->
-<i className="fas fa-chevron-left text-xl text-ios-blue"></i>
-</button>
-)}
-{left}
-</div>
-<h1 className="font-semibold text-ios-headline text-truncate max-w-[50%] text-center">
-{title}
-</h1>
-<div className="w-16 flex justify-end items-center">
-{right}
-</div>
-</div>
-);
-};
-// Tab Bar Component
-const TabBar = ({ activeTab, onTabChange }) => {
-const { isDark } = useContext(ThemeContext);
-return (
-<div className={`h-20 w-full flex justify-around items-start pt-2 pb-8 border-t safe-area-bottom backdrop-blur-ios ${
-isDark
-? 'bg-ios-darkCard/90 border-ios-darkSeparator'
-: 'bg-ios-bg/90 border-ios-separator'
-}`}>
-<button
-onClick={() => onTabChange('decks')}
-className={`flex flex-col items-center gap-1 w-20 transition-all duration-200 ios-button ${
-activeTab === 'decks'
-? 'text-ios-blue scale-105'
-: isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}
-aria-label="Decks"
->
-<i className={`fas fa-layer-group text-xl mb-1 ${
-activeTab === 'decks' ? 'scale-110' : ''
-}`}></i>
-<span className="text-ios-caption1 font-medium">Decks</span>
-</button>
-<button
-onClick={() => onTabChange('add')}
-className={`flex flex-col items-center gap-1 w-20 transition-all duration-200 ios-button ${
-activeTab === 'add'
-? 'text-ios-blue scale-105'
-: isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}
-aria-label="Add Card"
->
-<i className={`fas fa-plus-circle text-xl mb-1 ${
-activeTab === 'add' ? 'scale-110' : ''
-}`}></i>
-<span className="text-ios-caption1 font-medium">Add</span>
-</button>
-<button
-onClick={() => onTabChange('stats')}
-className={`flex flex-col items-center gap-1 w-20 transition-all duration-200 ios-button ${
-activeTab === 'stats'
-? 'text-ios-blue scale-105'
-: isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}
-aria-label="Statistics"
->
-<i className={`fas fa-chart-bar text-xl mb-1 ${
-activeTab === 'stats' ? 'scale-110' : ''
-}`}></i>
-<span className="text-ios-caption1 font-medium">Stats</span>
-</button>
-</div>
-);
-};
-// Card Component for study mode
-const StudyCard = ({ card, flipped, onFlip, isCloze = false, clozeId = null }) => {
-const { isDark } = useContext(ThemeContext);
-// Render front side of the card
-const renderFront = () => {
-if (isCloze && card.front && clozeId) {
-return <ClozeText text={card.front} clozeId={clozeId} isRevealed={false} />;
-}
-return (
-<div
-className="text-ios-title2 font-medium leading-relaxed text-center break-words px-4"
-dangerouslySetInnerHTML={{ __html: sanitize(card.front || 'No content') }}
-/>
-);
-};
-// Render back side of the card
-const renderBack = () => {
-if (isCloze && card.front && clozeId) {
-return (
-<div className="w-full h-full flex flex-col p-4">
-<div
-className={`w-full pb-6 mb-6 border-b ${
-isDark ? 'border-ios-darkSeparator' : 'border-ios-separator'
-}`}
-dangerouslySetInnerHTML={{ __html: sanitize(card.front || '') }}
-/>
-<div className="flex-1 flex flex-col items-center justify-center">
-<div className="text-ios-title2 font-medium mb-4 text-center">
-<ClozeText text={card.front} clozeId={clozeId} isRevealed={true} />
-</div>
-{card.back && (
-<div
-className={`mt-6 text-ios-body opacity-80 text-center ${
-isDark ? 'text-gray-300' : 'text-ios-gray'
-}`}
-dangerouslySetInnerHTML={{ __html: sanitize(card.back) }}
-/>
-)}
-</div>
-</div>
-);
-}
-return (
-<div className="w-full h-full flex flex-col p-4">
-<div
-className={`w-full pb-6 mb-6 border-b ${
-isDark ? 'border-ios-darkSeparator' : 'border-ios-separator'
-}`}
-dangerouslySetInnerHTML={{ __html: sanitize(card.front || '') }}
-/>
-<div className="flex-1 flex flex-col items-center justify-center">
-<div
-className="text-ios-title2 font-medium leading-relaxed text-center break-words"
-dangerouslySetInnerHTML={{ __html: sanitize(card.back || 'No answer provided') }}
-/>
-</div>
-</div>
-);
-};
-return (
-<div className="card-container w-full h-full max-h-[calc(100vh-200px)] px-4">
-<div className={`card-inner ${flipped ? 'card-flipped' : ''}`}>
-{/* Front Face */}
-<div
-className={`card-face ${
-isDark
-? 'bg-ios-darkCard border border-ios-darkSeparator'
-: 'bg-ios-card border border-ios-separator'
-} elevation-2 ${flipped ? 'hidden' : ''}`}
-onClick={onFlip}
->
-<div className="flex flex-col items-center justify-center h-full w-full p-6">
-{renderFront()}
-<div className={`mt-8 text-ios-caption1 uppercase font-bold tracking-widest ${
-isDark ? 'text-ios-gray3 opacity-70' : 'text-ios-gray opacity-60'
-}`}>
-Tap to show answer
-</div>
-</div>
-</div>
-{/* Back Face */}
-<div
-className={`card-face card-back ${
-isDark
-? 'bg-ios-darkCard border border-ios-darkSeparator'
-: 'bg-ios-card border border-ios-separator'
-} elevation-2`}
->
-{renderBack()}
-</div>
-</div>
-</div>
-);
-};
-// Cloze Text Component
-const ClozeText = ({ text, clozeId, isRevealed = false }) => {
-const { isDark } = useContext(ThemeContext);
-if (!text) return null;
-// Parse cloze deletions
-const parseCloze = (inputText) => {
-const regex = /{{c(\d+)::(.*?)(?:::(.*?))?}}/g;
-let lastIndex = 0;
-let match;
-const parts = [];
-while ((match = regex.exec(inputText)) !== null) {
-// Add text before the match
-if (match.index > lastIndex) {
-parts.push({
-type: 'text',
-content: inputText.substring(lastIndex, match.index)
-});
-}
-const id = match[1];
-const content = match[2] || '';
-const hint = match[3] || '';
-parts.push({
-type: 'cloze',
-id: id,
-content: content,
-hint: hint
-});
-lastIndex = regex.lastIndex;
-}
-// Add remaining text
-if (lastIndex < inputText.length) {
-parts.push({
-type: 'text',
-content: inputText.substring(lastIndex)
-});
-}
-return parts;
-};
-const parts = parseCloze(text);
-return (
-<span className="inline">
-{parts.map((part, index) => {
-if (part.type === 'text') {
-return (
-<span
-key={index}
-dangerouslySetInnerHTML={{ __html: sanitize(part.content) }}
-/>
-);
-}
-if (part.type === 'cloze') {
-const isTargetCloze = part.id === clozeId.toString();
-if (isTargetCloze) {
-if (isRevealed) {
-// Show the answer
-return (
-<span key={index}>
-<span
-className="cloze-revealed"
-dangerouslySetInnerHTML={{ __html: sanitize(part.content) }}
-/>
-{part.hint && (
-<span className="cloze-hint">
-({part.hint})
-</span>
-)}
-</span>
-);
-} else {
-// Show hidden with hint if available
-return (
-<span
-key={index}
-className="cloze-hidden ios-button"
-title={part.hint || 'Click to reveal'}
-onClick={(e) => e.stopPropagation()}
->
-{part.hint || '...'}
-</span>
-);
-}
-} else {
-// For non-target clozes, show the content normally
-return (
-<span
-key={index}
-dangerouslySetInnerHTML={{ __html: sanitize(part.content) }}
-/>
-);
-}
-}
-return null;
-})}
-</span>
-);
-};
-// Empty State Component
-const EmptyState = ({ icon, title, message, action }) => {
-const { isDark } = useContext(ThemeContext);
-return (
-<div className="flex flex-col items-center justify-center p-8 text-center h-full animate-fade-in">
-<div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 elevation-1 ${
-isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
-}`}>
-<i className={`${icon} text-3xl ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}></i>
-</div>
-<h2 className="text-ios-title2 font-bold mb-3">{title}</h2>
-<p className={`text-ios-body mb-8 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-{message}
-</p>
-{action}
-</div>
-);
-};
-// Toast Notification Component
-const Toast = ({ message, type = 'info', duration = 3000, onClose }) => {
-const [visible, setVisible] = useState(true);
-const { isDark } = useContext(ThemeContext);
-useEffect(() => {
-const timer = setTimeout(() => {
-setVisible(false);
-setTimeout(onClose, 300);
-}, duration);
-return () => clearTimeout(timer);
-}, [duration, onClose]);
-if (!visible) return null;
-let bgColor, icon;
-switch (type) {
-case 'success':
-bgColor = 'bg-ios-green';
-icon = 'fas fa-check-circle';
-break;
-case 'error':
-bgColor = 'bg-ios-red';
-icon = 'fas fa-exclamation-circle';
-break;
-case 'warning':
-bgColor = 'bg-ios-orange';
-icon = 'fas fa-exclamation-triangle';
-break;
-default:
-bgColor = 'bg-ios-blue';
-icon = 'fas fa-info-circle';
-}
-return (
-<div className={`fixed bottom-28 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl elevation-3 z-50 flex items-center gap-3 transition-all duration-300 animate-slide-up ${bgColor} text-white max-w-[90%] min-w-[200px]`}>
-<i className={`${icon} text-lg`}></i>
-<span className="font-medium text-ios-callout flex-1 text-center">
-{message}
-</span>
-<button
-onClick={() => {
-setVisible(false);
-setTimeout(onClose, 300);
-}}
-className="opacity-80 hover:opacity-100"
->
-<i className="fas fa-times"></i>
-</button>
-</div>
-);
-};
-// Study Controls Component
-const StudyControls = ({ flipped, onRate, card }) => {
-const { isDark } = useContext(ThemeContext);
-const intervals = useMemo(() => card ? calculateNextIntervals(card) : null, [card]);
-if (!flipped) {
-return (
-<button
-onClick={() => onRate('flip')}
-className="w-full bg-ios-blue text-white h-14 rounded-2xl font-bold text-ios-headline shadow-lg ios-button elevation-2"
->
-Show Answer
-</button>
-);
-}
-return (
-<div className="grid grid-cols-4 gap-3 w-full animate-fade-in">
-<button
-onClick={() => onRate(1)}
-className={`flex flex-col items-center justify-center h-16 rounded-2xl ios-button elevation-1 ${
-isDark
-? 'bg-ios-red/20 hover:bg-ios-red/30 active:bg-ios-red/40'
-: 'bg-ios-red/10 hover:bg-ios-red/20 active:bg-ios-red/30'
-}`}
->
-<span className="text-ios-red font-bold text-ios-caption1">Again</span>
-{intervals && (
-<span className={`text-ios-caption2 mt-1 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-{formatInterval(intervals.again)}
-</span>
-)}
-</button>
-<button
-onClick={() => onRate(2)}
-className={`flex flex-col items-center justify-center h-16 rounded-2xl ios-button elevation-1 ${
-isDark
-? 'bg-ios-orange/20 hover:bg-ios-orange/30 active:bg-ios-orange/40'
-: 'bg-ios-orange/10 hover:bg-ios-orange/20 active:bg-ios-orange/30'
-}`}
->
-<span className="text-ios-orange font-bold text-ios-caption1">Hard</span>
-{intervals && (
-<span className={`text-ios-caption2 mt-1 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-{formatInterval(intervals.hard)}
-</span>
-)}
-</button>
-<button
-onClick={() => onRate(3)}
-className={`flex flex-col items-center justify-center h-16 rounded-2xl ios-button elevation-1 ${
-isDark
-? 'bg-ios-green/20 hover:bg-ios-green/30 active:bg-ios-green/40'
-: 'bg-ios-green/10 hover:bg-ios-green/20 active:bg-ios-green/30'
-}`}
->
-<span className="text-ios-green font-bold text-ios-caption1">Good</span>
-{intervals && (
-<span className={`text-ios-caption2 mt-1 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-{formatInterval(intervals.good)}
-</span>
-)}
-</button>
-<button
-onClick={() => onRate(4)}
-className={`flex flex-col items-center justify-center h-16 rounded-2xl ios-button elevation-1 ${
-isDark
-? 'bg-ios-blue/20 hover:bg-ios-blue/30 active:bg-ios-blue/40'
-: 'bg-ios-blue/10 hover:bg-ios-blue/20 active:bg-ios-blue/30'
-}`}
->
-<span className="text-ios-blue font-bold text-ios-caption1">Easy</span>
-{intervals && (
-<span className={`text-ios-caption2 mt-1 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-{formatInterval(intervals.easy)}
-</span>
-)}
-</button>
-</div>
-);
-};
-// --- Decks View ---
-const DecksView = ({ onSelectDeck, onCreateDeck }) => {
-const { isDark } = useContext(ThemeContext);
-const [decks, setDecks] = useState([]);
-const [loading, setLoading] = useState(true);
-const [showAddModal, setShowAddModal] = useState(false);
-const [deckName, setDeckName] = useState('');
-const [toast, setToast] = useState(null);
-// Load decks from database
-useEffect(() => {
-const loadDecks = async () => {
-try {
-setLoading(true);
-const data = await db.getDecks();
-setDecks(data);
-} catch (error) {
-console.error('Error loading decks:', error);
-setToast({
-id: Date.now(),
-message: 'Failed to load decks. Please try again.',
-type: 'error'
-});
-} finally {
-setLoading(false);
-}
-};
-loadDecks();
-}, []);
-// Create a new deck
-const handleCreateDeck = async () => {
-if (!deckName.trim()) {
-setToast({
-id: Date.now(),
-message: 'Please enter a deck name',
-type: 'warning'
-});
-return;
-}
-try {
-const newDeck = await db.addDeck(deckName.trim());
-setDecks(prev => [...prev, newDeck]);
-setDeckName('');
-setShowAddModal(false);
-setToast({
-id: Date.now(),
-message: 'Deck created successfully!',
-type: 'success'
-});
-if (onCreateDeck) onCreateDeck(newDeck);
-} catch (error) {
-console.error('Error creating deck:', error);
-setToast({
-id: Date.now(),
-message: 'Failed to create deck. Please try again.',
-type: 'error'
-});
-}
-};
-// Delete a deck
-const handleDeleteDeck = async (deckId, deckName) => {
-if (!window.confirm(`Are you sure you want to delete the deck "${deckName}" and all its cards? This action cannot be undone.`)) {
-return;
-}
-try {
-await db.deleteDeck(deckId);
-setDecks(prev => prev.filter(deck => deck.id !== deckId));
-setToast({
-id: Date.now(),
-message: 'Deck deleted successfully!',
-type: 'success'
-});
-} catch (error) {
-console.error('Error deleting deck:', error);
-setToast({
-id: Date.now(),
-message: 'Failed to delete deck. Please try again.',
-type: 'error'
-});
-}
-};
-return (
-<div className="flex flex-col h-full pb-24 animate-fade-in">
-<Header
-title="Decks"
-right={
-<button
-onClick={() => setShowAddModal(true)}
-className="text-ios-blue text-xl ios-button"
-aria-label="Add Deck"
->
-<i className="fas fa-plus"></i>
-</button>
-}
-/>
-<div className="flex-1 overflow-y-auto scroll-area p-4 space-y-3 safe-area-left safe-area-right">
-{loading ? (
-<div className="flex justify-center items-center h-40">
-<div className="loader"></div>
-</div>
-) : decks.length === 0 ? (
-<EmptyState
-icon="fas fa-folder-open"
-title="No Decks Found"
-message="Create your first deck to start learning"
-action={
-<button
-onClick={() => setShowAddModal(true)}
-className="px-6 py-3 bg-ios-blue text-white rounded-xl font-semibold shadow-md ios-button elevation-2"
->
-Create Deck
-</button>
-}
-/>
-) : (
-decks.map(deck => (
-<div
-key={deck.id}
-onClick={() => onSelectDeck(deck)}
-className={`flex items-center justify-between p-4 rounded-2xl ios-button elevation-1 cursor-pointer ${
-isDark
-? 'bg-ios-darkCard border border-ios-darkSeparator hover:bg-gray-800'
-: 'bg-ios-card hover:bg-gray-50'
-}`}
->
-<div className="flex items-center gap-4 flex-1">
-<div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-isDark ? 'bg-ios-blue/20' : 'bg-ios-blue/10'
-}`}>
-<i className="fas fa-book text-ios-blue text-xl"></i>
-</div>
-<div className="flex-1">
-<h3 className="font-semibold text-ios-headline">{deck.name}</h3>
-<div className={`text-ios-caption1 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-{deck.cardCount || 0} cards • {deck.dueCount || 0} due
-</div>
-</div>
-</div>
-<button
-onClick={(e) => {
-e.stopPropagation();
-handleDeleteDeck(deck.id, deck.name);
-}}
-className={`w-8 h-8 rounded-full flex items-center justify-center ios-button ${
-isDark
-? 'text-ios-gray3 hover:text-ios-red hover:bg-gray-800'
-: 'text-ios-gray hover:text-ios-red hover:bg-gray-100'
-}`}
-aria-label={`Delete ${deck.name} deck`}
->
-<i className="fas fa-trash-alt"></i>
-</button>
-</div>
-))
-)}
-<div className="mt-8 text-center opacity-50">
-<p className="text-ios-caption2 font-medium">Made with ❤️ by Muhammad Daler</p>
-</div>
-</div>
-{/* Add Deck Modal */}
-{showAddModal && (
-<div
-className="fixed inset-0 z-40 flex items-center justify-center p-4 modal-backdrop animate-fade-in"
-onClick={() => setShowAddModal(false)}
->
-<div
-className={`w-full max-w-md rounded-2xl p-6 elevation-3 transform animate-scale ${
-isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
-}`}
-onClick={e => e.stopPropagation()}
->
-<h3 className="text-ios-title3 font-bold mb-4 text-center">Create New Deck</h3>
-<input
-type="text"
-value={deckName}
-onChange={(e) => setDeckName(e.target.value)}
-placeholder="e.g., English Vocabulary"
-className={`w-full p-4 rounded-xl text-ios-body outline-none focus:ring-2 focus:ring-ios-blue transition-colors ${
-isDark
-? 'bg-ios-darkBg2 text-white border border-ios-darkSeparator'
-: 'bg-ios-bg text-black border border-ios-separator'
-}`}
-autoFocus
-onKeyPress={(e) => e.key === 'Enter' && handleCreateDeck()}
-/>
-<div className="flex gap-3 mt-6">
-<button
-onClick={() => setShowAddModal(false)}
-className={`flex-1 py-3 rounded-xl font-semibold ios-button ${
-isDark
-? 'bg-ios-darkBg2 text-white hover:bg-gray-800'
-: 'bg-ios-bg text-ios-blue hover:bg-gray-100'
-}`}
->
-Cancel
-</button>
-<button
-onClick={handleCreateDeck}
-className="flex-1 py-3 bg-ios-blue text-white rounded-xl font-semibold shadow-md ios-button"
->
-Create
-</button>
-</div>
-</div>
-</div>
-)}
-{/* Toast Notifications */}
-{toast && (
-<Toast
-key={toast.id}
-message={toast.message}
-type={toast.type}
-onClose={() => setToast(null)}
-/>
-)}
-</div>
-);
-};
-// --- Add Card View ---
-const AddCardView = ({ onCardAdded }) => {
-const { isDark } = useContext(ThemeContext);
-const [decks, setDecks] = useState([]);
-const [selectedDeckId, setSelectedDeckId] = useState('');
-const [cardType, setCardType] = useState('basic');
-const [frontText, setFrontText] = useState('');
-const [backText, setBackText] = useState('');
-const [isProcessing, setIsProcessing] = useState(false);
-const [toast, setToast] = useState(null);
-const frontTextAreaRef = useRef(null);
-const backTextAreaRef = useRef(null);
-// Load decks on mount
-useEffect(() => {
-const loadDecks = async () => {
-try {
-const data = await db.getDecks();
-setDecks(data);
-if (data.length > 0) {
-setSelectedDeckId(data[0].id);
-}
-} catch (error) {
-console.error('Error loading decks:', error);
-setToast({
-id: Date.now(),
-message: 'Failed to load decks. Please try again.',
-type: 'error'
-});
-}
-};
-loadDecks();
-}, []);
-// Insert cloze deletion at cursor position
-const insertCloze = () => {
-const textarea = frontTextAreaRef.current;
-if (!textarea) return;
-const start = textarea.selectionStart;
-const end = textarea.selectionEnd;
-const selectedText = frontText.substring(start, end) || 'text';
-// Find the highest cloze ID used so far
-const clozeIds = extractClozeIds(frontText);
-let maxClozeId = 0;
-clozeIds.forEach(id => {
-const numId = parseInt(id);
-if (numId > maxClozeId) maxClozeId = numId;
-});
-const nextClozeId = maxClozeId + 1;
-const clozeText = `{{c${nextClozeId}::${selectedText}}}`;
-// Insert the cloze deletion
-const newText = frontText.substring(0, start) + clozeText + frontText.substring(end);
-setFrontText(newText);
-// Set cursor position after insertion
-setTimeout(() => {
-if (textarea) {
-const newPosition = start + clozeText.length;
-textarea.focus();
-textarea.setSelectionRange(newPosition, newPosition);
-}
-}, 0);
-};
-// Validate and save card
-const handleSaveCard = async () => {
-// Validation
-if (!selectedDeckId) {
-setToast({
-id: Date.now(),
-message: 'Please select a deck',
-type: 'warning'
-});
-return;
-}
-if (!frontText.trim()) {
-setToast({
-id: Date.now(),
-message: 'Front field cannot be empty',
-type: 'warning'
-});
-return;
-}
-if (cardType === 'cloze') {
-const clozeIds = extractClozeIds(frontText);
-if (clozeIds.length === 0) {
-setToast({
-id: Date.now(),
-message: 'No cloze deletions found. Use the "{...}" button to create one.',
-type: 'warning'
-});
-return;
-}
-}
-setIsProcessing(true);
-try {
-let cardsCreated = 0;
-if (cardType === 'basic') {
-// Create a single basic card
-await db.addCard({
-deckId: selectedDeckId,
-type: 'basic',
-front: frontText.trim(),
-back: backText.trim()
-});
-cardsCreated = 1;
-} else {
-// For cloze cards, create a card for each unique cloze ID
-const clozeIds = extractClozeIds(frontText);
-for (const clozeId of clozeIds) {
-await db.addCard({
-deckId: selectedDeckId,
-type: 'cloze',
-front: frontText.trim(),
-back: backText.trim(),
-clozeId: clozeId
-});
-cardsCreated++;
-}
-}
-// Show success message
-setToast({
-id: Date.now(),
-message: cardType === 'basic'
-? 'Card added successfully!'
-: `${cardsCreated} cloze cards created!`,
-type: 'success'
-});
-// Reset form
-setFrontText('');
-setBackText('');
-// Notify parent about new card
-if (onCardAdded) onCardAdded();
-} catch (error) {
-console.error('Error adding card:', error);
-setToast({
-id: Date.now(),
-message: 'Failed to add card. Please try again.',
-type: 'error'
-});
-} finally {
-setIsProcessing(false);
-}
-};
-return (
-<div className="flex flex-col h-full pb-24 animate-fade-in">
-<Header title="Add Card" />
-<div className="flex-1 overflow-y-auto scroll-area p-4 space-y-6 safe-area-left safe-area-right">
-{/* Deck and Card Type Selection */}
-<div className={`rounded-2xl p-4 elevation-1 ${
-isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
-}`}>
-<label className={`block text-ios-caption1 font-bold uppercase tracking-wider mb-2 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-Target Deck
-</label>
-<select
-value={selectedDeckId}
-onChange={(e) => setSelectedDeckId(e.target.value)}
-className={`w-full p-3 rounded-xl text-ios-body outline-none focus:ring-2 focus:ring-ios-blue appearance-none transition-colors ${
-isDark
-? 'bg-ios-darkBg2 text-white border border-ios-darkSeparator'
-: 'bg-ios-bg text-black border border-ios-separator'
-}`}
->
-{decks.map(deck => (
-<option key={deck.id} value={deck.id}>
-{deck.name}
-</option>
-))}
-</select>
-<label className={`block text-ios-caption1 font-bold uppercase tracking-wider mt-4 mb-2 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-Card Type
-</label>
-<div className={`flex p-1 rounded-xl overflow-hidden ${
-isDark ? 'bg-ios-darkBg2' : 'bg-ios-bg'
-}`}>
-<button
-onClick={() => setCardType('basic')}
-className={`flex-1 py-3 text-ios-caption1 font-semibold ios-button ${
-cardType === 'basic'
-? isDark
-? 'bg-ios-darkCard text-white'
-: 'bg-ios-card text-black'
-: isDark
-? 'text-ios-gray3'
-: 'text-ios-gray'
-}`}
->
-Basic
-</button>
-<button
-onClick={() => setCardType('cloze')}
-className={`flex-1 py-3 text-ios-caption1 font-semibold ios-button ${
-cardType === 'cloze'
-? isDark
-? 'bg-ios-darkCard text-white'
-: 'bg-ios-card text-black'
-: isDark
-? 'text-ios-gray3'
-: 'text-ios-gray'
-}`}
->
-Cloze
-</button>
-</div>
-</div>
-{/* Card Content */}
-<div className={`rounded-2xl p-4 elevation-1 ${
-isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
-}`}>
-<div className="flex justify-between items-center mb-3">
-<label className={`text-ios-caption1 font-bold uppercase tracking-wider ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-Front
-</label>
-{cardType === 'cloze' && (
-<button
-onClick={insertCloze}
-className="px-3 py-1 bg-ios-blue text-white text-ios-caption2 font-bold rounded-full shadow-sm ios-button"
-title="Insert Cloze Deletion"
->
-{'{...}'}
-</button>
-)}
-</div>
-<textarea
-ref={frontTextAreaRef}
-value={frontText}
-onChange={(e) => setFrontText(e.target.value)}
-placeholder={cardType === 'cloze'
-? "Type your text and select words to hide, then click '{...}'"
-: "Type your question here..."}
-className={`w-full min-h-[120px] p-3 rounded-xl text-ios-body outline-none focus:ring-2 focus:ring-ios-blue resize-none transition-colors ${
-isDark
-? 'bg-ios-darkBg2 text-white border border-ios-darkSeparator'
-: 'bg-ios-bg text-black border border-ios-separator'
-}`}
-/>
-<label className={`block text-ios-caption1 font-bold uppercase tracking-wider mt-4 mb-2 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-Back (Optional)
-</label>
-<textarea
-ref={backTextAreaRef}
-value={backText}
-onChange={(e) => setBackText(e.target.value)}
-placeholder="Additional information or context..."
-className={`w-full min-h-[80px] p-3 rounded-xl text-ios-body outline-none focus:ring-2 focus:ring-ios-blue resize-none transition-colors ${
-isDark
-? 'bg-ios-darkBg2 text-white border border-ios-darkSeparator'
-: 'bg-ios-bg text-black border border-ios-separator'
-}`}
-/>
-</div>
-{/* Save Button */}
-<button
-onClick={handleSaveCard}
-disabled={isProcessing}
-className={`w-full py-4 rounded-2xl font-bold text-ios-headline shadow-md ios-button elevation-2 ${
-isProcessing
-? 'bg-gray-400 cursor-not-allowed'
-: 'bg-ios-blue text-white'
-}`}
->
-{isProcessing ? (
-<div className="flex items-center justify-center">
-<div className="loader mr-2"></div>
-<span>Adding Card...</span>
-</div>
-) : (
-'Add to Deck'
-)}
-</button>
-{/* Cloze Example */}
-{cardType === 'cloze' && (
-<div className={`mt-4 p-4 rounded-xl ${
-isDark ? 'bg-ios-darkBg2 border border-ios-darkSeparator' : 'bg-ios-bg border border-ios-separator'
-}`}>
-<p className="font-medium text-ios-callout mb-2">Cloze Example:</p>
-<p className="text-ios-footnote">
-Use <code className="bg-black/10 dark:bg-white/10 px-1 rounded">{'{{c1::hidden text}}'}</code> to hide words.
-For hints: <code className="bg-black/10 dark:bg-white/10 px-1 rounded">{'{{c1::hidden text::hint}}'}</code>
-</p>
-</div>
-)}
-</div>
-{/* Toast Notifications */}
-{toast && (
-<Toast
-key={toast.id}
-message={toast.message}
-type={toast.type}
-onClose={() => setToast(null)}
-/>
-)}
-</div>
-);
-};
-// --- Study View ---
-const StudyView = ({ deck, onBack }) => {
-const { isDark } = useContext(ThemeContext);
-const [cards, setCards] = useState([]);
-const [currentIndex, setCurrentIndex] = useState(0);
-const [flipped, setFlipped] = useState(false);
-const [loading, setLoading] = useState(true);
-const [sessionStats, setSessionStats] = useState({
-correct: 0,
-total: 0,
-startTime: Date.now()
-});
-const [toast, setToast] = useState(null);
-// Load due cards for the deck
-useEffect(() => {
-const loadCards = async () => {
-try {
-setLoading(true);
-const dueCards = await db.getDueCards(deck.id, 100);
-setCards(dueCards);
-setSessionStats({
-correct: 0,
-total: dueCards.length,
-startTime: Date.now()
-});
-} catch (error) {
-console.error('Error loading cards:', error);
-setToast({
-id: Date.now(),
-message: 'Failed to load cards. Please try again.',
-type: 'error'
-});
-} finally {
-setLoading(false);
-}
-};
-loadCards();
-}, [deck.id]);
-// Handle card rating
-const handleRateCard = async (rating) => {
-if (rating === 'flip') {
-setFlipped(true);
-return;
-}
-if (currentIndex >= cards.length) return;
-const card = cards[currentIndex];
-try {
-// Update card with scheduler
-const updatedCard = scheduler(card, rating);
-await db.updateCard(updatedCard);
-// Update deck card count
-await db.updateDeckCardCount(deck.id);
-// Update session stats
-setSessionStats(prev => ({
-...prev,
-correct: prev.correct + (rating >= 3 ? 1 : 0)
-}));
-// Move to next card or finish session
-if (currentIndex < cards.length - 1) {
-setCurrentIndex(prev => prev + 1);
-setFlipped(false);
-} else {
-// Session complete
-const sessionTime = Math.round((Date.now() - sessionStats.startTime) / 1000 / 60);
-const successRate = Math.round((sessionStats.correct + (rating >= 3 ? 1 : 0)) / sessionStats.total * 100);
-setToast({
-id: Date.now(),
-message: `Session complete! ${successRate}% correct in ${sessionTime} min`,
-type: 'success',
-duration: 5000
-});
-// Return to decks after a delay
-setTimeout(() => {
-if (onBack) onBack();
-}, 3000);
-}
-} catch (error) {
-console.error('Error updating card:', error);
-setToast({
-id: Date.now(),
-message: 'Failed to update card. Please try again.',
-type: 'error'
-});
-}
-};
-if (loading) {
-return (
-<div className="h-full flex items-center justify-center">
-<div className="loader"></div>
-</div>
-);
-}
-if (cards.length === 0) {
-return (
-<div className="h-full flex flex-col items-center justify-center p-6 text-center animate-slide-up">
-<div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 elevation-2 ${
-isDark ? 'bg-ios-green/20' : 'bg-ios-green/10'
-}`}>
-<i className="fas fa-check text-4xl text-ios-green"></i>
-</div>
-<h2 className="text-ios-title2 font-bold mb-3">All Caught Up!</h2>
-<p className={`text-ios-body mb-8 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-You have no more cards to review in this deck.
-</p>
-<button
-onClick={onBack}
-className={`px-8 py-4 rounded-2xl font-bold text-ios-headline shadow-md ios-button elevation-2 ${
-isDark
-? 'bg-ios-darkCard text-white'
-: 'bg-ios-card text-ios-blue'
-}`}
->
-Return to Decks
-</button>
-</div>
-);
-}
-const currentCard = cards[currentIndex];
-const isCloze = currentCard.type === 'cloze';
-return (
-<div className="flex flex-col h-full animate-fade-in">
-<Header
-title={`${deck.name}`}
-left={
-<div className="text-ios-caption1 font-medium">
-{currentIndex + 1}/{cards.length}
-</div>
-}
-onBack={onBack}
-/>
-<div className="flex-1 flex items-center justify-center p-2">
-<StudyCard
-card={currentCard}
-flipped={flipped}
-onFlip={() => setFlipped(true)}
-isCloze={isCloze}
-clozeId={isCloze ? currentCard.clozeId : null}
-/>
-</div>
-<div className={`p-4 border-t safe-area-bottom ${
-isDark
-? 'bg-black/80 backdrop-blur-ios border-ios-darkSeparator'
-: 'bg-ios-bg/80 backdrop-blur-ios border-ios-separator'
-}`}>
-<StudyControls
-flipped={flipped}
-onRate={handleRateCard}
-card={currentCard}
-/>
-{/* Session Progress */}
-<div className={`p-3 text-center text-ios-caption1 font-medium ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-Session: {sessionStats.correct}/{sessionStats.total} correct •
-Success: {sessionStats.total > 0
-? Math.round(sessionStats.correct / sessionStats.total * 100)
-: 0}%
-</div>
-</div>
-{/* Toast Notifications */}
-{toast && (
-<Toast
-key={toast.id}
-message={toast.message}
-type={toast.type}
-duration={toast.duration}
-onClose={() => setToast(null)}
-/>
-)}
-</div>
-);
-};
-// --- Stats View ---
-const StatsView = () => {
-const { isDark } = useContext(ThemeContext);
-const [stats, setStats] = useState({
-decks: 0,
-cards: 0,
-due: 0,
-learning: 0,
-review: 0,
-todayReviews: 0
-});
-const [loading, setLoading] = useState(true);
-const [timeRange, setTimeRange] = useState('today');
-useEffect(() => {
-const loadStats = async () => {
-try {
-setLoading(true);
-const data = await db.getStats();
-setStats(data);
-} catch (error) {
-console.error('Error loading stats:', error);
-} finally {
-setLoading(false);
-}
-};
-loadStats();
-const interval = setInterval(loadStats, 30000); // Refresh every 30 seconds
-return () => clearInterval(interval);
-}, []);
-const calculateStreak = () => {
-// Simple streak calculation
-return 0;
-};
-return (
-<div className="flex flex-col h-full animate-fade-in">
-<Header title="Statistics" />
-{loading ? (
-<div className="flex justify-center items-center h-40">
-<div className="loader"></div>
-</div>
-) : (
-<div className="p-4 space-y-6 flex-1 overflow-y-auto scroll-area safe-area-left safe-area-right">
-{/* Summary Cards */}
-<div className="grid grid-cols-2 gap-4">
-<div className={`p-5 rounded-2xl elevation-1 flex flex-col items-center justify-center ${
-isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
-}`}>
-<div className="text-3xl font-bold text-ios-blue mb-2">{stats.decks}</div>
-<div className={`text-ios-caption1 uppercase font-bold tracking-wider ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-Decks
-</div>
-</div>
-<div className={`p-5 rounded-2xl elevation-1 flex flex-col items-center justify-center ${
-isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
-}`}>
-<div className="text-3xl font-bold text-ios-green mb-2">{stats.cards}</div>
-<div className={`text-ios-caption1 uppercase font-bold tracking-wider ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-Cards
-</div>
-</div>
-</div>
-{/* Due Cards Progress */}
-<div className={`p-5 rounded-2xl elevation-1 ${
-isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
-}`}>
-<div className="flex items-center justify-between mb-4">
-<h3 className="font-semibold text-ios-headline">Due Cards</h3>
-<div className="text-2xl font-bold text-ios-orange">{stats.due}</div>
-</div>
-<div className={`h-2 w-full rounded-full overflow-hidden ${
-isDark ? 'bg-gray-800' : 'bg-ios-bg'
-}`}>
-<div
-className="h-full bg-ios-orange rounded-full transition-all duration-500"
-style={{
-width: stats.cards > 0
-? `${Math.min(100, (stats.due / stats.cards) * 100)}%`
-: '0%'
-}}
-></div>
-</div>
-<div className="flex justify-between mt-2 text-ios-caption1">
-<span className={isDark ? 'text-ios-gray3' : 'text-ios-gray'}>
-{stats.cards - stats.due} mastered
-</span>
-<span className={isDark ? 'text-ios-gray3' : 'text-ios-gray'}>
-{stats.due} due
-</span>
-</div>
-</div>
-{/* Card Distribution */}
-<div className={`p-5 rounded-2xl elevation-1 ${
-isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
-}`}>
-<h3 className="font-semibold text-ios-headline mb-4">Card Distribution</h3>
-<div className="space-y-3">
-<div className="flex justify-between items-center">
-<div className="flex items-center gap-2">
-<div className="w-3 h-3 rounded-full bg-ios-blue"></div>
-<span>Learning</span>
-</div>
-<span className="font-medium">{stats.learning}</span>
-</div>
-<div className="flex justify-between items-center">
-<div className="flex items-center gap-2">
-<div className="w-3 h-3 rounded-full bg-ios-green"></div>
-<span>Review</span>
-</div>
-<span className="font-medium">{stats.review}</span>
-</div>
-<div className="flex justify-between items-center">
-<div className="flex items-center gap-2">
-<div className="w-3 h-3 rounded-full bg-ios-orange"></div>
-<span>Due Today</span>
-</div>
-<span className="font-medium">{stats.due}</span>
-</div>
-</div>
-</div>
-{/* Study Session Info */}
-<div className={`p-5 rounded-2xl elevation-1 ${
-isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
-}`}>
-<h3 className="font-semibold text-ios-headline mb-4">Today's Study</h3>
-<div className="space-y-3">
-<div className="flex justify-between">
-<span className={isDark ? 'text-ios-gray3' : 'text-ios-gray'}>
-Cards Reviewed
-</span>
-<span className="font-medium">{stats.todayReviews}</span>
-</div>
-<div className="flex justify-between">
-<span className={isDark ? 'text-ios-gray3' : 'text-ios-gray'}>
-Current Streak
-</span>
-<span className="font-medium">{calculateStreak()} days</span>
-</div>
-<div className="flex justify-between">
-<span className={isDark ? 'text-ios-gray3' : 'text-ios-gray'}>
-Total Study Time
-</span>
-<span className="font-medium">
-{Math.round(stats.todayReviews * 0.5)} min
-</span>
-</div>
-</div>
-</div>
-{/* App Info */}
-<div className={`mt-8 p-5 rounded-2xl text-center elevation-1 ${
-isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
-}`}>
-<div className={`text-ios-caption1 uppercase font-bold tracking-wider mb-2 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-App Information
-</div>
-<div className="font-medium text-ios-headline">Anki macOS Pro</div>
-<div className={`text-ios-callout mt-1 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-Version 1.3.0
-</div>
-<div className={`text-ios-footnote mt-3 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-© 2025 Muhammad Daler. All rights reserved.
-</div>
-<div className={`text-ios-caption2 mt-2 ${
-isDark ? 'text-ios-gray3' : 'text-ios-gray'
-}`}>
-Based on SM-2 spaced repetition algorithm
-</div>
-</div>
-</div>
-)}
-</div>
-);
-};
-// --- Main App ---
-const App = () => {
-const [activeTab, setActiveTab] = useState('decks');
-const [selectedDeck, setSelectedDeck] = useState(null);
-// Handle system theme changes
-useEffect(() => {
-const savedTheme = localStorage.getItem('theme');
-if (!savedTheme) {
-const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-if (darkMode) {
-document.body.classList.add('dark');
-}
-}
-// Initialize database
-db.init().catch(console.error);
-}, []);
-// Handle going back from study view
-const handleBackFromStudy = () => {
-setSelectedDeck(null);
-};
-// Handle card added event
-const handleCardAdded = () => {
-// Refresh stats or show notification
-console.log('New card added');
-};
-// Handle deck creation
-const handleDeckCreated = (newDeck) => {
-// Optionally switch to the new deck
-console.log('New deck created:', newDeck);
-};
-return (
-<ThemeProvider>
-<div className="flex flex-col h-full">
-{selectedDeck ? (
-<StudyView
-deck={selectedDeck}
-onBack={handleBackFromStudy}
-/>
-) : (
-<>
-{activeTab === 'decks' && (
-<DecksView
-onSelectDeck={setSelectedDeck}
-onCreateDeck={handleDeckCreated}
-/>
-)}
-{activeTab === 'add' && (
-<AddCardView onCardAdded={handleCardAdded} />
-)}
-{activeTab === 'stats' && <StatsView />}
-<TabBar activeTab={activeTab} onTabChange={setActiveTab} />
-</>
-)}
-</div>
-</ThemeProvider>
-);
-};
-// Render the app
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
-// Simple service worker for PWA (offline support)
-if ('serviceWorker' in navigator) {
-window.addEventListener('load', () => {
-// Create a simple service worker inline
-const swContent = `
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open('ankipro-v1').then(cache => {
-      return cache.addAll([
-        '/',
-        './index.html'
-      ]);
-    })
-  );
-});
+    <div id="root" class="h-full w-full flex flex-col overflow-hidden"></div>
+    
+    <script type="text/babel">
+        // ==========================================
+        // 1. CORE UTILITIES & HELPERS
+        // ==========================================
+        const { useState, useEffect, useRef, useMemo, useCallback, useContext, createContext, Fragment } = React;
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        return response || fetch(event.request);
-      })
-  );
-});
+        // Create context for theme management
+        const ThemeContext = createContext({
+            isDark: false,
+            toggleTheme: () => {}
+        });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.filter(name => name !== 'ankipro-v1')
-          .map(name => caches.delete(name))
-      );
-    })
-  );
-});
-`;
-// Create a blob URL for the service worker
-const blob = new Blob([swContent], { type: 'application/javascript' });
-const swURL = URL.createObjectURL(blob);
-navigator.serviceWorker.register(swURL)
-.then(registration => {
-console.log('Service Worker registered:', registration);
-// Clean up the blob URL after registration
-URL.revokeObjectURL(swURL);
-})
-.catch(error => {
-console.error('Service Worker registration failed:', error);
-// Clean up the blob URL even if registration fails
-URL.revokeObjectURL(swURL);
-});
-});
-}
-</script>
+        // Robust ID generator
+        const generateId = () => {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        };
+
+        // Enhanced HTML sanitization using DOMPurify with strict settings
+        const sanitize = (text) => {
+            if (!text || typeof text !== 'string') return '';
+            
+            // Convert newlines to <br> first
+            const htmlWithLineBreaks = text.replace(/\n/g, '<br>');
+            
+            // Configure DOMPurify with strict settings for production
+            const clean = DOMPurify.sanitize(htmlWithLineBreaks, {
+                ALLOWED_TAGS: ['b', 'i', 'u', 'strong', 'em', 'br', 'div', 'span', 'p', 'ul', 'ol', 'li', 'code', 'pre', 'blockquote', 'strike', 'mark', 'sub', 'sup'],
+                ALLOWED_ATTR: ['class', 'title'],
+                FORBID_ATTR: ['style', 'onerror', 'onload', 'onclick', 'onmouseover'],
+                FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'select', 'button', 'link', 'meta', 'base'],
+                USE_PROFILES: { html: true },
+                RETURN_DOM_FRAGMENT: false,
+                ALLOW_DATA_ATTR: false,
+                ALLOW_ARIA_ATTR: false,
+                SAFE_FOR_TEMPLATES: true,
+                WHOLE_DOCUMENT: false,
+                RETURN_DOM: false,
+                RETURN_DOM_IMPORT: false
+            });
+            
+            return clean;
+        };
+
+        // Format timestamp to human-readable date
+        const formatDate = (timestamp) => {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString(navigator.language, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        };
+
+        // Format time to human-readable format
+        const formatTime = (timestamp) => {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString(navigator.language, {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        };
+
+        // Parse cloze deletions from text
+        const parseClozeDeletions = (text) => {
+            if (!text) return [];
+            const regex = /{{c(\d+)::(.*?)(?:::(.*?))?}}/g;
+            const deletions = [];
+            let match;
+            
+            while ((match = regex.exec(text)) !== null) {
+                deletions.push({
+                    id: match[1],
+                    content: match[2] || '',
+                    hint: match[3] || ''
+                });
+            }
+            
+            return deletions;
+        };
+
+        // Extract unique cloze IDs from text
+        const extractClozeIds = (text) => {
+            const regex = /{{c(\d+)::/g;
+            const ids = new Set();
+            let match;
+            
+            while ((match = regex.exec(text)) !== null) {
+                ids.add(match[1]);
+            }
+            
+            return Array.from(ids);
+        };
+
+        // ==========================================
+        // 2. DATABASE (IndexedDB Wrapper) - IMPROVED
+        // ==========================================
+        class Database {
+            constructor() {
+                this.name = 'AnkiPro_v3';
+                this.version = 3;
+                this.db = null;
+                this.initialized = false;
+            }
+
+            async init() {
+                if (this.initialized && this.db) return this.db;
+                
+                return new Promise((resolve, reject) => {
+                    try {
+                        const request = indexedDB.open(this.name, this.version);
+                        
+                        request.onupgradeneeded = (event) => {
+                            const db = event.target.result;
+                            this.db = db;
+                            
+                            // Create object stores if they don't exist
+                            if (!db.objectStoreNames.contains('decks')) {
+                                const deckStore = db.createObjectStore('decks', { keyPath: 'id' });
+                                deckStore.createIndex('created', 'created', { unique: false });
+                                deckStore.createIndex('updated', 'updated', { unique: false });
+                            }
+                            
+                            if (!db.objectStoreNames.contains('cards')) {
+                                const cardStore = db.createObjectStore('cards', { keyPath: 'id' });
+                                cardStore.createIndex('deckId', 'deckId', { unique: false });
+                                cardStore.createIndex('due', 'due', { unique: false });
+                                cardStore.createIndex('created', 'created', { unique: false });
+                                cardStore.createIndex('phase', 'phase', { unique: false });
+                                cardStore.createIndex('type', 'type', { unique: false });
+                                cardStore.createIndex('clozeId', 'clozeId', { unique: false });
+                            }
+                            
+                            if (!db.objectStoreNames.contains('reviews')) {
+                                const reviewStore = db.createObjectStore('reviews', { keyPath: 'id' });
+                                reviewStore.createIndex('cardId', 'cardId', { unique: false });
+                                reviewStore.createIndex('timestamp', 'timestamp', { unique: false });
+                                reviewStore.createIndex('rating', 'rating', { unique: false });
+                            }
+                            
+                            if (!db.objectStoreNames.contains('settings')) {
+                                const settingsStore = db.createObjectStore('settings', { keyPath: 'key' });
+                            }
+                        };
+                        
+                        request.onsuccess = (event) => {
+                            this.db = event.target.result;
+                            this.initialized = true;
+                            resolve(this.db);
+                        };
+                        
+                        request.onerror = (event) => {
+                            console.error('Database error:', event.target.error);
+                            reject(new Error('Failed to open database'));
+                        };
+                    } catch (error) {
+                        // Handle private browsing mode
+                        console.warn('IndexedDB not available, using fallback storage');
+                        this.useFallback = true;
+                        this.fallbackStorage = {
+                            decks: [],
+                            cards: [],
+                            reviews: [],
+                            settings: {}
+                        };
+                        resolve(this);
+                    }
+                });
+            }
+
+            async withStore(storeName, mode = 'readonly', callback) {
+                try {
+                    await this.init();
+                    
+                    if (this.useFallback) {
+                        return callback(this.fallbackStorage[storeName]);
+                    }
+                    
+                    const transaction = this.db.transaction(storeName, mode);
+                    const store = transaction.objectStore(storeName);
+                    
+                    return await new Promise((resolve, reject) => {
+                        const result = callback(store);
+                        
+                        transaction.oncomplete = () => {
+                            resolve(result);
+                        };
+                        
+                        transaction.onerror = (event) => {
+                            console.error('Transaction error:', event.target.error);
+                            reject(event.target.error);
+                        };
+                    });
+                } catch (error) {
+                    console.error(`Database operation failed for ${storeName}:`, error);
+                    throw error;
+                }
+            }
+
+            async withStores(storeNames, mode = 'readonly', callback) {
+                try {
+                    await this.init();
+                    
+                    if (this.useFallback) {
+                        const stores = {};
+                        storeNames.forEach(name => {
+                            stores[name] = this.fallbackStorage[name];
+                        });
+                        return callback(stores);
+                    }
+                    
+                    const transaction = this.db.transaction(storeNames, mode);
+                    const stores = {};
+                    
+                    storeNames.forEach(name => {
+                        stores[name] = transaction.objectStore(name);
+                    });
+                    
+                    return await new Promise((resolve, reject) => {
+                        const result = callback(stores);
+                        
+                        transaction.oncomplete = () => {
+                            resolve(result);
+                        };
+                        
+                        transaction.onerror = (event) => {
+                            console.error('Transaction error:', event.target.error);
+                            reject(event.target.error);
+                        };
+                    });
+                } catch (error) {
+                    console.error(`Database operation failed for ${storeNames}:`, error);
+                    throw error;
+                }
+            }
+
+            async getDecks() {
+                try {
+                    return await this.withStore('decks', 'readonly', async (store) => {
+                        if (this.useFallback) {
+                            return store || [];
+                        }
+                        
+                        return new Promise((resolve) => {
+                            const request = store.getAll();
+                            request.onsuccess = () => resolve(request.result || []);
+                            request.onerror = () => resolve([]);
+                        });
+                    });
+                } catch (error) {
+                    console.error('Error getting decks:', error);
+                    return [];
+                }
+            }
+
+            async addDeck(name) {
+                if (!name || name.trim().length === 0) {
+                    throw new Error('Deck name cannot be empty');
+                }
+                
+                const deck = {
+                    id: generateId(),
+                    name: name.trim(),
+                    created: Date.now(),
+                    updated: Date.now(),
+                    cardCount: 0,
+                    dueCount: 0
+                };
+                
+                await this.withStore('decks', 'readwrite', async (store) => {
+                    if (this.useFallback) {
+                        store.push(deck);
+                        return deck;
+                    }
+                    
+                    return new Promise((resolve, reject) => {
+                        const request = store.add(deck);
+                        request.onsuccess = () => resolve(deck);
+                        request.onerror = (e) => reject(e.target.error);
+                    });
+                });
+                
+                return deck;
+            }
+
+            async updateDeck(deck) {
+                deck.updated = Date.now();
+                await this.withStore('decks', 'readwrite', async (store) => {
+                    if (this.useFallback) {
+                        const index = store.findIndex(d => d.id === deck.id);
+                        if (index !== -1) {
+                            store[index] = deck;
+                        }
+                        return;
+                    }
+                    
+                    return new Promise((resolve, reject) => {
+                        const request = store.put(deck);
+                        request.onsuccess = () => resolve();
+                        request.onerror = (e) => reject(e.target.error);
+                    });
+                });
+            }
+
+            async deleteDeck(deckId) {
+                // First, get all cards in this deck
+                const cards = await this.getCardsByDeck(deckId);
+                
+                // Delete deck and all its cards in a transaction
+                await this.withStores(['decks', 'cards', 'reviews'], 'readwrite', async (stores) => {
+                    const deckStore = stores.decks;
+                    const cardStore = stores.cards;
+                    const reviewStore = stores.reviews;
+                    
+                    if (this.useFallback) {
+                        // Remove deck
+                        this.fallbackStorage.decks = this.fallbackStorage.decks.filter(d => d.id !== deckId);
+                        // Remove cards
+                        this.fallbackStorage.cards = this.fallbackStorage.cards.filter(c => c.deckId !== deckId);
+                        // Remove reviews for those cards
+                        const cardIds = cards.map(c => c.id);
+                        this.fallbackStorage.reviews = this.fallbackStorage.reviews.filter(r => !cardIds.includes(r.cardId));
+                        return;
+                    }
+                    
+                    // Delete deck
+                    deckStore.delete(deckId);
+                    
+                    // Delete all cards in the deck
+                    cards.forEach(card => {
+                        cardStore.delete(card.id);
+                    });
+                    
+                    // Delete associated reviews (optional, can be done in background)
+                    return Promise.resolve();
+                });
+            }
+
+            async addCard(cardData) {
+                if (!cardData.deckId) {
+                    throw new Error('Card must belong to a deck');
+                }
+                
+                const card = {
+                    id: generateId(),
+                    created: Date.now(),
+                    updated: Date.now(),
+                    due: Date.now(), // Due immediately
+                    interval: 0,
+                    ease: 250, // 250%
+                    reps: 0,
+                    lapses: 0,
+                    phase: 'learning',
+                    lastReview: null,
+                    ...cardData
+                };
+                
+                await this.withStore('cards', 'readwrite', async (store) => {
+                    if (this.useFallback) {
+                        store.push(card);
+                        return card;
+                    }
+                    
+                    return new Promise((resolve, reject) => {
+                        const request = store.add(card);
+                        request.onsuccess = () => resolve(card);
+                        request.onerror = (e) => reject(e.target.error);
+                    });
+                });
+                
+                // Update deck card count
+                await this.updateDeckCardCount(card.deckId);
+                
+                return card;
+            }
+
+            async updateCard(card) {
+                card.updated = Date.now();
+                await this.withStore('cards', 'readwrite', async (store) => {
+                    if (this.useFallback) {
+                        const index = store.findIndex(c => c.id === card.id);
+                        if (index !== -1) {
+                            store[index] = card;
+                        }
+                        return;
+                    }
+                    
+                    return new Promise((resolve, reject) => {
+                        const request = store.put(card);
+                        request.onsuccess = () => resolve();
+                        request.onerror = (e) => reject(e.target.error);
+                    });
+                });
+            }
+
+            async getCardById(id) {
+                return await this.withStore('cards', 'readonly', async (store) => {
+                    if (this.useFallback) {
+                        return store.find(card => card.id === id) || null;
+                    }
+                    
+                    return new Promise((resolve) => {
+                        const request = store.get(id);
+                        request.onsuccess = () => resolve(request.result || null);
+                        request.onerror = () => resolve(null);
+                    });
+                });
+            }
+
+            async getDueCards(deckId, limit = 100) {
+                return await this.withStore('cards', 'readonly', async (store) => {
+                    if (this.useFallback) {
+                        const now = Date.now();
+                        return store
+                            .filter(card => card.deckId === deckId && card.due <= now)
+                            .slice(0, limit)
+                            .sort((a, b) => a.due - b.due);
+                    }
+                    
+                    return new Promise((resolve) => {
+                        const index = store.index('deckId');
+                        const range = IDBKeyRange.only(deckId);
+                        const request = index.openCursor(range);
+                        const now = Date.now();
+                        const dueCards = [];
+                        
+                        request.onsuccess = (event) => {
+                            const cursor = event.target.result;
+                            if (cursor) {
+                                const card = cursor.value;
+                                if (card.due <= now && dueCards.length < limit) {
+                                    dueCards.push(card);
+                                }
+                                cursor.continue();
+                            } else {
+                                // Sort by due date (oldest first)
+                                dueCards.sort((a, b) => a.due - b.due);
+                                resolve(dueCards);
+                            }
+                        };
+                        
+                        request.onerror = () => resolve([]);
+                    });
+                });
+            }
+
+            async getCardsByDeck(deckId) {
+                return await this.withStore('cards', 'readonly', async (store) => {
+                    if (this.useFallback) {
+                        return store.filter(card => card.deckId === deckId);
+                    }
+                    
+                    return new Promise((resolve) => {
+                        const index = store.index('deckId');
+                        const request = index.getAll(deckId);
+                        request.onsuccess = () => resolve(request.result || []);
+                        request.onerror = () => resolve([]);
+                    });
+                });
+            }
+
+            async updateDeckCardCount(deckId) {
+                const cards = await this.getCardsByDeck(deckId);
+                const dueCards = cards.filter(card => card.due <= Date.now());
+                
+                const deck = await this.withStore('decks', 'readonly', async (store) => {
+                    if (this.useFallback) {
+                        return store.find(d => d.id === deckId) || null;
+                    }
+                    
+                    return new Promise((resolve) => {
+                        const request = store.get(deckId);
+                        request.onsuccess = () => resolve(request.result);
+                        request.onerror = () => resolve(null);
+                    });
+                });
+                
+                if (deck) {
+                    deck.cardCount = cards.length;
+                    deck.dueCount = dueCards.length;
+                    deck.updated = Date.now();
+                    
+                    await this.withStore('decks', 'readwrite', async (store) => {
+                        if (this.useFallback) {
+                            const index = store.findIndex(d => d.id === deckId);
+                            if (index !== -1) {
+                                store[index] = deck;
+                            }
+                            return;
+                        }
+                        
+                        return new Promise((resolve) => {
+                            const request = store.put(deck);
+                            request.onsuccess = () => resolve();
+                            request.onerror = () => resolve();
+                        });
+                    });
+                }
+            }
+
+            async getStats() {
+                const [decks, cards] = await Promise.all([
+                    this.getDecks(),
+                    this.withStore('cards', 'readonly', async (store) => {
+                        if (this.useFallback) {
+                            return store || [];
+                        }
+                        
+                        return new Promise(resolve => {
+                            const request = store.getAll();
+                            request.onsuccess = () => resolve(request.result || []);
+                            request.onerror = () => resolve([]);
+                        });
+                    })
+                ]);
+                
+                const now = Date.now();
+                const dueCards = cards.filter(card => card.due <= now);
+                const learningCards = cards.filter(card => card.phase === 'learning');
+                const reviewCards = cards.filter(card => card.phase === 'review');
+                
+                // Calculate total reviews today
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
+                const todayEnd = new Date();
+                todayEnd.setHours(23, 59, 59, 999);
+                
+                const todayReviews = await this.withStore('reviews', 'readonly', async (store) => {
+                    if (this.useFallback) {
+                        return store.filter(review => {
+                            const time = review.timestamp;
+                            return time >= todayStart.getTime() && time <= todayEnd.getTime();
+                        }).length;
+                    }
+                    
+                    return new Promise(resolve => {
+                        const index = store.index('timestamp');
+                        const range = IDBKeyRange.bound(todayStart.getTime(), todayEnd.getTime());
+                        const request = index.count(range);
+                        request.onsuccess = () => resolve(request.result);
+                        request.onerror = () => resolve(0);
+                    });
+                });
+                
+                return {
+                    decks: decks.length,
+                    cards: cards.length,
+                    due: dueCards.length,
+                    learning: learningCards.length,
+                    review: reviewCards.length,
+                    todayReviews: todayReviews
+                };
+            }
+
+            async clearAllData() {
+                await this.withStores(['decks', 'cards', 'reviews', 'settings'], 'readwrite', async (stores) => {
+                    if (this.useFallback) {
+                        this.fallbackStorage.decks = [];
+                        this.fallbackStorage.cards = [];
+                        this.fallbackStorage.reviews = [];
+                        this.fallbackStorage.settings = {};
+                        return;
+                    }
+                    
+                    stores.decks.clear();
+                    stores.cards.clear();
+                    stores.reviews.clear();
+                    stores.settings.clear();
+                });
+            }
+        }
+
+        // Create a singleton database instance
+        const db = new Database();
+
+        // ==========================================
+        // 3. SCHEDULING ALGORITHM (Enhanced SM-2)
+        // ==========================================
+        const scheduler = (card, rating, now = Date.now()) => {
+            if (!card) throw new Error('Card is required');
+            if (![1, 2, 3, 4].includes(rating)) throw new Error('Invalid rating');
+            
+            const updatedCard = { ...card };
+            const minute = 60 * 1000;
+            const hour = 60 * minute;
+            const day = 24 * hour;
+            
+            // Record the review
+            const review = {
+                id: generateId(),
+                cardId: card.id,
+                timestamp: now,
+                rating: rating,
+                previousInterval: card.interval,
+                previousEase: card.ease,
+                previousPhase: card.phase
+            };
+            
+            // Save review to database (async, don't await)
+            db.withStore('reviews', 'readwrite', async (store) => {
+                if (db.useFallback) {
+                    store.push(review);
+                    return;
+                }
+                store.add(review);
+            }).catch(console.error);
+            
+            // Handle "Again" (rating 1)
+            if (rating === 1) {
+                updatedCard.lapses += 1;
+                updatedCard.ease = Math.max(130, updatedCard.ease - 20);
+                
+                if (updatedCard.phase === 'learning') {
+                    updatedCard.interval = 0;
+                    updatedCard.due = now + minute; // 1 minute
+                } else if (updatedCard.phase === 'review') {
+                    updatedCard.phase = 'relearning';
+                    updatedCard.interval = 0;
+                    updatedCard.reps = 0;
+                    updatedCard.due = now + minute; // 1 minute
+                } else { // relearning
+                    updatedCard.interval = 0;
+                    updatedCard.due = now + minute; // 1 minute
+                }
+            }
+            // Handle other ratings
+            else {
+                if (updatedCard.phase === 'learning' || updatedCard.phase === 'relearning') {
+                    // Learning/relearning phase
+                    if (rating === 2) { // Hard
+                        updatedCard.interval = 10 * minute; // 10 minutes
+                        updatedCard.due = now + updatedCard.interval;
+                    } 
+                    else if (rating === 3) { // Good
+                        updatedCard.phase = 'review';
+                        updatedCard.interval = 1 * day; // 1 day
+                        updatedCard.due = now + updatedCard.interval;
+                        updatedCard.reps += 1;
+                    } 
+                    else if (rating === 4) { // Easy
+                        updatedCard.phase = 'review';
+                        updatedCard.interval = 4 * day; // 4 days
+                        updatedCard.ease += 15;
+                        updatedCard.due = now + updatedCard.interval;
+                        updatedCard.reps += 1;
+                    }
+                } 
+                else {
+                    // Review phase
+                    updatedCard.reps += 1;
+                    
+                    if (rating === 2) { // Hard
+                        updatedCard.interval = Math.max(1 * day, Math.round(updatedCard.interval * 0.6));
+                        updatedCard.ease = Math.max(130, updatedCard.ease - 10);
+                    } 
+                    else if (rating === 3) { // Good
+                        updatedCard.interval = Math.round(updatedCard.interval * (updatedCard.ease / 100));
+                    } 
+                    else if (rating === 4) { // Easy
+                        updatedCard.interval = Math.round(updatedCard.interval * (updatedCard.ease / 100) * 1.3);
+                        updatedCard.ease += 15;
+                    }
+                    
+                    // Ensure minimum interval of 1 day in review phase
+                    updatedCard.interval = Math.max(1 * day, updatedCard.interval);
+                    updatedCard.ease = Math.max(130, Math.min(500, updatedCard.ease));
+                    updatedCard.due = now + updatedCard.interval;
+                }
+            }
+            
+            updatedCard.lastReview = now;
+            updatedCard.updated = now;
+            
+            return updatedCard;
+        };
+
+        // Calculate next intervals for display
+        const calculateNextIntervals = (card) => {
+            const minute = 60 * 1000;
+            const day = 24 * 60 * 60 * 1000;
+            
+            if (card.phase === 'learning' || card.phase === 'relearning') {
+                return {
+                    again: 1 * minute,
+                    hard: 10 * minute,
+                    good: 1 * day,
+                    easy: 4 * day
+                };
+            } else {
+                // For review phase, calculate based on current card state
+                const intervals = {
+                    again: 1 * minute,
+                    hard: Math.max(1 * day, Math.round(card.interval * 0.6)),
+                    good: Math.round(card.interval * (card.ease / 100)),
+                    easy: Math.round(card.interval * (card.ease / 100) * 1.3)
+                };
+                
+                return intervals;
+            }
+        };
+
+        // Format interval for display
+        const formatInterval = (ms) => {
+            const minute = 60 * 1000;
+            const hour = 60 * minute;
+            const day = 24 * hour;
+            
+            if (ms < hour) {
+                return Math.round(ms / minute) + 'm';
+            } else if (ms < day) {
+                return Math.round(ms / hour) + 'h';
+            } else {
+                return Math.round(ms / day) + 'd';
+            }
+        };
+
+        // ==========================================
+        // 4. COMPONENTS
+        // ==========================================
+
+        // Theme Provider Component
+        const ThemeProvider = ({ children }) => {
+            const [isDark, setIsDark] = useState(() => {
+                const saved = localStorage.getItem('theme');
+                if (saved) {
+                    return saved === 'dark';
+                }
+                return window.matchMedia('(prefers-color-scheme: dark)').matches;
+            });
+
+            useEffect(() => {
+                if (isDark) {
+                    document.body.classList.add('dark');
+                } else {
+                    document.body.classList.remove('dark');
+                }
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            }, [isDark]);
+
+            useEffect(() => {
+                const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                const handleChange = (e) => {
+                    const saved = localStorage.getItem('theme');
+                    if (!saved) {
+                        setIsDark(e.matches);
+                    }
+                };
+                mediaQuery.addEventListener('change', handleChange);
+                return () => mediaQuery.removeEventListener('change', handleChange);
+            }, []);
+
+            const toggleTheme = useCallback(() => setIsDark(prev => !prev), []);
+
+            return (
+                <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+                    {children}
+                </ThemeContext.Provider>
+            );
+        };
+
+        // Header Component
+        const Header = ({ title, left = null, right = null, onBack = null }) => {
+            const { isDark } = useContext(ThemeContext);
+            
+            return (
+                <div className={`h-16 w-full flex items-center justify-between px-4 sticky top-0 z-50 safe-area-top backdrop-blur-ios ${
+                    isDark 
+                    ? 'bg-black/80 border-b border-ios-darkSeparator' 
+                    : 'bg-ios-bg/90 border-b border-ios-separator'
+                }`}>
+                    <div className="w-16 flex items-center justify-start">
+                        {onBack && (
+                            <button 
+                                onClick={onBack}
+                                className="w-10 h-10 rounded-full flex items-center justify-center ios-button touch-min-44"
+                                aria-label="Back"
+                            >
+                                <i className="fas fa-chevron-left text-xl text-ios-blue"></i>
+                            </button>
+                        )}
+                        {left}
+                    </div>
+                    
+                    <h1 className="font-semibold text-ios-headline text-truncate max-w-[50%] text-center">
+                        {title}
+                    </h1>
+                    
+                    <div className="w-16 flex justify-end items-center">
+                        {right}
+                    </div>
+                </div>
+            );
+        };
+
+        // Tab Bar Component
+        const TabBar = ({ activeTab, onTabChange }) => {
+            const { isDark } = useContext(ThemeContext);
+            
+            return (
+                <div className={`h-20 w-full flex justify-around items-start pt-2 pb-8 border-t safe-area-bottom backdrop-blur-ios ${
+                    isDark 
+                    ? 'bg-ios-darkCard/90 border-ios-darkSeparator' 
+                    : 'bg-ios-bg/90 border-ios-separator'
+                }`}>
+                    <button 
+                        onClick={() => onTabChange('decks')}
+                        className={`flex flex-col items-center gap-1 w-20 transition-all duration-200 ios-button touch-min-44 ${
+                            activeTab === 'decks' 
+                            ? 'text-ios-blue scale-105' 
+                            : isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                        }`}
+                        aria-label="Decks"
+                    >
+                        <i className={`fas fa-layer-group text-xl mb-1 ${
+                            activeTab === 'decks' ? 'scale-110' : ''
+                        }`}></i>
+                        <span className="text-ios-caption1 font-medium">Decks</span>
+                    </button>
+                    
+                    <button 
+                        onClick={() => onTabChange('add')}
+                        className={`flex flex-col items-center gap-1 w-20 transition-all duration-200 ios-button touch-min-44 ${
+                            activeTab === 'add' 
+                            ? 'text-ios-blue scale-105' 
+                            : isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                        }`}
+                        aria-label="Add Card"
+                    >
+                        <i className={`fas fa-plus-circle text-xl mb-1 ${
+                            activeTab === 'add' ? 'scale-110' : ''
+                        }`}></i>
+                        <span className="text-ios-caption1 font-medium">Add</span>
+                    </button>
+                    
+                    <button 
+                        onClick={() => onTabChange('stats')}
+                        className={`flex flex-col items-center gap-1 w-20 transition-all duration-200 ios-button touch-min-44 ${
+                            activeTab === 'stats' 
+                            ? 'text-ios-blue scale-105' 
+                            : isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                        }`}
+                        aria-label="Statistics"
+                    >
+                        <i className={`fas fa-chart-bar text-xl mb-1 ${
+                            activeTab === 'stats' ? 'scale-110' : ''
+                        }`}></i>
+                        <span className="text-ios-caption1 font-medium">Stats</span>
+                    </button>
+                </div>
+            );
+        };
+
+        // Card Component for study mode
+        const StudyCard = ({ card, flipped, onFlip, isCloze = false, clozeId = null, onClozeReveal = null }) => {
+            const { isDark } = useContext(ThemeContext);
+            const cardRef = useRef(null);
+            
+            // Handle keyboard events for the card
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.code === 'Space' || e.code === 'Enter') {
+                        e.preventDefault();
+                        if (!flipped) {
+                            onFlip();
+                        }
+                    }
+                };
+                
+                const cardElement = cardRef.current;
+                if (cardElement) {
+                    cardElement.addEventListener('keydown', handleKeyDown);
+                    return () => cardElement.removeEventListener('keydown', handleKeyDown);
+                }
+            }, [flipped, onFlip]);
+            
+            // Render front side of the card
+            const renderFront = () => {
+                if (isCloze && card.front && clozeId) {
+                    return <ClozeText text={card.front} clozeId={clozeId} isRevealed={false} onReveal={onClozeReveal} />;
+                }
+                return (
+                    <div 
+                        className="text-ios-title2 font-medium leading-relaxed text-center break-words px-4"
+                        dangerouslySetInnerHTML={{ __html: sanitize(card.front || 'No content') }}
+                    />
+                );
+            };
+            
+            // Render back side of the card
+            const renderBack = () => {
+                if (isCloze && card.front && clozeId) {
+                    return (
+                        <div className="w-full h-full flex flex-col p-4">
+                            <div 
+                                className={`w-full pb-6 mb-6 border-b ${
+                                    isDark ? 'border-ios-darkSeparator' : 'border-ios-separator'
+                                }`}
+                                dangerouslySetInnerHTML={{ __html: sanitize(card.front || '') }}
+                            />
+                            <div className="flex-1 flex flex-col items-center justify-center">
+                                <div className="text-ios-title2 font-medium mb-4 text-center">
+                                    <ClozeText text={card.front} clozeId={clozeId} isRevealed={true} />
+                                </div>
+                                {card.back && (
+                                    <div 
+                                        className={`mt-6 text-ios-body opacity-80 text-center ${
+                                            isDark ? 'text-gray-300' : 'text-ios-gray'
+                                        }`}
+                                        dangerouslySetInnerHTML={{ __html: sanitize(card.back) }}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    );
+                }
+                
+                return (
+                    <div className="w-full h-full flex flex-col p-4">
+                        <div 
+                            className={`w-full pb-6 mb-6 border-b ${
+                                isDark ? 'border-ios-darkSeparator' : 'border-ios-separator'
+                            }`}
+                            dangerouslySetInnerHTML={{ __html: sanitize(card.front || '') }}
+                        />
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                            <div 
+                                className="text-ios-title2 font-medium leading-relaxed text-center break-words"
+                                dangerouslySetInnerHTML={{ __html: sanitize(card.back || 'No answer provided') }}
+                            />
+                        </div>
+                    </div>
+                );
+            };
+            
+            return (
+                <div className="card-container w-full h-full max-h-[calc(100vh-200px)] px-4" ref={cardRef} tabIndex={0}>
+                    <div className={`card-inner ${flipped ? 'card-flipped' : ''}`}>
+                        {/* Front Face */}
+                        <div 
+                            className={`card-face ${
+                                isDark 
+                                ? 'bg-ios-darkCard border border-ios-darkSeparator' 
+                                : 'bg-ios-card border border-ios-separator'
+                            } elevation-2 ${flipped ? 'hidden' : ''}`}
+                            onClick={onFlip}
+                        >
+                            <div className="flex flex-col items-center justify-center h-full w-full p-6">
+                                {renderFront()}
+                                <div className={`mt-8 text-ios-caption1 uppercase font-bold tracking-widest ${
+                                    isDark ? 'text-ios-gray3 opacity-70' : 'text-ios-gray opacity-60'
+                                }`}>
+                                    Tap or press Space to show answer
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Back Face */}
+                        <div 
+                            className={`card-face card-back ${
+                                isDark 
+                                ? 'bg-ios-darkCard border border-ios-darkSeparator' 
+                                : 'bg-ios-card border border-ios-separator'
+                            } elevation-2`}
+                        >
+                            {renderBack()}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Cloze Text Component
+        const ClozeText = ({ text, clozeId, isRevealed = false, onReveal = null }) => {
+            const { isDark } = useContext(ThemeContext);
+            
+            if (!text) return null;
+            
+            // Parse cloze deletions
+            const parseCloze = (inputText) => {
+                const regex = /{{c(\d+)::(.*?)(?:::(.*?))?}}/g;
+                let lastIndex = 0;
+                let match;
+                const parts = [];
+                
+                while ((match = regex.exec(inputText)) !== null) {
+                    // Add text before the match
+                    if (match.index > lastIndex) {
+                        parts.push({
+                            type: 'text',
+                            content: inputText.substring(lastIndex, match.index)
+                        });
+                    }
+                    
+                    const id = match[1];
+                    const content = match[2] || '';
+                    const hint = match[3] || '';
+                    
+                    parts.push({
+                        type: 'cloze',
+                        id: id,
+                        content: content,
+                        hint: hint
+                    });
+                    
+                    lastIndex = regex.lastIndex;
+                }
+                
+                // Add remaining text
+                if (lastIndex < inputText.length) {
+                    parts.push({
+                        type: 'text',
+                        content: inputText.substring(lastIndex)
+                    });
+                }
+                
+                return parts;
+            };
+            
+            const parts = parseCloze(text);
+            
+            // Handle keyboard for cloze elements
+            const handleClozeKeyDown = (e, partId) => {
+                if (e.code === 'Enter' || e.code === 'Space') {
+                    e.preventDefault();
+                    if (!isRevealed && onReveal) {
+                        onReveal(partId);
+                    }
+                }
+            };
+            
+            return (
+                <span className="inline">
+                    {parts.map((part, index) => {
+                        if (part.type === 'text') {
+                            return (
+                                <span 
+                                    key={index} 
+                                    dangerouslySetInnerHTML={{ __html: sanitize(part.content) }}
+                                />
+                            );
+                        }
+                        
+                        if (part.type === 'cloze') {
+                            const isTargetCloze = part.id === clozeId.toString();
+                            
+                            if (isTargetCloze) {
+                                if (isRevealed) {
+                                    // Show the answer
+                                    return (
+                                        <span key={index}>
+                                            <span 
+                                                className="cloze-revealed"
+                                                dangerouslySetInnerHTML={{ __html: sanitize(part.content) }}
+                                            />
+                                            {part.hint && (
+                                                <span className="cloze-hint">
+                                                    ({part.hint})
+                                                </span>
+                                            )}
+                                        </span>
+                                    );
+                                } else {
+                                    // Show hidden with hint if available
+                                    return (
+                                        <span 
+                                            key={index} 
+                                            className="cloze-hidden ios-button keyboard-focus"
+                                            title={part.hint || 'Click or press Enter to reveal'}
+                                            tabIndex={0}
+                                            onClick={() => onReveal && onReveal(part.id)}
+                                            onKeyDown={(e) => handleClozeKeyDown(e, part.id)}
+                                        >
+                                            {part.hint || '...'}
+                                        </span>
+                                    );
+                                }
+                            } else {
+                                // For non-target clozes, show the content normally
+                                return (
+                                    <span 
+                                        key={index}
+                                        dangerouslySetInnerHTML={{ __html: sanitize(part.content) }}
+                                    />
+                                );
+                            }
+                        }
+                        
+                        return null;
+                    })}
+                </span>
+            );
+        };
+
+        // Empty State Component
+        const EmptyState = ({ icon, title, message, action }) => {
+            const { isDark } = useContext(ThemeContext);
+            
+            return (
+                <div className="flex flex-col items-center justify-center p-8 text-center h-full animate-fade-in">
+                    <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 elevation-1 ${
+                        isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
+                    }`}>
+                        <i className={`${icon} text-3xl ${
+                            isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                        }`}></i>
+                    </div>
+                    <h2 className="text-ios-title2 font-bold mb-3">{title}</h2>
+                    <p className={`text-ios-body mb-8 ${
+                        isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                    }`}>
+                        {message}
+                    </p>
+                    {action}
+                </div>
+            );
+        };
+
+        // Toast Notification Component
+        const Toast = ({ message, type = 'info', duration = 3000, onClose }) => {
+            const [visible, setVisible] = useState(true);
+            const { isDark } = useContext(ThemeContext);
+            
+            useEffect(() => {
+                const timer = setTimeout(() => {
+                    setVisible(false);
+                    setTimeout(onClose, 300);
+                }, duration);
+                
+                return () => clearTimeout(timer);
+            }, [duration, onClose]);
+            
+            if (!visible) return null;
+            
+            let bgColor, icon;
+            switch (type) {
+                case 'success':
+                    bgColor = 'bg-ios-green';
+                    icon = 'fas fa-check-circle';
+                    break;
+                case 'error':
+                    bgColor = 'bg-ios-red';
+                    icon = 'fas fa-exclamation-circle';
+                    break;
+                case 'warning':
+                    bgColor = 'bg-ios-orange';
+                    icon = 'fas fa-exclamation-triangle';
+                    break;
+                default:
+                    bgColor = 'bg-ios-blue';
+                    icon = 'fas fa-info-circle';
+            }
+            
+            return (
+                <div className={`fixed bottom-28 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl elevation-3 z-50 flex items-center gap-3 transition-all duration-300 animate-slide-up ${bgColor} text-white max-w-[90%] min-w-[200px]`}>
+                    <i className={`${icon} text-lg`}></i>
+                    <span className="font-medium text-ios-callout flex-1 text-center">
+                        {message}
+                    </span>
+                    <button 
+                        onClick={() => {
+                            setVisible(false);
+                            setTimeout(onClose, 300);
+                        }}
+                        className="opacity-80 hover:opacity-100 touch-min-44"
+                    >
+                        <i className="fas fa-times"></i>
+                    </button>
+                </div>
+            );
+        };
+
+        // Study Controls Component
+        const StudyControls = ({ flipped, onRate, card }) => {
+            const { isDark } = useContext(ThemeContext);
+            const intervals = useMemo(() => card ? calculateNextIntervals(card) : null, [card]);
+            
+            if (!flipped) {
+                return (
+                    <button 
+                        onClick={() => onRate('flip')}
+                        className="w-full bg-ios-blue text-white h-14 rounded-2xl font-bold text-ios-headline shadow-lg ios-button touch-min-44 elevation-2"
+                    >
+                        Show Answer (Space)
+                    </button>
+                );
+            }
+            
+            return (
+                <div className="grid grid-cols-4 gap-3 w-full animate-fade-in study-controls">
+                    <button 
+                        onClick={() => onRate(1)}
+                        className={`flex flex-col items-center justify-center h-16 rounded-2xl ios-button touch-min-44 elevation-1 ${
+                            isDark 
+                            ? 'bg-ios-red/20 hover:bg-ios-red/30 active:bg-ios-red/40' 
+                            : 'bg-ios-red/10 hover:bg-ios-red/20 active:bg-ios-red/30'
+                        }`}
+                        aria-label="Again (1)"
+                    >
+                        <span className="text-ios-red font-bold text-ios-caption1">Again (1)</span>
+                        {intervals && (
+                            <span className={`text-ios-caption2 mt-1 ${
+                                isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                            }`}>
+                                {formatInterval(intervals.again)}
+                            </span>
+                        )}
+                    </button>
+                    
+                    <button 
+                        onClick={() => onRate(2)}
+                        className={`flex flex-col items-center justify-center h-16 rounded-2xl ios-button touch-min-44 elevation-1 ${
+                            isDark 
+                            ? 'bg-ios-orange/20 hover:bg-ios-orange/30 active:bg-ios-orange/40' 
+                            : 'bg-ios-orange/10 hover:bg-ios-orange/20 active:bg-ios-orange/30'
+                        }`}
+                        aria-label="Hard (2)"
+                    >
+                        <span className="text-ios-orange font-bold text-ios-caption1">Hard (2)</span>
+                        {intervals && (
+                            <span className={`text-ios-caption2 mt-1 ${
+                                isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                            }`}>
+                                {formatInterval(intervals.hard)}
+                            </span>
+                        )}
+                    </button>
+                    
+                    <button 
+                        onClick={() => onRate(3)}
+                        className={`flex flex-col items-center justify-center h-16 rounded-2xl ios-button touch-min-44 elevation-1 ${
+                            isDark 
+                            ? 'bg-ios-green/20 hover:bg-ios-green/30 active:bg-ios-green/40' 
+                            : 'bg-ios-green/10 hover:bg-ios-green/20 active:bg-ios-green/30'
+                        }`}
+                        aria-label="Good (3)"
+                    >
+                        <span className="text-ios-green font-bold text-ios-caption1">Good (3)</span>
+                        {intervals && (
+                            <span className={`text-ios-caption2 mt-1 ${
+                                isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                            }`}>
+                                {formatInterval(intervals.good)}
+                            </span>
+                        )}
+                    </button>
+                    
+                    <button 
+                        onClick={() => onRate(4)}
+                        className={`flex flex-col items-center justify-center h-16 rounded-2xl ios-button touch-min-44 elevation-1 ${
+                            isDark 
+                            ? 'bg-ios-blue/20 hover:bg-ios-blue/30 active:bg-ios-blue/40' 
+                            : 'bg-ios-blue/10 hover:bg-ios-blue/20 active:bg-ios-blue/30'
+                        }`}
+                        aria-label="Easy (4)"
+                    >
+                        <span className="text-ios-blue font-bold text-ios-caption1">Easy (4)</span>
+                        {intervals && (
+                            <span className={`text-ios-caption2 mt-1 ${
+                                isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                            }`}>
+                                {formatInterval(intervals.easy)}
+                            </span>
+                        )}
+                    </button>
+                </div>
+            );
+        };
+
+        // --- Decks View ---
+        const DecksView = ({ onSelectDeck, onCreateDeck }) => {
+            const { isDark } = useContext(ThemeContext);
+            const [decks, setDecks] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [deckName, setDeckName] = useState('');
+            const [toast, setToast] = useState(null);
+            
+            // Load decks from database
+            useEffect(() => {
+                const loadDecks = async () => {
+                    try {
+                        setLoading(true);
+                        const data = await db.getDecks();
+                        setDecks(data);
+                    } catch (error) {
+                        console.error('Error loading decks:', error);
+                        setToast({
+                            id: Date.now(),
+                            message: 'Failed to load decks. Please try again.',
+                            type: 'error'
+                        });
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                loadDecks();
+            }, []);
+            
+            // Create a new deck
+            const handleCreateDeck = async () => {
+                if (!deckName.trim()) {
+                    setToast({
+                        id: Date.now(),
+                        message: 'Please enter a deck name',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                
+                try {
+                    const newDeck = await db.addDeck(deckName.trim());
+                    setDecks(prev => [...prev, newDeck]);
+                    setDeckName('');
+                    setShowAddModal(false);
+                    setToast({
+                        id: Date.now(),
+                        message: 'Deck created successfully!',
+                        type: 'success'
+                    });
+                    
+                    if (onCreateDeck) onCreateDeck(newDeck);
+                } catch (error) {
+                    console.error('Error creating deck:', error);
+                    setToast({
+                        id: Date.now(),
+                        message: 'Failed to create deck. Please try again.',
+                        type: 'error'
+                    });
+                }
+            };
+            
+            // Delete a deck
+            const handleDeleteDeck = async (deckId, deckName) => {
+                if (!window.confirm(`Are you sure you want to delete the deck "${deckName}" and all its cards? This action cannot be undone.`)) {
+                    return;
+                }
+                
+                try {
+                    await db.deleteDeck(deckId);
+                    setDecks(prev => prev.filter(deck => deck.id !== deckId));
+                    setToast({
+                        id: Date.now(),
+                        message: 'Deck deleted successfully!',
+                        type: 'success'
+                    });
+                } catch (error) {
+                    console.error('Error deleting deck:', error);
+                    setToast({
+                        id: Date.now(),
+                        message: 'Failed to delete deck. Please try again.',
+                        type: 'error'
+                    });
+                }
+            };
+            
+            return (
+                <div className="flex flex-col h-full pb-24 animate-fade-in">
+                    <Header 
+                        title="Decks" 
+                        right={
+                            <button 
+                                onClick={() => setShowAddModal(true)} 
+                                className="text-ios-blue text-xl ios-button touch-min-44"
+                                aria-label="Add Deck"
+                            >
+                                <i className="fas fa-plus"></i>
+                            </button>
+                        }
+                    />
+                    
+                    <div className="flex-1 overflow-y-auto scroll-area p-4 space-y-3 safe-area-left safe-area-right">
+                        {loading ? (
+                            <div className="flex justify-center items-center h-40">
+                                <div className="loader"></div>
+                            </div>
+                        ) : decks.length === 0 ? (
+                            <EmptyState
+                                icon="fas fa-folder-open"
+                                title="No Decks Found"
+                                message="Create your first deck to start learning"
+                                action={
+                                    <button
+                                        onClick={() => setShowAddModal(true)}
+                                        className="px-6 py-3 bg-ios-blue text-white rounded-xl font-semibold shadow-md ios-button touch-min-44 elevation-2"
+                                    >
+                                        Create Deck
+                                    </button>
+                                }
+                            />
+                        ) : (
+                            decks.map(deck => (
+                                <div 
+                                    key={deck.id} 
+                                    onClick={() => onSelectDeck(deck)}
+                                    className={`flex items-center justify-between p-4 rounded-2xl ios-button elevation-1 cursor-pointer ${
+                                        isDark 
+                                        ? 'bg-ios-darkCard border border-ios-darkSeparator hover:bg-gray-800' 
+                                        : 'bg-ios-card hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-4 flex-1">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                                            isDark ? 'bg-ios-blue/20' : 'bg-ios-blue/10'
+                                        }`}>
+                                            <i className="fas fa-book text-ios-blue text-xl"></i>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold text-ios-headline">{deck.name}</h3>
+                                            <div className={`text-ios-caption1 ${
+                                                isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                                            }`}>
+                                                {deck.cardCount || 0} cards • {deck.dueCount || 0} due
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteDeck(deck.id, deck.name);
+                                        }}
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center ios-button touch-min-44 ${
+                                            isDark 
+                                            ? 'text-ios-gray3 hover:text-ios-red hover:bg-gray-800' 
+                                            : 'text-ios-gray hover:text-ios-red hover:bg-gray-100'
+                                        }`}
+                                        aria-label={`Delete ${deck.name} deck`}
+                                    >
+                                        <i className="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            ))
+                        )}
+                        
+                        <div className="mt-8 text-center opacity-50">
+                            <p className="text-ios-caption2 font-medium">Made with ❤️ by Muhammad Daler</p>
+                        </div>
+                    </div>
+                    
+                    {/* Add Deck Modal */}
+                    {showAddModal && (
+                        <div 
+                            className="fixed inset-0 z-40 flex items-center justify-center p-4 modal-backdrop animate-fade-in"
+                            onClick={() => setShowAddModal(false)}
+                        >
+                            <div 
+                                className={`w-full max-w-md rounded-2xl p-6 elevation-3 transform animate-scale ${
+                                    isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
+                                }`}
+                                onClick={e => e.stopPropagation()}
+                            >
+                                <h3 className="text-ios-title3 font-bold mb-4 text-center">Create New Deck</h3>
+                                
+                                <input
+                                    type="text"
+                                    value={deckName}
+                                    onChange={(e) => setDeckName(e.target.value)}
+                                    placeholder="e.g., English Vocabulary"
+                                    className={`w-full p-4 rounded-xl text-ios-body outline-none focus:ring-2 focus:ring-ios-blue transition-colors ${
+                                        isDark 
+                                        ? 'bg-ios-darkBg2 text-white border border-ios-darkSeparator' 
+                                        : 'bg-ios-bg text-black border border-ios-separator'
+                                    }`}
+                                    autoFocus
+                                    onKeyPress={(e) => e.key === 'Enter' && handleCreateDeck()}
+                                />
+                                
+                                <div className="flex gap-3 mt-6">
+                                    <button
+                                        onClick={() => setShowAddModal(false)}
+                                        className={`flex-1 py-3 rounded-xl font-semibold ios-button touch-min-44 ${
+                                            isDark 
+                                            ? 'bg-ios-darkBg2 text-white hover:bg-gray-800' 
+                                            : 'bg-ios-bg text-ios-blue hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleCreateDeck}
+                                        className="flex-1 py-3 bg-ios-blue text-white rounded-xl font-semibold shadow-md ios-button touch-min-44"
+                                    >
+                                        Create
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Toast Notifications */}
+                    {toast && (
+                        <Toast 
+                            key={toast.id} 
+                            message={toast.message} 
+                            type={toast.type} 
+                            onClose={() => setToast(null)} 
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        // --- Add Card View ---
+        const AddCardView = ({ onCardAdded }) => {
+            const { isDark } = useContext(ThemeContext);
+            const [decks, setDecks] = useState([]);
+            const [selectedDeckId, setSelectedDeckId] = useState('');
+            const [cardType, setCardType] = useState('basic');
+            const [frontText, setFrontText] = useState('');
+            const [backText, setBackText] = useState('');
+            const [isProcessing, setIsProcessing] = useState(false);
+            const [toast, setToast] = useState(null);
+            const frontTextAreaRef = useRef(null);
+            const backTextAreaRef = useRef(null);
+            
+            // Load decks on mount
+            useEffect(() => {
+                const loadDecks = async () => {
+                    try {
+                        const data = await db.getDecks();
+                        setDecks(data);
+                        if (data.length > 0) {
+                            setSelectedDeckId(data[0].id);
+                        }
+                    } catch (error) {
+                        console.error('Error loading decks:', error);
+                        setToast({
+                            id: Date.now(),
+                            message: 'Failed to load decks. Please try again.',
+                            type: 'error'
+                        });
+                    }
+                };
+                loadDecks();
+            }, []);
+            
+            // Insert cloze deletion at cursor position
+            const insertCloze = () => {
+                const textarea = frontTextAreaRef.current;
+                if (!textarea) return;
+                
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const selectedText = frontText.substring(start, end) || 'text';
+                
+                // Find the highest cloze ID used so far
+                const clozeIds = extractClozeIds(frontText);
+                let maxClozeId = 0;
+                clozeIds.forEach(id => {
+                    const numId = parseInt(id);
+                    if (numId > maxClozeId) maxClozeId = numId;
+                });
+                
+                const nextClozeId = maxClozeId + 1;
+                const clozeText = `{{c${nextClozeId}::${selectedText}}}`;
+                
+                // Insert the cloze deletion
+                const newText = frontText.substring(0, start) + clozeText + frontText.substring(end);
+                setFrontText(newText);
+                
+                // Set cursor position after insertion
+                setTimeout(() => {
+                    if (textarea) {
+                        const newPosition = start + clozeText.length;
+                        textarea.focus();
+                        textarea.setSelectionRange(newPosition, newPosition);
+                    }
+                }, 0);
+            };
+            
+            // Validate and save card
+            const handleSaveCard = async () => {
+                // Validation
+                if (!selectedDeckId) {
+                    setToast({
+                        id: Date.now(),
+                        message: 'Please select a deck',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                
+                if (!frontText.trim()) {
+                    setToast({
+                        id: Date.now(),
+                        message: 'Front field cannot be empty',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                
+                if (cardType === 'cloze') {
+                    const clozeIds = extractClozeIds(frontText);
+                    if (clozeIds.length === 0) {
+                        setToast({
+                            id: Date.now(),
+                            message: 'No cloze deletions found. Use the "{...}" button to create one.',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+                
+                setIsProcessing(true);
+                
+                try {
+                    let cardsCreated = 0;
+                    
+                    if (cardType === 'basic') {
+                        // Create a single basic card
+                        await db.addCard({
+                            deckId: selectedDeckId,
+                            type: 'basic',
+                            front: frontText.trim(),
+                            back: backText.trim()
+                        });
+                        cardsCreated = 1;
+                    } else {
+                        // For cloze cards, create a card for each unique cloze ID
+                        const clozeIds = extractClozeIds(frontText);
+                        
+                        for (const clozeId of clozeIds) {
+                            await db.addCard({
+                                deckId: selectedDeckId,
+                                type: 'cloze',
+                                front: frontText.trim(),
+                                back: backText.trim(),
+                                clozeId: clozeId
+                            });
+                            cardsCreated++;
+                        }
+                    }
+                    
+                    // Show success message
+                    setToast({
+                        id: Date.now(),
+                        message: cardType === 'basic' 
+                            ? 'Card added successfully!' 
+                            : `${cardsCreated} cloze cards created!`,
+                        type: 'success'
+                    });
+                    
+                    // Reset form
+                    setFrontText('');
+                    setBackText('');
+                    
+                    // Notify parent about new card
+                    if (onCardAdded) onCardAdded();
+                    
+                } catch (error) {
+                    console.error('Error adding card:', error);
+                    setToast({
+                        id: Date.now(),
+                        message: 'Failed to add card. Please try again.',
+                        type: 'error'
+                    });
+                } finally {
+                    setIsProcessing(false);
+                }
+            };
+            
+            return (
+                <div className="flex flex-col h-full pb-24 animate-fade-in">
+                    <Header title="Add Card" />
+                    
+                    <div className="flex-1 overflow-y-auto scroll-area p-4 space-y-6 safe-area-left safe-area-right">
+                        {/* Deck and Card Type Selection */}
+                        <div className={`rounded-2xl p-4 elevation-1 ${
+                            isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
+                        }`}>
+                            <label className={`block text-ios-caption1 font-bold uppercase tracking-wider mb-2 ${
+                                isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                            }`}>
+                                Target Deck
+                            </label>
+                            <select
+                                value={selectedDeckId}
+                                onChange={(e) => setSelectedDeckId(e.target.value)}
+                                className={`w-full p-3 rounded-xl text-ios-body outline-none focus:ring-2 focus:ring-ios-blue appearance-none transition-colors ${
+                                    isDark 
+                                    ? 'bg-ios-darkBg2 text-white border border-ios-darkSeparator' 
+                                    : 'bg-ios-bg text-black border border-ios-separator'
+                                }`}
+                            >
+                                {decks.map(deck => (
+                                    <option key={deck.id} value={deck.id}>
+                                        {deck.name}
+                                    </option>
+                                ))}
+                            </select>
+                            
+                            <label className={`block text-ios-caption1 font-bold uppercase tracking-wider mt-4 mb-2 ${
+                                isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                            }`}>
+                                Card Type
+                            </label>
+                            <div className={`flex p-1 rounded-xl overflow-hidden ${
+                                isDark ? 'bg-ios-darkBg2' : 'bg-ios-bg'
+                            }`}>
+                                <button
+                                    onClick={() => setCardType('basic')}
+                                    className={`flex-1 py-3 text-ios-caption1 font-semibold ios-button touch-min-44 ${
+                                        cardType === 'basic'
+                                        ? isDark
+                                            ? 'bg-ios-darkCard text-white'
+                                            : 'bg-ios-card text-black'
+                                        : isDark
+                                            ? 'text-ios-gray3'
+                                            : 'text-ios-gray'
+                                    }`}
+                                >
+                                    Basic
+                                </button>
+                                <button
+                                    onClick={() => setCardType('cloze')}
+                                    className={`flex-1 py-3 text-ios-caption1 font-semibold ios-button touch-min-44 ${
+                                        cardType === 'cloze'
+                                        ? isDark
+                                            ? 'bg-ios-darkCard text-white'
+                                            : 'bg-ios-card text-black'
+                                        : isDark
+                                            ? 'text-ios-gray3'
+                                            : 'text-ios-gray'
+                                    }`}
+                                >
+                                    Cloze
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {/* Card Content */}
+                        <div className={`rounded-2xl p-4 elevation-1 ${
+                            isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
+                        }`}>
+                            <div className="flex justify-between items-center mb-3">
+                                <label className={`text-ios-caption1 font-bold uppercase tracking-wider ${
+                                    isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                                }`}>
+                                    Front
+                                </label>
+                                {cardType === 'cloze' && (
+                                    <button
+                                        onClick={insertCloze}
+                                        className="px-3 py-2 bg-ios-blue text-white text-ios-caption2 font-bold rounded-full shadow-sm ios-button touch-min-44"
+                                        title="Insert Cloze Deletion"
+                                    >
+                                        {...}
+                                    </button>
+                                )}
+                            </div>
+                            
+                            <textarea
+                                ref={frontTextAreaRef}
+                                value={frontText}
+                                onChange={(e) => setFrontText(e.target.value)}
+                                placeholder={cardType === 'cloze' 
+                                    ? "Type your text and select words to hide, then click '{...}'" 
+                                    : "Type your question here..."}
+                                className={`w-full min-h-[120px] p-3 rounded-xl text-ios-body outline-none focus:ring-2 focus:ring-ios-blue resize-none transition-colors ${
+                                    isDark 
+                                    ? 'bg-ios-darkBg2 text-white border border-ios-darkSeparator' 
+                                    : 'bg-ios-bg text-black border border-ios-separator'
+                                }`}
+                            />
+                            
+                            <label className={`block text-ios-caption1 font-bold uppercase tracking-wider mt-4 mb-2 ${
+                                isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                            }`}>
+                                Back (Optional)
+                            </label>
+                            
+                            <textarea
+                                ref={backTextAreaRef}
+                                value={backText}
+                                onChange={(e) => setBackText(e.target.value)}
+                                placeholder="Additional information or context..."
+                                className={`w-full min-h-[80px] p-3 rounded-xl text-ios-body outline-none focus:ring-2 focus:ring-ios-blue resize-none transition-colors ${
+                                    isDark 
+                                    ? 'bg-ios-darkBg2 text-white border border-ios-darkSeparator' 
+                                    : 'bg-ios-bg text-black border border-ios-separator'
+                                }`}
+                            />
+                        </div>
+                        
+                        {/* Save Button */}
+                        <button
+                            onClick={handleSaveCard}
+                            disabled={isProcessing}
+                            className={`w-full py-4 rounded-2xl font-bold text-ios-headline shadow-md ios-button touch-min-44 elevation-2 ${
+                                isProcessing
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-ios-blue text-white'
+                            }`}
+                        >
+                            {isProcessing ? (
+                                <div className="flex items-center justify-center">
+                                    <div className="loader mr-2"></div>
+                                    <span>Adding Card...</span>
+                                </div>
+                            ) : (
+                                'Add to Deck'
+                            )}
+                        </button>
+                        
+                        {/* Cloze Example */}
+                        {cardType === 'cloze' && (
+                            <div className={`mt-4 p-4 rounded-xl ${
+                                isDark ? 'bg-ios-darkBg2 border border-ios-darkSeparator' : 'bg-ios-bg border border-ios-separator'
+                            }`}>
+                                <p className="font-medium text-ios-callout mb-2">Cloze Example:</p>
+                                <p className="text-ios-footnote">
+                                    Use <code className="bg-black/10 dark:bg-white/10 px-1 rounded">{'{{c1::hidden text}}'}</code> to hide words.
+                                    For hints: <code className="bg-black/10 dark:bg-white/10 px-1 rounded">{'{{c1::hidden text::hint}}'}</code>
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                    
+                    {/* Toast Notifications */}
+                    {toast && (
+                        <Toast 
+                            key={toast.id} 
+                            message={toast.message} 
+                            type={toast.type} 
+                            onClose={() => setToast(null)} 
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        // --- Study View ---
+        const StudyView = ({ deck, onBack }) => {
+            const { isDark } = useContext(ThemeContext);
+            const [cards, setCards] = useState([]);
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [flipped, setFlipped] = useState(false);
+            const [loading, setLoading] = useState(true);
+            const [sessionStats, setSessionStats] = useState({ 
+                correct: 0, 
+                total: 0,
+                startTime: Date.now()
+            });
+            const [toast, setToast] = useState(null);
+            const [revealedClozes, setRevealedClozes] = useState({});
+            
+            // Ref for keyboard handling
+            const cardsRef = useRef(cards);
+            const currentIndexRef = useRef(currentIndex);
+            const sessionStatsRef = useRef(sessionStats);
+            const flippedRef = useRef(flipped);
+            
+            // Update refs
+            useEffect(() => {
+                cardsRef.current = cards;
+            }, [cards]);
+            
+            useEffect(() => {
+                currentIndexRef.current = currentIndex;
+            }, [currentIndex]);
+            
+            useEffect(() => {
+                sessionStatsRef.current = sessionStats;
+            }, [sessionStats]);
+            
+            useEffect(() => {
+                flippedRef.current = flipped;
+            }, [flipped]);
+            
+            // Load due cards for the deck
+            useEffect(() => {
+                const loadCards = async () => {
+                    try {
+                        setLoading(true);
+                        const dueCards = await db.getDueCards(deck.id, 100);
+                        setCards(dueCards);
+                        setSessionStats({ 
+                            correct: 0, 
+                            total: dueCards.length,
+                            startTime: Date.now()
+                        });
+                        setRevealedClozes({});
+                    } catch (error) {
+                        console.error('Error loading cards:', error);
+                        setToast({
+                            id: Date.now(),
+                            message: 'Failed to load cards. Please try again.',
+                            type: 'error'
+                        });
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                loadCards();
+            }, [deck.id]);
+            
+            // Handle cloze reveal
+            const handleClozeReveal = (clozeId) => {
+                setRevealedClozes(prev => ({
+                    ...prev,
+                    [clozeId]: true
+                }));
+            };
+            
+            // Handle card rating
+            const handleRateCard = useCallback(async (rating) => {
+                if (rating === 'flip') {
+                    setFlipped(true);
+                    return;
+                }
+                
+                const currentCards = cardsRef.current;
+                const currentIdx = currentIndexRef.current;
+                const currentSessionStats = sessionStatsRef.current;
+                
+                if (currentIdx >= currentCards.length) return;
+                
+                const card = currentCards[currentIdx];
+                
+                try {
+                    // Update card with scheduler
+                    const updatedCard = scheduler(card, rating);
+                    await db.updateCard(updatedCard);
+                    
+                    // Update deck card count
+                    await db.updateDeckCardCount(deck.id);
+                    
+                    // Update session stats
+                    const newSessionStats = {
+                        ...currentSessionStats,
+                        correct: currentSessionStats.correct + (rating >= 3 ? 1 : 0)
+                    };
+                    setSessionStats(newSessionStats);
+                    sessionStatsRef.current = newSessionStats;
+                    
+                    // Move to next card or finish session
+                    if (currentIdx < currentCards.length - 1) {
+                        setCurrentIndex(prev => prev + 1);
+                        currentIndexRef.current = currentIdx + 1;
+                        setFlipped(false);
+                        setRevealedClozes({});
+                    } else {
+                        // Session complete
+                        const sessionTime = Math.round((Date.now() - newSessionStats.startTime) / 1000 / 60);
+                        const successRate = Math.round((newSessionStats.correct) / newSessionStats.total * 100);
+                        
+                        setToast({
+                            id: Date.now(),
+                            message: `Session complete! ${successRate}% correct in ${sessionTime} min`,
+                            type: 'success',
+                            duration: 5000
+                        });
+                        
+                        // Return to decks after a delay
+                        setTimeout(() => {
+                            if (onBack) onBack();
+                        }, 3000);
+                    }
+                } catch (error) {
+                    console.error('Error updating card:', error);
+                    setToast({
+                        id: Date.now(),
+                        message: 'Failed to update card. Please try again.',
+                        type: 'error'
+                    });
+                }
+            }, [deck.id, onBack]);
+            
+            // Keyboard event handling
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    // Don't handle keyboard events if user is typing in an input
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                        return;
+                    }
+                    
+                    if (e.code === 'Space' || e.code === 'Enter') {
+                        e.preventDefault();
+                        if (!flippedRef.current) {
+                            setFlipped(true);
+                        }
+                    } else if (flippedRef.current) {
+                        // Rating keys: 1,2,3,4
+                        if (e.code === 'Digit1' || e.code === 'Numpad1') {
+                            e.preventDefault();
+                            handleRateCard(1);
+                        } else if (e.code === 'Digit2' || e.code === 'Numpad2') {
+                            e.preventDefault();
+                            handleRateCard(2);
+                        } else if (e.code === 'Digit3' || e.code === 'Numpad3') {
+                            e.preventDefault();
+                            handleRateCard(3);
+                        } else if (e.code === 'Digit4' || e.code === 'Numpad4') {
+                            e.preventDefault();
+                            handleRateCard(4);
+                        }
+                    }
+                };
+                
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [handleRateCard]);
+            
+            if (loading) {
+                return (
+                    <div className="h-full flex items-center justify-center">
+                        <div className="loader"></div>
+                    </div>
+                );
+            }
+            
+            if (cards.length === 0) {
+                return (
+                    <div className="h-full flex flex-col items-center justify-center p-6 text-center animate-slide-up">
+                        <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 elevation-2 ${
+                            isDark ? 'bg-ios-green/20' : 'bg-ios-green/10'
+                        }`}>
+                            <i className="fas fa-check text-4xl text-ios-green"></i>
+                        </div>
+                        <h2 className="text-ios-title2 font-bold mb-3">All Caught Up!</h2>
+                        <p className={`text-ios-body mb-8 ${
+                            isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                        }`}>
+                            You have no more cards to review in this deck.
+                        </p>
+                        <button 
+                            onClick={onBack}
+                            className={`px-8 py-4 rounded-2xl font-bold text-ios-headline shadow-md ios-button touch-min-44 elevation-2 ${
+                                isDark 
+                                ? 'bg-ios-darkCard text-white' 
+                                : 'bg-ios-card text-ios-blue'
+                            }`}
+                        >
+                            Return to Decks
+                        </button>
+                    </div>
+                );
+            }
+            
+            const currentCard = cards[currentIndex];
+            const isCloze = currentCard.type === 'cloze';
+            
+            return (
+                <div className="flex flex-col h-full animate-fade-in">
+                    <Header 
+                        title={`${deck.name}`}
+                        left={
+                            <div className="text-ios-caption1 font-medium">
+                                {currentIndex + 1}/{cards.length}
+                            </div>
+                        }
+                        onBack={onBack}
+                    />
+                    
+                    <div className="flex-1 flex items-center justify-center p-2">
+                        <StudyCard
+                            card={currentCard}
+                            flipped={flipped}
+                            onFlip={() => setFlipped(true)}
+                            isCloze={isCloze}
+                            clozeId={isCloze ? currentCard.clozeId : null}
+                            onClozeReveal={isCloze ? handleClozeReveal : null}
+                        />
+                    </div>
+                    
+                    <div className={`p-4 border-t safe-area-bottom study-controls ${
+                        isDark 
+                        ? 'bg-black/80 backdrop-blur-ios border-ios-darkSeparator' 
+                        : 'bg-ios-bg/80 backdrop-blur-ios border-ios-separator'
+                    }`}>
+                        <StudyControls
+                            flipped={flipped}
+                            onRate={handleRateCard}
+                            card={currentCard}
+                        />
+                        
+                        {/* Session Progress */}
+                        <div className={`p-3 text-center text-ios-caption1 font-medium ${
+                            isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                        }`}>
+                            Session: {sessionStats.correct}/{sessionStats.total} correct • 
+                            Success: {sessionStats.total > 0 
+                                ? Math.round(sessionStats.correct / sessionStats.total * 100) 
+                                : 0}%
+                        </div>
+                    </div>
+                    
+                    {/* Toast Notifications */}
+                    {toast && (
+                        <Toast 
+                            key={toast.id} 
+                            message={toast.message} 
+                            type={toast.type} 
+                            duration={toast.duration}
+                            onClose={() => setToast(null)} 
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        // --- Stats View ---
+        const StatsView = () => {
+            const { isDark } = useContext(ThemeContext);
+            const [stats, setStats] = useState({ 
+                decks: 0, 
+                cards: 0, 
+                due: 0, 
+                learning: 0,
+                review: 0,
+                todayReviews: 0
+            });
+            const [loading, setLoading] = useState(true);
+            
+            useEffect(() => {
+                const loadStats = async () => {
+                    try {
+                        setLoading(true);
+                        const data = await db.getStats();
+                        setStats(data);
+                    } catch (error) {
+                        console.error('Error loading stats:', error);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                
+                loadStats();
+                const interval = setInterval(loadStats, 30000); // Refresh every 30 seconds
+                return () => clearInterval(interval);
+            }, []);
+            
+            const calculateStreak = () => {
+                // Simple streak calculation - in a real app, you'd calculate from review history
+                return 0;
+            };
+            
+            return (
+                <div className="flex flex-col h-full animate-fade-in">
+                    <Header title="Statistics" />
+                    
+                    {loading ? (
+                        <div className="flex justify-center items-center h-40">
+                            <div className="loader"></div>
+                        </div>
+                    ) : (
+                        <div className="p-4 space-y-6 flex-1 overflow-y-auto scroll-area safe-area-left safe-area-right">
+                            {/* Summary Cards */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className={`p-5 rounded-2xl elevation-1 flex flex-col items-center justify-center ${
+                                    isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
+                                }`}>
+                                    <div className="text-3xl font-bold text-ios-blue mb-2">{stats.decks}</div>
+                                    <div className={`text-ios-caption1 uppercase font-bold tracking-wider ${
+                                        isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                                    }`}>
+                                        Decks
+                                    </div>
+                                </div>
+                                
+                                <div className={`p-5 rounded-2xl elevation-1 flex flex-col items-center justify-center ${
+                                    isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
+                                }`}>
+                                    <div className="text-3xl font-bold text-ios-green mb-2">{stats.cards}</div>
+                                    <div className={`text-ios-caption1 uppercase font-bold tracking-wider ${
+                                        isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                                    }`}>
+                                        Cards
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Due Cards Progress */}
+                            <div className={`p-5 rounded-2xl elevation-1 ${
+                                isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
+                            }`}>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-semibold text-ios-headline">Due Cards</h3>
+                                    <div className="text-2xl font-bold text-ios-orange">{stats.due}</div>
+                                </div>
+                                
+                                <div className={`h-2 w-full rounded-full overflow-hidden ${
+                                    isDark ? 'bg-gray-800' : 'bg-ios-bg'
+                                }`}>
+                                    <div 
+                                        className="h-full bg-ios-orange rounded-full transition-all duration-500"
+                                        style={{ 
+                                            width: stats.cards > 0 
+                                                ? `${Math.min(100, (stats.due / stats.cards) * 100)}%` 
+                                                : '0%' 
+                                        }}
+                                    ></div>
+                                </div>
+                                
+                                <div className="flex justify-between mt-2 text-ios-caption1">
+                                    <span className={isDark ? 'text-ios-gray3' : 'text-ios-gray'}>
+                                        {stats.cards - stats.due} mastered
+                                    </span>
+                                    <span className={isDark ? 'text-ios-gray3' : 'text-ios-gray'}>
+                                        {stats.due} due
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            {/* Card Distribution */}
+                            <div className={`p-5 rounded-2xl elevation-1 ${
+                                isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
+                            }`}>
+                                <h3 className="font-semibold text-ios-headline mb-4">Card Distribution</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded-full bg-ios-blue"></div>
+                                            <span>Learning</span>
+                                        </div>
+                                        <span className="font-medium">{stats.learning}</span>
+                                    </div>
+                                    
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded-full bg-ios-green"></div>
+                                            <span>Review</span>
+                                        </div>
+                                        <span className="font-medium">{stats.review}</span>
+                                    </div>
+                                    
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded-full bg-ios-orange"></div>
+                                            <span>Due Today</span>
+                                        </div>
+                                        <span className="font-medium">{stats.due}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Study Session Info */}
+                            <div className={`p-5 rounded-2xl elevation-1 ${
+                                isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
+                            }`}>
+                                <h3 className="font-semibold text-ios-headline mb-4">Today's Study</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between">
+                                        <span className={isDark ? 'text-ios-gray3' : 'text-ios-gray'}>
+                                            Cards Reviewed
+                                        </span>
+                                        <span className="font-medium">{stats.todayReviews}</span>
+                                    </div>
+                                    
+                                    <div className="flex justify-between">
+                                        <span className={isDark ? 'text-ios-gray3' : 'text-ios-gray'}>
+                                            Current Streak
+                                        </span>
+                                        <span className="font-medium">{calculateStreak()} days</span>
+                                    </div>
+                                    
+                                    <div className="flex justify-between">
+                                        <span className={isDark ? 'text-ios-gray3' : 'text-ios-gray'}>
+                                            Total Study Time
+                                        </span>
+                                        <span className="font-medium">
+                                            {Math.round(stats.todayReviews * 0.5)} min
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* App Info */}
+                            <div className={`mt-8 p-5 rounded-2xl text-center elevation-1 ${
+                                isDark ? 'bg-ios-darkCard' : 'bg-ios-card'
+                            }`}>
+                                <div className={`text-ios-caption1 uppercase font-bold tracking-wider mb-2 ${
+                                    isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                                }`}>
+                                    App Information
+                                </div>
+                                <div className="font-medium text-ios-headline">Anki macOS Pro</div>
+                                <div className={`text-ios-callout mt-1 ${
+                                    isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                                }`}>
+                                    Version 1.3.0
+                                </div>
+                                <div className={`text-ios-footnote mt-3 ${
+                                    isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                                }`}>
+                                    © 2025 Muhammad Daler. All rights reserved.
+                                </div>
+                                <div className={`text-ios-caption2 mt-2 ${
+                                    isDark ? 'text-ios-gray3' : 'text-ios-gray'
+                                }`}>
+                                    Based on SM-2 spaced repetition algorithm
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Main App ---
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('decks');
+            const [selectedDeck, setSelectedDeck] = useState(null);
+            
+            // Handle system theme changes
+            useEffect(() => {
+                const savedTheme = localStorage.getItem('theme');
+                if (!savedTheme) {
+                    const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (darkMode) {
+                        document.body.classList.add('dark');
+                    }
+                }
+                
+                // Initialize database
+                db.init().catch(console.error);
+                
+                // Handle virtual keyboard
+                const handleResize = () => {
+                    // Ensure content doesn't get hidden by keyboard
+                    const activeElement = document.activeElement;
+                    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                        setTimeout(() => {
+                            activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 100);
+                    }
+                };
+                
+                window.addEventListener('resize', handleResize);
+                return () => window.removeEventListener('resize', handleResize);
+            }, []);
+            
+            // Handle going back from study view
+            const handleBackFromStudy = () => {
+                setSelectedDeck(null);
+            };
+            
+            // Handle card added event
+            const handleCardAdded = () => {
+                // Refresh stats or show notification
+                console.log('New card added');
+            };
+            
+            // Handle deck creation
+            const handleDeckCreated = (newDeck) => {
+                // Optionally switch to the new deck
+                console.log('New deck created:', newDeck);
+            };
+            
+            return (
+                <ThemeProvider>
+                    <div className="flex flex-col h-full">
+                        {selectedDeck ? (
+                            <StudyView 
+                                deck={selectedDeck} 
+                                onBack={handleBackFromStudy} 
+                            />
+                        ) : (
+                            <>
+                                {activeTab === 'decks' && (
+                                    <DecksView 
+                                        onSelectDeck={setSelectedDeck}
+                                        onCreateDeck={handleDeckCreated}
+                                    />
+                                )}
+                                {activeTab === 'add' && (
+                                    <AddCardView onCardAdded={handleCardAdded} />
+                                )}
+                                {activeTab === 'stats' && <StatsView />}
+                                
+                                <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+                            </>
+                        )}
+                    </div>
+                </ThemeProvider>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+        // Simple service worker for PWA (offline support)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Create a simple service worker inline
+                const swContent = `
+                    self.addEventListener('install', event => {
+                        event.waitUntil(
+                            caches.open('ankipro-v1').then(cache => {
+                                return cache.addAll([
+                                    '/',
+                                    './index.html'
+                                ]);
+                            })
+                        );
+                    });
+                    
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            caches.match(event.request).then(response => {
+                                return response || fetch(event.request);
+                            })
+                        );
+                    });
+                `;
+                
+                // Create a blob URL for the service worker
+                const blob = new Blob([swContent], { type: 'application/javascript' });
+                const swURL = URL.createObjectURL(blob);
+                
+                navigator.serviceWorker.register(swURL)
+                    .then(registration => {
+                        console.log('Service Worker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
