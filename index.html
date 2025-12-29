@@ -1,713 +1,1844 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Anki macOS Pro</title>
-    
-    <!-- PWA Settings -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-
-    <!-- Libraries -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <script>
-        tailwind.config = {
-            darkMode: 'media',
-            theme: {
-                extend: {
-                    colors: {
-                        ios: {
-                            blue: '#007AFF',
-                            green: '#34C759',
-                            red: '#FF3B30',
-                            orange: '#FF9500',
-                            yellow: '#FFCC00',
-                            gray: '#8E8E93',
-                            gray2: '#AEAEB2',
-                            bg: '#F2F2F7',
-                            darkBg: '#000000',
-                            card: '#FFFFFF',
-                            darkCard: '#1C1C1E',
-                            separator: '#C6C6C8',
-                            darkSeparator: '#38383A'
-                        }
-                    },
-                    boxShadow: {
-                        'native': '0 4px 12px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
-                        'float': '0 8px 24px rgba(0,0,0,0.12)'
-                    },
-                    fontFamily: {
-                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'Helvetica Neue', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        /* Global Reset & Typography */
-        body {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            overscroll-behavior-y: none; /* Pull-to-refreshni o'chiradi */
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            user-select: none; /* App kabi ishlashi uchun */
-        }
-        
-        input, textarea {
-            user-select: text; /* Yozish uchun ruxsat */
-        }
-
-        /* 3D Flip Animation */
-        .card-container {
-            perspective: 1200px;
-        }
-        .card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            transform-style: preserve-3d;
-        }
-        .card-flipped {
-            transform: rotateY(180deg);
-        }
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            overflow-y: auto;
-        }
-        .card-back {
-            transform: rotateY(180deg);
-        }
-
-        /* Cloze Styles - Enhanced */
-        .cloze-hidden {
-            color: transparent;
-            background: #007AFF;
-            border-radius: 6px;
-            padding: 2px 8px;
-            font-weight: 600;
-            cursor: pointer;
-            position: relative;
-            display: inline-block;
-            min-width: 30px;
-        }
-        .cloze-hidden::after {
-            content: '...';
-            color: white;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 0.9em;
-        }
-        
-        .dark .cloze-hidden {
-            background: #0A84FF;
-        }
-
-        .cloze-revealed {
-            color: #34C759;
-            font-weight: 700;
-            border-bottom: 2px solid rgba(52, 199, 89, 0.3);
-            padding: 0 2px;
-        }
-        
-        /* Animations */
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .animate-enter { animation: slideUp 0.3s ease-out; }
-
-        /* Loader */
-        .loader {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(128,128,128,0.2);
-            border-top-color: #007AFF;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        ::-webkit-scrollbar { width: 0; height: 0; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Anki macOS Pro</title>
+<!-- PWA Settings -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Professional flashcard app with spaced repetition">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3395/3395431.png">
+<link rel="manifest" href="manifest.json">
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Libraries -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+tailwind.config = {
+darkMode: 'class',
+theme: {
+extend: {
+colors: {
+ios: {
+blue: '#007AFF',
+green: '#34C759',
+red: '#FF3B30',
+orange: '#FF9500',
+yellow: '#FFCC00',
+gray: '#8E8E93',
+gray2: '#AEAEB2',
+bg: '#F2F2F7',
+darkBg: '#000000',
+card: '#FFFFFF',
+darkCard: '#1C1C1E',
+separator: '#C6C6C8',
+darkSeparator: '#38383A',
+shadow: 'rgba(0, 0, 0, 0.06)',
+darkShadow: 'rgba(0, 0, 0, 0.3)'
+}
+},
+boxShadow: {
+'native': '0 4px 12px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+'native-dark': '0 4px 12px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)',
+'float': '0 8px 24px rgba(0,0,0,0.12)',
+'float-dark': '0 8px 24px rgba(0,0,0,0.4)'
+},
+fontFamily: {
+sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Helvetica Neue', 'sans-serif'],
+},
+transitionProperty: {
+'all': 'all',
+},
+animation: {
+'fade-in': 'fadeIn 0.3s ease-out',
+'slide-up': 'slideUp 0.3s ease-out',
+},
+keyframes: {
+fadeIn: {
+'0%': { opacity: 0 },
+'100%': { opacity: 1 }
+},
+slideUp: {
+'0%': { transform: 'translateY(20px)', opacity: 0 },
+'100%': { transform: 'translateY(0)', opacity: 1 }
+},
+spin: {
+'0%': { transform: 'rotate(0deg)' },
+'100%': { transform: 'rotate(360deg)' }
+}
+}
+}
+},
+plugins: [
+function({ addUtilities }) {
+addUtilities({
+'.text-truncate': {
+'overflow': 'hidden',
+'text-overflow': 'ellipsis',
+'white-space': 'nowrap',
+},
+'.word-break': {
+'word-break': 'break-word',
+},
+});
+}
+]
+}
+</script>
+<style>
+/* Global Reset & Typography */
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+body {
+-webkit-tap-highlight-color: transparent;
+-webkit-touch-callout: none;
+overscroll-behavior-y: none;
+font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+background-color: #F2F2F7;
+color: #000000;
+height: 100vh;
+overflow: hidden;
+transition: background-color 0.3s ease, color 0.3s ease;
+}
+body.dark {
+background-color: #000000;
+color: #FFFFFF;
+}
+body * {
+user-select: none;
+}
+input, textarea, [contenteditable] {
+user-select: text;
+-webkit-user-select: text;
+}
+/* 3D Flip Animation */
+.card-container {
+perspective: 1200px;
+width: 100%;
+height: 100%;
+}
+.card-inner {
+position: relative;
+width: 100%;
+height: 100%;
+transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+transform-style: preserve-3d;
+}
+.card-flipped {
+transform: rotateY(180deg);
+}
+.card-face {
+position: absolute;
+width: 100%;
+height: 100%;
+backface-visibility: hidden;
+-webkit-backface-visibility: hidden;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 2rem;
+overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+}
+.card-back {
+transform: rotateY(180deg);
+}
+/* Cloze Styles */
+.cloze-hidden {
+color: transparent;
+background: #007AFF;
+border-radius: 6px;
+padding: 2px 8px;
+font-weight: 600;
+cursor: pointer;
+position: relative;
+display: inline-block;
+min-width: 30px;
+user-select: none;
+-webkit-user-select: none;
+}
+.cloze-hidden::after {
+content: '...';
+color: white;
+position: absolute;
+left: 50%;
+top: 50%;
+transform: translate(-50%, -50%);
+font-size: 0.9em;
+}
+body.dark .cloze-hidden {
+background: #0A84FF;
+}
+.cloze-revealed {
+color: #34C759;
+font-weight: 700;
+border-bottom: 2px solid rgba(52, 199, 89, 0.3);
+padding: 0 2px;
+}
+/* Loader animation */
+.loader {
+width: 24px;
+height: 24px;
+border: 3px solid rgba(128, 128, 128, 0.2);
+border-top-color: #007AFF;
+border-radius: 50%;
+animation: spin 0.8s linear infinite;
+}
+body.dark .loader {
+border-top-color: #0A84FF;
+}
+/* Custom scrollbar */
+::-webkit-scrollbar {
+width: 6px;
+height: 6px;
+}
+::-webkit-scrollbar-track {
+background: transparent;
+}
+::-webkit-scrollbar-thumb {
+background: #C6C6C8;
+border-radius: 10px;
+}
+body.dark ::-webkit-scrollbar-thumb {
+background: #38383A;
+}
+/* Safe area support */
+@supports (padding: max(0px)) {
+.safe-area-top {
+padding-top: max(12px, env(safe-area-inset-top));
+}
+.safe-area-bottom {
+padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+}
+/* Animation classes */
+.fade-in {
+animation: fadeIn 0.3s ease-out;
+}
+.slide-up {
+animation: slideUp 0.3s ease-out;
+}
+/* Button active states */
+button:active {
+opacity: 0.7;
+}
+/* Focus states for accessibility */
+button:focus-visible, input:focus-visible, textarea:focus-visible {
+outline: 2px solid #007AFF;
+outline-offset: 2px;
+}
+body.dark button:focus-visible, 
+body.dark input:focus-visible, 
+body.dark textarea:focus-visible {
+outline: 2px solid #64B5FF;
+}
+/* Prevent image dragging */
+img {
+-webkit-user-drag: none;
+user-drag: none;
+pointer-events: none;
+}
+</style>
 </head>
-<body class="bg-ios-bg dark:bg-black text-black dark:text-white transition-colors duration-300">
-    <div id="root" class="h-screen w-full flex flex-col overflow-hidden"></div>
+<body class="transition-colors duration-300">
+<div id="root" class="h-full w-full flex flex-col overflow-hidden"></div>
+<script type="text/babel">
+// ==========================================
+// 1. CORE UTILITIES & HELPERS
+// ==========================================
+const { useState, useEffect, useRef, useMemo, useCallback, useContext, createContext, Fragment } = React;
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo, useCallback, Fragment } = React;
+// Create context for theme management
+const ThemeContext = createContext({
+isDark: false,
+toggleTheme: () => {}
+});
 
-        // ==========================================
-        // 1. HELPERS & ID GENERATOR
-        // ==========================================
-        
-        // Robust ID generator (No crypto dependency)
-        const generateId = () => {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
-        };
+// Robust ID generator
+const generateId = () => {
+return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+};
 
-        const sanitize = (text) => {
-            // Convert newlines to <br> first
-            const html = text.replace(/\n/g, '<br>');
-            return DOMPurify.sanitize(html, {
-                ALLOWED_TAGS: ['b', 'i', 'u', 'strong', 'em', 'br', 'div', 'span', 'p', 'ul', 'li', 'code'],
-                ALLOWED_ATTR: ['class', 'style']
-            });
-        };
+// Robust HTML sanitization using DOMPurify
+const sanitize = (text) => {
+if (!text) return '';
+// Convert newlines to <br> first
+const htmlWithLineBreaks = text.replace(/\n/g, '<br>');
+// Configure DOMPurify with safe settings
+const clean = DOMPurify.sanitize(htmlWithLineBreaks, {
+ALLOWED_TAGS: ['b', 'i', 'u', 'strong', 'em', 'br', 'div', 'span', 'p', 'ul', 'ol', 'li', 'code', 'pre', 'blockquote', 'strike'],
+ALLOWED_ATTR: ['class', 'style', 'title'],
+FORBID_ATTR: ['style'], // Forbid inline styles for security
+FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed', 'form', 'input'],
+USE_PROFILES: { html: true },
+RETURN_DOM_FRAGMENT: false,
+ADD_ATTR: ['target'] // Allow target attribute for links (if we allow them later)
+});
+return clean;
+};
 
-        // ==========================================
-        // 2. DATABASE (IndexedDB Singleton)
-        // ==========================================
-        const db = {
-            name: 'AnkiPro_Final',
-            version: 1,
-            
-            async connect() {
-                return new Promise((resolve, reject) => {
-                    const req = indexedDB.open(this.name, this.version);
-                    req.onupgradeneeded = (e) => {
-                        const d = e.target.result;
-                        if (!d.objectStoreNames.contains('decks')) d.createObjectStore('decks', { keyPath: 'id' });
-                        if (!d.objectStoreNames.contains('cards')) {
-                            const s = d.createObjectStore('cards', { keyPath: 'id' });
-                            s.createIndex('deckId', 'deckId', { unique: false });
-                        }
-                    };
-                    req.onsuccess = (e) => resolve(e.target.result);
-                    req.onerror = (e) => reject(e);
-                });
-            },
+// Format timestamp to human-readable date
+const formatDate = (timestamp) => {
+const date = new Date(timestamp);
+return date.toLocaleDateString(navigator.language, {
+year: 'numeric',
+month: 'short',
+day: 'numeric'
+});
+};
 
-            async getDecks() {
-                const conn = await this.connect();
-                return new Promise(resolve => {
-                    conn.transaction('decks', 'readonly').objectStore('decks').getAll().onsuccess = (e) => resolve(e.target.result || []);
-                });
-            },
+// Format time to human-readable format
+const formatTime = (timestamp) => {
+const date = new Date(timestamp);
+return date.toLocaleTimeString(navigator.language, {
+hour: '2-digit',
+minute: '2-digit'
+});
+};
 
-            async addDeck(name) {
-                const conn = await this.connect();
-                const deck = { id: generateId(), name, created: Date.now() };
-                return new Promise(resolve => {
-                    const tx = conn.transaction('decks', 'readwrite');
-                    tx.objectStore('decks').add(deck);
-                    tx.oncomplete = () => resolve(deck);
-                });
-            },
+// ==========================================
+// 2. DATABASE (IndexedDB Wrapper)
+// ==========================================
+class Database {
+constructor() {
+this.name = 'AnkiPro_v2';
+this.version = 2;
+this.db = null;
+}
 
-            async deleteDeck(id) {
-                const conn = await this.connect();
-                return new Promise(resolve => {
-                    const tx = conn.transaction(['decks', 'cards'], 'readwrite');
-                    tx.objectStore('decks').delete(id);
-                    const index = tx.objectStore('cards').index('deckId');
-                    index.openCursor(IDBKeyRange.only(id)).onsuccess = (e) => {
-                        const cursor = e.target.result;
-                        if (cursor) { cursor.delete(); cursor.continue(); }
-                    };
-                    tx.oncomplete = () => resolve();
-                });
-            },
+async init() {
+if (this.db) return this.db;
+return new Promise((resolve, reject) => {
+const request = indexedDB.open(this.name, this.version);
+request.onupgradeneeded = (event) => {
+this.db = event.target.result;
+// Create object stores if they don't exist
+if (!this.db.objectStoreNames.contains('decks')) {
+this.db.createObjectStore('decks', { keyPath: 'id' });
+}
+if (!this.db.objectStoreNames.contains('cards')) {
+const cardStore = this.db.createObjectStore('cards', { keyPath: 'id' });
+cardStore.createIndex('deckId', 'deckId', { unique: false });
+cardStore.createIndex('due', 'due', { unique: false });
+cardStore.createIndex('created', 'created', { unique: false });
+}
+if (!this.db.objectStoreNames.contains('reviews')) {
+const reviewStore = this.db.createObjectStore('reviews', { keyPath: 'id' });
+reviewStore.createIndex('cardId', 'cardId', { unique: false });
+reviewStore.createIndex('timestamp', 'timestamp', { unique: false });
+}
+};
+request.onsuccess = (event) => {
+this.db = event.target.result;
+resolve(this.db);
+};
+request.onerror = (event) => {
+console.error('Database error:', event.target.error);
+reject(event.target.error);
+};
+});
+}
 
-            async addCard(card) {
-                const conn = await this.connect();
-                return new Promise(resolve => {
-                    const tx = conn.transaction('cards', 'readwrite');
-                    tx.objectStore('cards').add(card);
-                    tx.oncomplete = () => resolve();
-                });
-            },
+async withStore(storeName, mode = 'readonly', callback) {
+try {
+await this.init();
+const transaction = this.db.transaction(storeName, mode);
+const store = transaction.objectStore(storeName);
+return await callback(store);
+} catch (error) {
+console.error(`Database operation failed for ${storeName}:`, error);
+throw error;
+}
+}
 
-            async getDueCards(deckId) {
-                const conn = await this.connect();
-                return new Promise(resolve => {
-                    const tx = conn.transaction('cards', 'readonly');
-                    const index = tx.objectStore('cards').index('deckId');
-                    index.getAll(deckId).onsuccess = (e) => {
-                        const all = e.target.result || [];
-                        const now = Date.now();
-                        // Sort: Due date first
-                        const due = all.filter(c => c.due <= now).sort((a, b) => a.due - b.due);
-                        resolve(due);
-                    };
-                });
-            },
+async getDecks() {
+return this.withStore('decks', 'readonly', async (store) => {
+return new Promise((resolve) => {
+const request = store.getAll();
+request.onsuccess = () => resolve(request.result || []);
+request.onerror = () => resolve([]);
+});
+});
+}
 
-            async updateCard(card) {
-                const conn = await this.connect();
-                return new Promise(resolve => {
-                    conn.transaction('cards', 'readwrite').objectStore('cards').put(card).onsuccess = () => resolve();
-                });
-            },
-            
-            async getStats() {
-                const conn = await this.connect();
-                return new Promise(async resolve => {
-                    const dCount = await new Promise(r => conn.transaction('decks').objectStore('decks').count().onsuccess = e => r(e.target.result));
-                    const cCount = await new Promise(r => conn.transaction('cards').objectStore('cards').count().onsuccess = e => r(e.target.result));
-                    resolve({ decks: dCount, cards: cCount });
-                });
-            }
-        };
+async addDeck(name) {
+if (!name || name.trim().length === 0) {
+throw new Error('Deck name cannot be empty');
+}
+const deck = {
+id: generateId(),
+name: name.trim(),
+created: Date.now(),
+updated: Date.now()
+};
+await this.withStore('decks', 'readwrite', async (store) => {
+return new Promise((resolve, reject) => {
+const request = store.add(deck);
+request.onsuccess = () => resolve(deck);
+request.onerror = () => reject(request.error);
+});
+});
+return deck;
+}
 
-        // ==========================================
-        // 3. ADVANCED ALGORITHM (SM-2 ENHANCED)
-        // ==========================================
-        const scheduler = (card, rating) => {
-            // Rating: 1=Again, 2=Hard, 3=Good, 4=Easy
-            let { interval, ease, reps, phase } = card;
-            const now = Date.now();
-            const min = 60 * 1000;
-            const day = 24 * 60 * 60 * 1000;
+async updateDeck(deck) {
+await this.withStore('decks', 'readwrite', async (store) => {
+return new Promise((resolve, reject) => {
+deck.updated = Date.now();
+const request = store.put(deck);
+request.onsuccess = () => resolve();
+request.onerror = () => reject(request.error);
+});
+});
+}
 
-            // Phase: 'learning' | 'review'
-            // Learning Steps: 1min -> 10min -> Graduated (1 day)
+async deleteDeck(deckId) {
+// First get all cards in this deck to delete them
+const cards = await this.withStore('cards', 'readonly', async (store) => {
+return new Promise((resolve) => {
+const index = store.index('deckId');
+const request = index.getAll(deckId);
+request.onsuccess = () => resolve(request.result || []);
+request.onerror = () => resolve([]);
+});
+});
+// Delete cards and deck in a single transaction
+await this.withStore(['decks', 'cards'], 'readwrite', async (stores) => {
+const deckStore = stores['decks'];
+const cardStore = stores['cards'];
+return new Promise((resolve, reject) => {
+// Delete deck
+deckStore.delete(deckId);
+// Delete all cards in the deck
+cards.forEach(card => {
+cardStore.delete(card.id);
+});
+resolve();
+});
+});
+}
 
-            let nextDue;
+async addCard(card) {
+if (!card.deckId) {
+throw new Error('Card must belong to a deck');
+}
+// Ensure card has all required fields
+const newCard = {
+id: generateId(),
+created: Date.now(),
+due: Date.now(), // Due immediately
+interval: 0,
+ease: 250, // 250%
+reps: 0,
+lapses: 0,
+phase: 'learning', // 'learning', 'review', 'relearning'
+...card
+};
+await this.withStore('cards', 'readwrite', async (store) => {
+return new Promise((resolve, reject) => {
+const request = store.add(newCard);
+request.onsuccess = () => resolve(newCard);
+request.onerror = () => reject(request.error);
+});
+});
+return newCard;
+}
 
-            if (rating === 1) { // AGAIN (Forgot)
-                phase = 'learning';
-                interval = 0; // 1 min step
-                reps = 0;
-                ease = Math.max(130, ease - 20);
-                nextDue = now + min; // Due in 1 min
-            } else {
-                if (phase === 'learning') {
-                    if (rating === 2) { // Hard (Stay in learning 10min)
-                        nextDue = now + (10 * min);
-                    } else if (rating === 3) { // Good (Graduate to 1 day)
-                        phase = 'review';
-                        interval = 1;
-                        nextDue = now + day;
-                    } else if (rating === 4) { // Easy (Graduate to 4 days)
-                        phase = 'review';
-                        interval = 4;
-                        ease += 15;
-                        nextDue = now + (4 * day);
-                    }
-                } else {
-                    // Review Phase
-                    if (rating === 2) { // Hard
-                        interval = Math.max(1, interval * 1.2);
-                        ease -= 15;
-                    } else if (rating === 3) { // Good
-                        interval = Math.round(interval * (ease / 100));
-                    } else if (rating === 4) { // Easy
-                        interval = Math.round(interval * (ease / 100) * 1.3);
-                        ease += 15;
-                    }
-                    
-                    if (interval < 1) interval = 1;
-                    ease = Math.max(130, ease); // Minimum ease 130%
-                    nextDue = now + (interval * day);
-                }
-                reps += 1;
-            }
+async updateCard(card) {
+await this.withStore('cards', 'readwrite', async (store) => {
+return new Promise((resolve, reject) => {
+const request = store.put(card);
+request.onsuccess = () => resolve();
+request.onerror = () => reject(request.error);
+});
+});
+}
 
-            return { ...card, interval, ease, reps, phase, due: nextDue, lastReview: now };
-        };
+async getCardById(id) {
+return this.withStore('cards', 'readonly', async (store) => {
+return new Promise((resolve) => {
+const request = store.get(id);
+request.onsuccess = () => resolve(request.result || null);
+request.onerror = () => resolve(null);
+});
+});
+}
 
-        // ==========================================
-        // 4. COMPONENTS
-        // ==========================================
+async getDueCards(deckId, limit = 50) {
+return this.withStore('cards', 'readonly', async (store) => {
+return new Promise((resolve) => {
+const index = store.index('deckId');
+const range = IDBKeyRange.only(deckId);
+const request = index.openCursor(range);
+const now = Date.now();
+const dueCards = [];
+request.onsuccess = (event) => {
+const cursor = event.target.result;
+if (cursor) {
+const card = cursor.value;
+if (card.due <= now && dueCards.length < limit) {
+dueCards.push(card);
+}
+cursor.continue();
+} else {
+// Sort by due date (oldest first)
+dueCards.sort((a, b) => a.due - b.due);
+resolve(dueCards);
+}
+};
+request.onerror = () => resolve([]);
+});
+});
+}
 
-        const Header = ({ title, left, right }) => (
-            <div className="h-14 bg-ios-bg/80 dark:bg-black/80 backdrop-blur-xl border-b border-ios-separator dark:border-ios-darkSeparator flex items-center justify-between px-4 sticky top-0 z-50 pt-[env(safe-area-inset-top)] transition-colors">
-                <div className="w-16 flex items-center">{left}</div>
-                <h1 className="font-semibold text-[17px] truncate tracking-tight">{title}</h1>
-                <div className="w-16 flex justify-end items-center">{right}</div>
-            </div>
-        );
+async getCardsByDeck(deckId) {
+return this.withStore('cards', 'readonly', async (store) => {
+return new Promise((resolve) => {
+const index = store.index('deckId');
+const request = index.getAll(deckId);
+request.onsuccess = () => resolve(request.result || []);
+request.onerror = () => resolve([]);
+});
+});
+}
 
-        const TabBar = ({ active, onChange }) => (
-            <div className="h-[83px] bg-ios-bg/80 dark:bg-ios-darkCard/90 backdrop-blur-xl border-t border-ios-separator dark:border-ios-darkSeparator flex justify-around items-start pt-2 pb-[env(safe-area-inset-bottom)] fixed bottom-0 w-full z-50 transition-colors">
-                <button onClick={() => onChange('decks')} className={`flex flex-col items-center gap-1 w-20 transition-all active:scale-95 ${active === 'decks' ? 'text-ios-blue' : 'text-ios-gray'}`}>
-                    <i className="fas fa-layer-group text-xl mb-0.5"></i>
-                    <span className="text-[10px] font-medium">Decks</span>
-                </button>
-                <button onClick={() => onChange('add')} className={`flex flex-col items-center gap-1 w-20 transition-all active:scale-95 ${active === 'add' ? 'text-ios-blue' : 'text-ios-gray'}`}>
-                    <i className="fas fa-plus-circle text-xl mb-0.5"></i>
-                    <span className="text-[10px] font-medium">Add</span>
-                </button>
-                <button onClick={() => onChange('stats')} className={`flex flex-col items-center gap-1 w-20 transition-all active:scale-95 ${active === 'stats' ? 'text-ios-blue' : 'text-ios-gray'}`}>
-                    <i className="fas fa-chart-bar text-xl mb-0.5"></i>
-                    <span className="text-[10px] font-medium">Stats</span>
-                </button>
-            </div>
-        );
+async getStats() {
+const [decksCount, cardsCount, dueCount] = await Promise.all([
+this.withStore('decks', 'readonly', async (store) => {
+return new Promise(resolve => {
+const request = store.count();
+request.onsuccess = () => resolve(request.result);
+request.onerror = () => resolve(0);
+});
+}),
+this.withStore('cards', 'readonly', async (store) => {
+return new Promise(resolve => {
+const request = store.count();
+request.onsuccess = () => resolve(request.result);
+request.onerror = () => resolve(0);
+});
+}),
+this.withStore('cards', 'readonly', async (store) => {
+return new Promise(resolve => {
+const index = store.index('due');
+const now = Date.now();
+const range = IDBKeyRange.upperBound(now);
+const request = index.count(range);
+request.onsuccess = () => resolve(request.result);
+request.onerror = () => resolve(0);
+});
+})
+]);
+return {
+decks: decksCount,
+cards: cardsCount,
+due: dueCount,
+new: 0 // Could be calculated separately if needed
+};
+}
 
-        // --- Decks View ---
-        const Decks = ({ onSelect }) => {
-            const [list, setList] = useState([]);
-            const [loading, setLoading] = useState(true);
-            const [modal, setModal] = useState(false);
-            const [name, setName] = useState('');
+async clearAllData() {
+// This is for development only
+await Promise.all([
+this.withStore('decks', 'readwrite', async (store) => {
+store.clear();
+}),
+this.withStore('cards', 'readwrite', async (store) => {
+store.clear();
+})
+]);
+}
+}
 
-            const load = async () => {
-                const data = await db.getDecks();
-                setList(data);
-                setLoading(false);
-            };
+// Create a singleton database instance
+const db = new Database();
 
-            useEffect(() => { load(); }, []);
+// ==========================================
+// 3. SCHEDULING ALGORITHM (SM-2 Enhanced)
+// ==========================================
+const scheduler = (card, rating, now = Date.now()) => {
+// Validate inputs
+if (!card) throw new Error('Card is required');
+if (![1, 2, 3, 4].includes(rating)) throw new Error('Invalid rating');
+// Clone the card to avoid modifying the original
+const updatedCard = { ...card };
+const min = 60 * 1000; // 1 minute in milliseconds
+const day = 24 * 60 * 60 * 1000; // 1 day in milliseconds
+// Handle "Again" (rating 1) - reset progress
+if (rating === 1) {
+updatedCard.lapses += 1;
+updatedCard.ease = Math.max(130, updatedCard.ease - 20); // Reduce ease factor
+updatedCard.reps = 0; // Reset reps
+if (updatedCard.phase === 'learning') {
+// First learning step
+updatedCard.interval = 0.02; // ~1 minute
+updatedCard.due = now + (1 * min);
+} else {
+// Failed review card - move back to learning phase
+updatedCard.phase = 'relearning';
+updatedCard.interval = 0.02; // ~1 minute
+updatedCard.due = now + (1 * min);
+}
+} 
+// Handle other ratings
+else {
+if (updatedCard.phase === 'learning' || updatedCard.phase === 'relearning') {
+// Learning/relearning phase
+if (rating === 2) { // Hard
+// Stay in learning but increase interval
+updatedCard.interval = 0.15; // ~10 minutes
+updatedCard.due = now + (10 * min);
+} 
+else if (rating === 3) { // Good
+// Graduate to review phase
+updatedCard.phase = 'review';
+updatedCard.interval = 1; // 1 day
+updatedCard.due = now + day;
+updatedCard.reps = Math.max(1, updatedCard.reps + 1);
+} 
+else if (rating === 4) { // Easy
+// Graduate to review phase with longer interval
+updatedCard.phase = 'review';
+updatedCard.interval = 3; // 3 days
+updatedCard.ease += 15; // Increase ease factor
+updatedCard.due = now + (3 * day);
+updatedCard.reps = Math.max(1, updatedCard.reps + 1);
+}
+} 
+else {
+// Review phase
+updatedCard.reps += 1;
+if (rating === 2) { // Hard
+// Shorten interval but don't decrease ease too much
+updatedCard.interval = Math.max(1, Math.round(updatedCard.interval * 0.6));
+updatedCard.ease = Math.max(130, updatedCard.ease - 10);
+} 
+else if (rating === 3) { // Good
+// Standard interval growth
+updatedCard.interval = Math.round(updatedCard.interval * (updatedCard.ease / 100));
+} 
+else if (rating === 4) { // Easy
+// Increase interval and ease
+updatedCard.interval = Math.round(updatedCard.interval * (updatedCard.ease / 100) * 1.3);
+updatedCard.ease += 15;
+}
+// Ensure minimum interval of 1 day in review phase
+updatedCard.interval = Math.max(1, updatedCard.interval);
+updatedCard.ease = Math.max(130, updatedCard.ease); // Minimum ease 130%
+updatedCard.due = now + (updatedCard.interval * day);
+}
+}
+updatedCard.lastReview = now;
+updatedCard.updated = now;
+return updatedCard;
+};
 
-            const create = async () => {
-                if(!name.trim()) return;
-                await db.addDeck(name);
-                setName('');
-                setModal(false);
-                load();
-            };
+// ==========================================
+// 4. COMPONENTS
+// ==========================================
 
-            const remove = async (e, id) => {
-                e.stopPropagation();
-                if(confirm('Delete deck and all cards inside?')) {
-                    await db.deleteDeck(id);
-                    load();
-                }
-            };
+// Theme Provider Component
+const ThemeProvider = ({ children }) => {
+const [isDark, setIsDark] = useState(() => {
+// Check system preference first
+if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+return true;
+}
+// Then check localStorage
+const saved = localStorage.getItem('theme');
+return saved === 'dark';
+});
 
-            return (
-                <div className="flex flex-col h-full pb-24">
-                    <Header title="Decks" right={<button onClick={() => setModal(true)} className="text-ios-blue text-2xl active:opacity-50 transition-opacity"><i className="fas fa-plus"></i></button>} />
-                    
-                    <div className="p-4 space-y-3 flex-1 overflow-y-auto">
-                        {loading ? <div className="flex justify-center mt-10"><div className="loader"></div></div> : 
-                         list.length === 0 ? <div className="text-center mt-20 text-ios-gray opacity-70"><i className="fas fa-folder-open text-4xl mb-4"></i><p>No decks found.</p></div> :
-                         list.map(d => (
-                            <div key={d.id} onClick={() => onSelect(d)} className="bg-ios-card dark:bg-ios-darkCard p-4 rounded-xl shadow-native flex justify-between items-center active:scale-[0.98] transition-all cursor-pointer group border border-transparent dark:border-ios-darkSeparator">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-ios-blue/10 dark:bg-ios-blue/20 rounded-full flex items-center justify-center text-ios-blue">
-                                        <i className="fas fa-book"></i>
-                                    </div>
-                                    <span className="font-semibold text-[17px]">{d.name}</span>
-                                </div>
-                                <button onClick={(e) => remove(e, d.id)} className="w-8 h-8 flex items-center justify-center text-ios-gray2 hover:text-ios-red transition-colors">
-                                    <i className="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
-                        ))}
-                        
-                        <div className="mt-8 text-center opacity-40">
-                            <p className="text-xs font-medium text-ios-gray">Made by Muhammad Daler</p>
-                        </div>
-                    </div>
+useEffect(() => {
+// Apply dark mode class to body
+if (isDark) {
+document.body.classList.add('dark');
+} else {
+document.body.classList.remove('dark');
+}
+// Save preference to localStorage
+localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}, [isDark]);
 
-                    {modal && (
-                        <div className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center p-6 backdrop-blur-sm animate-enter">
-                            <div className="bg-ios-card dark:bg-ios-darkCard w-full max-w-sm rounded-2xl p-6 shadow-float">
-                                <h3 className="text-lg font-bold mb-4 text-center">Create New Deck</h3>
-                                <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g., English Vocabulary" className="w-full bg-ios-bg dark:bg-black p-3 rounded-xl mb-4 outline-none border-none focus:ring-2 focus:ring-ios-blue" autoFocus />
-                                <div className="flex gap-3">
-                                    <button onClick={() => setModal(false)} className="flex-1 py-3 bg-ios-bg dark:bg-gray-800 rounded-xl text-ios-blue font-semibold">Cancel</button>
-                                    <button onClick={create} className="flex-1 py-3 bg-ios-blue text-white rounded-xl font-semibold shadow-lg">Create</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        };
+// Watch for system preference changes
+useEffect(() => {
+const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+const handleChange = (e) => {
+// Only change if user hasn't manually set a preference
+const saved = localStorage.getItem('theme');
+if (!saved) {
+setIsDark(e.matches);
+}
+};
+mediaQuery.addEventListener('change', handleChange);
+return () => mediaQuery.removeEventListener('change', handleChange);
+}, []);
 
-        // --- Add Card View ---
-        const AddCard = () => {
-            const [decks, setDecks] = useState([]);
-            const [deckId, setDeckId] = useState('');
-            const [type, setType] = useState('basic');
-            const [front, setFront] = useState('');
-            const [back, setBack] = useState('');
-            const [msg, setMsg] = useState(null);
-            const frontRef = useRef(null);
+const toggleTheme = () => setIsDark(prev => !prev);
 
-            useEffect(() => {
-                db.getDecks().then(d => { setDecks(d); if(d.length) setDeckId(d[0].id); });
-            }, []);
+return (
+<ThemeContext.Provider value={{ isDark, toggleTheme }}>
+{children}
+</ThemeContext.Provider>
+);
+};
 
-            const insertCloze = () => {
-                const el = frontRef.current;
-                if(!el) return;
-                const txt = el.value;
-                const start = el.selectionStart;
-                const end = el.selectionEnd;
-                const sel = txt.substring(start, end) || '...';
-                
-                // Find next number
-                const matches = txt.match(/{{c(\d+)::/g);
-                let next = 1;
-                if(matches) {
-                    const nums = matches.map(m => parseInt(m.match(/\d+/)[0]));
-                    next = Math.max(...nums) + 1;
-                }
-                
-                const newTxt = txt.substring(0, start) + `{{c${next}::${sel}}}` + txt.substring(end);
-                setFront(newTxt);
-                
-                setTimeout(() => {
-                    el.focus();
-                    const newCursor = start + 5 + next.toString().length + sel.length + 2; // Approximate cursor placement
-                    el.setSelectionRange(newCursor, newCursor);
-                }, 10);
-            };
+// Header Component
+const Header = ({ title, left = null, right = null, onBack = null }) => {
+const { isDark } = useContext(ThemeContext);
+return (
+<div className={`h-16 w-full flex items-center justify-between px-4 sticky top-0 z-50 transition-colors ${isDark ? 'bg-black/80 backdrop-blur-xl border-b border-ios-darkSeparator' : 'bg-ios-bg/80 backdrop-blur-xl border-b border-ios-separator'}`}>
+<div className="w-16 flex items-center">
+{onBack && (
+<button 
+onClick={onBack}
+className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-ios-bg dark:hover:bg-gray-800 transition-colors"
+aria-label="Back"
+>
+<i className="fas fa-chevron-left text-xl text-ios-blue"></i>
+</button>
+)}
+{left}
+</div>
+<h1 className="font-semibold text-lg truncate max-w-[50%] text-center">{title}</h1>
+<div className="w-16 flex justify-end items-center">
+{right}
+</div>
+</div>
+);
+};
 
-            const save = async () => {
-                if(!deckId || !front.trim()) {
-                    setMsg({txt: "Please select a deck and fill the front field.", err: true});
-                    setTimeout(() => setMsg(null), 3000);
-                    return;
-                }
+// Tab Bar Component
+const TabBar = ({ activeTab, onTabChange }) => {
+const { isDark } = useContext(ThemeContext);
+return (
+<div className={`h-[83px] w-full flex justify-around items-start pt-2 pb-4 border-t transition-colors ${isDark ? 'bg-ios-darkCard/90 backdrop-blur-xl border-ios-darkSeparator' : 'bg-ios-bg/80 backdrop-blur-xl border-ios-separator'}`}>
+<button 
+onClick={() => onTabChange('decks')}
+className={`flex flex-col items-center gap-1 w-20 transition-all duration-200 ${activeTab === 'decks' ? 'text-ios-blue scale-105' : 'text-ios-gray'}`}
+aria-label="Decks"
+>
+<i className={`fas fa-layer-group text-xl mb-0.5 ${activeTab === 'decks' ? 'scale-110' : ''}`}></i>
+<span className="text-xs font-medium">Decks</span>
+</button>
+<button 
+onClick={() => onTabChange('add')}
+className={`flex flex-col items-center gap-1 w-20 transition-all duration-200 ${activeTab === 'add' ? 'text-ios-blue scale-105' : 'text-ios-gray'}`}
+aria-label="Add Card"
+>
+<i className={`fas fa-plus-circle text-xl mb-0.5 ${activeTab === 'add' ? 'scale-110' : ''}`}></i>
+<span className="text-xs font-medium">Add</span>
+</button>
+<button 
+onClick={() => onTabChange('stats')}
+className={`flex flex-col items-center gap-1 w-20 transition-all duration-200 ${activeTab === 'stats' ? 'text-ios-blue scale-105' : 'text-ios-gray'}`}
+aria-label="Statistics"
+>
+<i className={`fas fa-chart-bar text-xl mb-0.5 ${activeTab === 'stats' ? 'scale-110' : ''}`}></i>
+<span className="text-xs font-medium">Stats</span>
+</button>
+</div>
+);
+};
 
-                const base = {
-                    deckId,
-                    type,
-                    created: Date.now(),
-                    due: Date.now(),
-                    interval: 0,
-                    ease: 250, // 250%
-                    reps: 0,
-                    phase: 'learning'
-                };
+// Card Component for study mode
+const StudyCard = ({ card, flipped, onFlip, isCloze = false, clozeId = null }) => {
+const { isDark } = useContext(ThemeContext);
+// Render front side of the card
+const renderFront = () => {
+if (isCloze && card.front && clozeId) {
+return <ClozeText text={card.front} clozeId={clozeId} isRevealed={false} />;
+}
+return <div dangerouslySetInnerHTML={{ __html: sanitize(card.front || '') }} />;
+};
+// Render back side of the card
+const renderBack = () => {
+if (isCloze && card.front && clozeId) {
+return (
+<div className="w-full h-full flex flex-col">
+<div 
+className={`w-full pb-6 mb-6 border-b ${isDark ? 'border-ios-darkSeparator' : 'border-ios-separator'}`}
+dangerouslySetInnerHTML={{ __html: sanitize(card.front || '') }}
+/>
+<div className="flex-1 flex flex-col items-center justify-center">
+<ClozeText text={card.front} clozeId={clozeId} isRevealed={true} />
+{card.back && (
+<div className="mt-6 text-lg opacity-80" dangerouslySetInnerHTML={{ __html: sanitize(card.back) }} />
+)}
+</div>
+</div>
+);
+}
+return (
+<div className="w-full h-full flex flex-col">
+<div 
+className={`w-full pb-6 mb-6 border-b ${isDark ? 'border-ios-darkSeparator' : 'border-ios-separator'}`}
+dangerouslySetInnerHTML={{ __html: sanitize(card.front || '') }}
+/>
+<div className="flex-1 flex flex-col items-center justify-center">
+<div dangerouslySetInnerHTML={{ __html: sanitize(card.back || '') }} />
+</div>
+</div>
+);
+};
+return (
+<div className="card-container w-full h-full max-h-[calc(100vh-180px)]">
+<div className={`card-inner ${flipped ? 'card-flipped' : ''}`}>
+{/* Front Face */}
+<div 
+className={`card-face ${isDark ? 'bg-ios-darkCard border-ios-darkSeparator' : 'bg-ios-card border-ios-separator'} rounded-3xl shadow-lg cursor-pointer ${flipped ? 'hidden' : ''}`}
+onClick={onFlip}
+>
+<div className="text-2xl md:text-3xl font-medium leading-relaxed max-w-full break-words text-center">
+{renderFront()}
+</div>
+<div className={`mt-8 text-base text-ios-gray uppercase font-bold tracking-widest ${isDark ? 'opacity-70' : 'opacity-60'}`}>
+Tap to show answer
+</div>
+</div>
+{/* Back Face */}
+<div 
+className={`card-face card-back ${isDark ? 'bg-ios-darkCard border-ios-darkSeparator' : 'bg-ios-card border-ios-separator'} rounded-3xl shadow-lg`}
+>
+<div className="text-xl md:text-2xl font-medium leading-relaxed max-w-full break-words text-center h-full w-full">
+{renderBack()}
+</div>
+</div>
+</div>
+</div>
+);
+};
 
-                if(type === 'basic') {
-                    await db.addCard({ ...base, id: generateId(), front: front, back: back });
-                } else {
-                    const regex = /{{c(\d+)::.*?}}/g;
-                    const matches = [...front.matchAll(regex)];
-                    const ids = [...new Set(matches.map(m => m[1]))];
-                    
-                    if(ids.length === 0) {
-                        setMsg({txt: "No cloze found. Use the {...} button.", err: true});
-                        setTimeout(() => setMsg(null), 3000);
-                        return;
-                    }
+// Cloze Text Component
+const ClozeText = ({ text, clozeId, isRevealed = false }) => {
+const { isDark } = useContext(ThemeContext);
+// Parse cloze deletions safely
+const parseCloze = (inputText) => {
+// Handle basic cloze deletions {{c1::text}}
+// Handle cloze deletions with hints {{c1::text::hint}}
+const regex = /{{c(\d+)::(.*?)(?:::(.*?))?}}/g;
+let lastIndex = 0;
+let match;
+const parts = [];
+while ((match = regex.exec(inputText)) !== null) {
+// Add text before the match
+if (match.index > lastIndex) {
+parts.push({
+type: 'text',
+content: inputText.substring(lastIndex, match.index)
+});
+}
+const id = match[1];
+const content = match[2] || '';
+const hint = match[3] || '';
+parts.push({
+type: 'cloze',
+id: id,
+content: content,
+hint: hint
+});
+lastIndex = regex.lastIndex;
+}
+// Add remaining text
+if (lastIndex < inputText.length) {
+parts.push({
+type: 'text',
+content: inputText.substring(lastIndex)
+});
+}
+return parts;
+};
+const parts = parseCloze(text);
+return (
+<span>
+{parts.map((part, index) => {
+if (part.type === 'text') {
+return <span key={index} dangerouslySetInnerHTML={{ __html: sanitize(part.content) }} />;
+}
+if (part.type === 'cloze') {
+const isTargetCloze = part.id === clozeId;
+if (isTargetCloze) {
+if (isRevealed) {
+// Show the answer
+return (
+<span 
+key={index} 
+className="cloze-revealed"
+dangerouslySetInnerHTML={{ __html: sanitize(part.content) }}
+/>
+);
+} else {
+// Show hidden with hint if available
+return (
+<span 
+key={index} 
+className="cloze-hidden" 
+title={part.hint || ''}
+>
+{part.hint || '...'}
+</span>
+);
+}
+} else {
+// For non-target clozes, show the content normally
+return (
+<span 
+key={index}
+dangerouslySetInnerHTML={{ __html: sanitize(part.content) }}
+/>
+);
+}
+}
+return null;
+})}
+</span>
+);
+};
 
-                    for(let cid of ids) {
-                        await db.addCard({ 
-                            ...base, 
-                            id: generateId(), 
-                            front: front, 
-                            back: back,
-                            clozeId: cid 
-                        });
-                    }
-                }
+// Empty State Component
+const EmptyState = ({ icon, title, message, action }) => {
+const { isDark } = useContext(ThemeContext);
+return (
+<div className="flex flex-col items-center justify-center p-8 text-center h-full">
+<div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${isDark ? 'bg-gray-800' : 'bg-ios-bg'}`}>
+<i className={`${icon} text-4xl ${isDark ? 'text-gray-300' : 'text-ios-gray'}`}></i>
+</div>
+<h2 className="text-2xl font-bold mb-2">{title}</h2>
+<p className={`mb-8 ${isDark ? 'text-gray-400' : 'text-ios-gray'}`}>{message}</p>
+{action}
+</div>
+);
+};
 
-                setMsg({txt: "Card Added Successfully!", err: false});
-                setFront('');
-                setBack('');
-                setTimeout(() => setMsg(null), 2000);
-            };
+// Toast Notification Component
+const Toast = ({ message, type = 'info', duration = 3000, onClose }) => {
+const [visible, setVisible] = useState(true);
+useEffect(() => {
+const timer = setTimeout(() => {
+setVisible(false);
+setTimeout(onClose, 300); // Wait for animation to finish
+}, duration);
+return () => clearTimeout(timer);
+}, [duration, onClose]);
+if (!visible) return null;
+let bgColor, icon;
+switch (type) {
+case 'success':
+bgColor = 'bg-ios-green';
+icon = 'fas fa-check-circle';
+break;
+case 'error':
+bgColor = 'bg-ios-red';
+icon = 'fas fa-exclamation-circle';
+break;
+case 'warning':
+bgColor = 'bg-ios-orange';
+icon = 'fas fa-exclamation-triangle';
+break;
+default:
+bgColor = 'bg-ios-blue';
+icon = 'fas fa-info-circle';
+}
+return (
+<div className={`fixed bottom-24 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg z-50 flex items-center gap-2 transition-all duration-300 animate-fade-in ${bgColor} text-white max-w-[90%]`}>
+<i className={`${icon} text-lg`}></i>
+<span className="font-medium">{message}</span>
+</div>
+);
+};
 
-            return (
-                <div className="flex flex-col h-full pb-24">
-                    <Header title="Add Card" />
-                    {msg && <div className={`fixed top-20 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-sm font-bold shadow-float z-[100] animate-enter ${msg.err ? 'bg-ios-red' : 'bg-ios-green'}`}>{msg.txt}</div>}
-                    
-                    <div className="p-4 space-y-6 overflow-y-auto flex-1">
-                        <div className="bg-ios-card dark:bg-ios-darkCard rounded-xl p-4 shadow-native">
-                            <label className="text-xs font-bold text-ios-gray uppercase mb-2 block tracking-wider">Target Deck</label>
-                            <select value={deckId} onChange={e => setDeckId(e.target.value)} className="w-full bg-ios-bg dark:bg-black p-3 rounded-xl outline-none mb-4 appearance-none">
-                                {decks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                            </select>
+// Study Controls Component
+const StudyControls = ({ flipped, onRate }) => {
+const { isDark } = useContext(ThemeContext);
+if (!flipped) {
+return (
+<button 
+onClick={() => onRate('flip')}
+className="w-full bg-ios-blue text-white h-14 rounded-2xl font-bold text-lg shadow-lg active:scale-[0.98] transition-transform"
+>
+Show Answer
+</button>
+);
+}
+return (
+<div className="grid grid-cols-4 gap-3 w-full">
+<button 
+onClick={() => onRate(1)}
+className={`flex flex-col items-center justify-center h-16 rounded-2xl transition-all active:scale-95 ${
+isDark ? 'bg-ios-red/20 hover:bg-ios-red/30' : 'bg-ios-red/10 hover:bg-ios-red/20'
+}`}
+>
+<span className="text-ios-red font-bold text-sm">Again</span>
+<span className={`text-[10px] mt-1 ${isDark ? 'text-gray-300' : 'text-ios-gray'}`}>1m</span>
+</button>
+<button 
+onClick={() => onRate(2)}
+className={`flex flex-col items-center justify-center h-16 rounded-2xl transition-all active:scale-95 ${
+isDark ? 'bg-ios-orange/20 hover:bg-ios-orange/30' : 'bg-ios-orange/10 hover:bg-ios-orange/20'
+}`}
+>
+<span className="text-ios-orange font-bold text-sm">Hard</span>
+<span className={`text-[10px] mt-1 ${isDark ? 'text-gray-300' : 'text-ios-gray'}`}>10m</span>
+</button>
+<button 
+onClick={() => onRate(3)}
+className={`flex flex-col items-center justify-center h-16 rounded-2xl transition-all active:scale-95 ${
+isDark ? 'bg-ios-green/20 hover:bg-ios-green/30' : 'bg-ios-green/10 hover:bg-ios-green/20'
+}`}
+>
+<span className="text-ios-green font-bold text-sm">Good</span>
+<span className={`text-[10px] mt-1 ${isDark ? 'text-gray-300' : 'text-ios-gray'}`}>1d</span>
+</button>
+<button 
+onClick={() => onRate(4)}
+className={`flex flex-col items-center justify-center h-16 rounded-2xl transition-all active:scale-95 ${
+isDark ? 'bg-ios-blue/20 hover:bg-ios-blue/30' : 'bg-ios-blue/10 hover:bg-ios-blue/20'
+}`}
+>
+<span className="text-ios-blue font-bold text-sm">Easy</span>
+<span className={`text-[10px] mt-1 ${isDark ? 'text-gray-300' : 'text-ios-gray'}`}>4d</span>
+</button>
+</div>
+);
+};
 
-                            <label className="text-xs font-bold text-ios-gray uppercase mb-2 block tracking-wider">Card Type</label>
-                            <div className="flex bg-ios-bg dark:bg-black p-1 rounded-xl">
-                                <button onClick={() => setType('basic')} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${type==='basic' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-ios-gray'}`}>Basic</button>
-                                <button onClick={() => setType('cloze')} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${type==='cloze' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-ios-gray'}`}>Cloze</button>
-                            </div>
-                        </div>
+// --- Decks View ---
+const DecksView = ({ onSelectDeck, onCreateDeck }) => {
+const { isDark } = useContext(ThemeContext);
+const [decks, setDecks] = useState([]);
+const [loading, setLoading] = useState(true);
+const [showAddModal, setShowAddModal] = useState(false);
+const [deckName, setDeckName] = useState('');
+const [toast, setToast] = useState(null);
+// Load decks from database
+useEffect(() => {
+const loadDecks = async () => {
+try {
+setLoading(true);
+const data = await db.getDecks();
+setDecks(data);
+} catch (error) {
+console.error('Error loading decks:', error);
+setToast({
+id: Date.now(),
+message: 'Failed to load decks. Please try again.',
+type: 'error'
+});
+} finally {
+setLoading(false);
+}
+};
+loadDecks();
+}, []);
+// Create a new deck
+const handleCreateDeck = async () => {
+if (!deckName.trim()) {
+setToast({
+id: Date.now(),
+message: 'Please enter a deck name',
+type: 'warning'
+});
+return;
+}
+try {
+const newDeck = await db.addDeck(deckName.trim());
+setDecks(prev => [...prev, newDeck]);
+setDeckName('');
+setShowAddModal(false);
+setToast({
+id: Date.now(),
+message: 'Deck created successfully!',
+type: 'success'
+});
+} catch (error) {
+console.error('Error creating deck:', error);
+setToast({
+id: Date.now(),
+message: 'Failed to create deck. Please try again.',
+type: 'error'
+});
+}
+};
+// Delete a deck
+const handleDeleteDeck = async (deckId, deckName) => {
+if (!window.confirm(`Are you sure you want to delete the deck "${deckName}" and all its cards? This action cannot be undone.`)) {
+return;
+}
+try {
+await db.deleteDeck(deckId);
+setDecks(prev => prev.filter(deck => deck.id !== deckId));
+setToast({
+id: Date.now(),
+message: 'Deck deleted successfully!',
+type: 'success'
+});
+} catch (error) {
+console.error('Error deleting deck:', error);
+setToast({
+id: Date.now(),
+message: 'Failed to delete deck. Please try again.',
+type: 'error'
+});
+}
+};
+return (
+<div className="flex flex-col h-full pb-24">
+<Header 
+title="Decks" 
+right={
+<button 
+onClick={() => setShowAddModal(true)} 
+className="text-ios-blue text-xl active:opacity-50 transition-opacity"
+aria-label="Add Deck"
+>
+<i className="fas fa-plus"></i>
+</button>
+}
+/>
+<div className="flex-1 overflow-y-auto p-4 space-y-3">
+{loading ? (
+<div className="flex justify-center mt-10">
+<div className="loader"></div>
+</div>
+) : decks.length === 0 ? (
+<EmptyState
+icon="fas fa-folder-open"
+title="No Decks Found"
+message="Create your first deck to start learning"
+action={
+<button
+onClick={() => setShowAddModal(true)}
+className="px-6 py-3 bg-ios-blue text-white rounded-xl font-semibold shadow-md hover:bg-opacity-90 transition-colors"
+>
+Create Deck
+</button>
+}
+/>
+) : (
+decks.map(deck => (
+<div 
+key={deck.id} 
+onClick={() => onSelectDeck(deck)}
+className={`flex items-center justify-between p-4 rounded-2xl shadow-sm transition-all active:scale-[0.99] cursor-pointer ${
+isDark 
+? 'bg-ios-darkCard border border-ios-darkSeparator hover:bg-gray-800' 
+: 'bg-ios-card hover:bg-gray-50'
+}`}
+>
+<div className="flex items-center gap-4">
+<div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+isDark ? 'bg-ios-blue/20' : 'bg-ios-blue/10'
+}`}>
+<i className="fas fa-book text-ios-blue text-xl"></i>
+</div>
+<div>
+<h3 className="font-semibold text-lg">{deck.name}</h3>
+<div className={`text-sm ${isDark ? 'text-gray-400' : 'text-ios-gray'}`}>
+Loading card count...
+</div>
+</div>
+</div>
+<button
+onClick={(e) => {
+e.stopPropagation();
+handleDeleteDeck(deck.id, deck.name);
+}}
+className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+isDark 
+? 'text-gray-400 hover:text-ios-red hover:bg-gray-800' 
+: 'text-ios-gray2 hover:text-ios-red hover:bg-gray-100'
+}`}
+aria-label={`Delete ${deck.name} deck`}
+>
+<i className="fas fa-trash-alt"></i>
+</button>
+</div>
+))
+)}
+<div className="mt-8 text-center opacity-50">
+<p className="text-xs font-medium">Made with ❤️ by Muhammad Daler</p>
+</div>
+</div>
+{/* Add Deck Modal */}
+{showAddModal && (
+<div 
+className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in"
+onClick={() => setShowAddModal(false)}
+>
+<div 
+className={`w-full max-w-md rounded-2xl p-6 shadow-xl transform transition-all animate-slide-up ${
+isDark ? 'bg-ios-darkCard border border-ios-darkSeparator' : 'bg-ios-card'
+}`}
+onClick={e => e.stopPropagation()}
+>
+<h3 className="text-xl font-bold mb-4 text-center">Create New Deck</h3>
+<input
+type="text"
+value={deckName}
+onChange={(e) => setDeckName(e.target.value)}
+placeholder="e.g., English Vocabulary"
+className={`w-full p-4 rounded-xl text-lg outline-none focus:ring-2 focus:ring-ios-blue transition-colors ${
+isDark ? 'bg-gray-800 text-white border border-ios-darkSeparator' : 'bg-ios-bg text-black'
+}`}
+autoFocus
+onKeyPress={(e) => e.key === 'Enter' && handleCreateDeck()}
+/>
+<div className="flex gap-4 mt-6">
+<button
+onClick={() => setShowAddModal(false)}
+className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
+isDark ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-ios-bg text-ios-blue hover:bg-gray-100'
+}`}
+>
+Cancel
+</button>
+<button
+onClick={handleCreateDeck}
+className="flex-1 py-3 bg-ios-blue text-white rounded-xl font-semibold shadow-md hover:bg-opacity-90 transition-colors"
+>
+Create
+</button>
+</div>
+</div>
+</div>
+)}
+{/* Toast Notifications */}
+{toast && (
+<Toast 
+key={toast.id} 
+message={toast.message} 
+type={toast.type} 
+onClose={() => setToast(null)} 
+/>
+)}
+</div>
+);
+};
 
-                        <div className="bg-ios-card dark:bg-ios-darkCard rounded-xl p-4 shadow-native space-y-4">
-                            <div className="relative">
-                                <div className="flex justify-between items-center mb-2">
-                                    <label className="text-xs font-bold text-ios-gray uppercase tracking-wider">Front</label>
-                                    {type === 'cloze' && <button onClick={insertCloze} className="text-xs bg-ios-blue text-white px-3 py-1 rounded-full font-bold shadow-sm active:scale-95 transition-transform">{`{...}`}</button>}
-                                </div>
-                                <textarea ref={frontRef} value={front} onChange={e => setFront(e.target.value)} className="w-full bg-transparent border-b border-ios-separator dark:border-ios-darkSeparator min-h-[100px] outline-none resize-none pb-2 text-[17px] leading-relaxed" placeholder="Type your question here..." />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold text-ios-gray uppercase mb-2 block tracking-wider">Back (Extra)</label>
-                                <textarea value={back} onChange={e => setBack(e.target.value)} className="w-full bg-transparent min-h-[60px] outline-none resize-none text-[17px] leading-relaxed" placeholder="Extra notes (optional)..." />
-                            </div>
-                        </div>
+// --- Add Card View ---
+const AddCardView = ({ onCardAdded }) => {
+const { isDark } = useContext(ThemeContext);
+const [decks, setDecks] = useState([]);
+const [selectedDeckId, setSelectedDeckId] = useState('');
+const [cardType, setCardType] = useState('basic');
+const [frontText, setFrontText] = useState('');
+const [backText, setBackText] = useState('');
+const [isProcessing, setIsProcessing] = useState(false);
+const [toast, setToast] = useState(null);
+const frontTextAreaRef = useRef(null);
+// Load decks on mount
+useEffect(() => {
+const loadDecks = async () => {
+try {
+const data = await db.getDecks();
+setDecks(data);
+if (data.length > 0) {
+setSelectedDeckId(data[0].id);
+}
+} catch (error) {
+console.error('Error loading decks:', error);
+setToast({
+id: Date.now(),
+message: 'Failed to load decks. Please try again.',
+type: 'error'
+});
+}
+};
+loadDecks();
+}, []);
+// Insert cloze deletion at cursor position
+const insertCloze = () => {
+const textarea = frontTextAreaRef.current;
+if (!textarea) return;
+const start = textarea.selectionStart;
+const end = textarea.selectionEnd;
+const selectedText = frontText.substring(start, end) || 'text';
+// Find the highest cloze ID used so far
+let maxClozeId = 0;
+const clozeRegex = /{{c(\d+)::/g;
+let match;
+while ((match = clozeRegex.exec(frontText)) !== null) {
+const id = parseInt(match[1]);
+if (id > maxClozeId) maxClozeId = id;
+}
+const nextClozeId = maxClozeId + 1;
+const clozeText = `{{c${nextClozeId}::${selectedText}}}`;
+// Insert the cloze deletion
+const newText = frontText.substring(0, start) + clozeText + frontText.substring(end);
+setFrontText(newText);
+// Set cursor position after insertion
+setTimeout(() => {
+if (textarea) {
+const newPosition = start + clozeText.length;
+textarea.focus();
+textarea.setSelectionRange(newPosition, newPosition);
+}
+}, 0);
+};
+// Validate and save card
+const handleSaveCard = async () => {
+if (!selectedDeckId) {
+setToast({
+id: Date.now(),
+message: 'Please select a deck',
+type: 'warning'
+});
+return;
+}
+if (!frontText.trim()) {
+setToast({
+id: Date.now(),
+message: 'Front field cannot be empty',
+type: 'warning'
+});
+return;
+}
+if (cardType === 'cloze') {
+// Check if there are any cloze deletions
+const hasCloze = /{{c\d+::.*?}}/g.test(frontText);
+if (!hasCloze) {
+setToast({
+id: Date.now(),
+message: 'No cloze deletions found. Use the "{...}" button to create one.',
+type: 'warning'
+});
+return;
+}
+}
+setIsProcessing(true);
+try {
+let cardsCreated = 0;
+if (cardType === 'basic') {
+// Create a single basic card
+await db.addCard({
+deckId: selectedDeckId,
+type: 'basic',
+front: frontText.trim(),
+back: backText.trim()
+});
+cardsCreated = 1;
+} else {
+// For cloze cards, find all unique cloze IDs
+const clozeRegex = /{{c(\d+)::.*?}}/g;
+const matches = [...frontText.matchAll(clozeRegex)];
+const uniqueClozeIds = [...new Set(matches.map(m => m[1]))];
+if (uniqueClozeIds.length === 0) {
+throw new Error('No valid cloze deletions found');
+}
+// Create a card for each unique cloze ID
+for (const clozeId of uniqueClozeIds) {
+await db.addCard({
+deckId: selectedDeckId,
+type: 'cloze',
+front: frontText.trim(),
+back: backText.trim(),
+clozeId: clozeId
+});
+cardsCreated++;
+}
+}
+// Show success message
+setToast({
+id: Date.now(),
+message: cardType === 'basic' 
+? 'Card added successfully!' 
+: `${cardsCreated} cards created for cloze deletions!`,
+type: 'success'
+});
+// Reset form
+setFrontText('');
+setBackText('');
+// Notify parent about new card
+if (onCardAdded) onCardAdded();
+} catch (error) {
+console.error('Error adding card:', error);
+setToast({
+id: Date.now(),
+message: 'Failed to add card. Please try again.',
+type: 'error'
+});
+} finally {
+setIsProcessing(false);
+}
+};
+return (
+<div className="flex flex-col h-full pb-24">
+<Header title="Add Card" />
+<div className="flex-1 overflow-y-auto p-4 space-y-6">
+{/* Deck and Card Type Selection */}
+<div className={`rounded-2xl p-4 shadow-sm ${
+isDark ? 'bg-ios-darkCard border border-ios-darkSeparator' : 'bg-ios-card'
+}`}>
+<label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${
+isDark ? 'text-gray-400' : 'text-ios-gray'
+}`}>
+Target Deck
+</label>
+<select
+value={selectedDeckId}
+onChange={(e) => setSelectedDeckId(e.target.value)}
+className={`w-full p-3 rounded-xl text-lg outline-none focus:ring-2 focus:ring-ios-blue appearance-none transition-colors ${
+isDark ? 'bg-gray-800 text-white border border-ios-darkSeparator' : 'bg-ios-bg text-black'
+}`}
+>
+{decks.map(deck => (
+<option key={deck.id} value={deck.id}>
+{deck.name}
+</option>
+))}
+</select>
+<label className={`block text-xs font-bold uppercase tracking-wider mt-4 mb-2 ${
+isDark ? 'text-gray-400' : 'text-ios-gray'
+}`}>
+Card Type
+</label>
+<div className={`flex p-1 rounded-xl overflow-hidden ${
+isDark ? 'bg-gray-800' : 'bg-ios-bg'
+}`}>
+<button
+onClick={() => setCardType('basic')}
+className={`flex-1 py-3 text-sm font-semibold transition-all ${
+cardType === 'basic'
+? isDark
+? 'bg-gray-700 text-white shadow-sm'
+: 'bg-white text-black shadow-sm'
+: isDark
+? 'text-gray-400'
+: 'text-ios-gray'
+}`}
+>
+Basic
+</button>
+<button
+onClick={() => setCardType('cloze')}
+className={`flex-1 py-3 text-sm font-semibold transition-all ${
+cardType === 'cloze'
+? isDark
+? 'bg-gray-700 text-white shadow-sm'
+: 'bg-white text-black shadow-sm'
+: isDark
+? 'text-gray-400'
+: 'text-ios-gray'
+}`}
+>
+Cloze
+</button>
+</div>
+</div>
+{/* Card Content */}
+<div className={`rounded-2xl p-4 shadow-sm ${
+isDark ? 'bg-ios-darkCard border border-ios-darkSeparator' : 'bg-ios-card'
+}`}>
+<div className="flex justify-between items-center mb-3">
+<label className={`text-xs font-bold uppercase tracking-wider ${
+isDark ? 'text-gray-400' : 'text-ios-gray'
+}`}>
+Front
+</label>
+{cardType === 'cloze' && (
+<button
+onClick={insertCloze}
+className="px-3 py-1 bg-ios-blue text-white text-xs font-bold rounded-full shadow-sm hover:bg-opacity-90 transition-colors active:scale-95"
+title="Insert Cloze Deletion"
+>
+{'{...}'}
+</button>
+)}
+</div>
+<textarea
+ref={frontTextAreaRef}
+value={frontText}
+onChange={(e) => setFrontText(e.target.value)}
+placeholder={cardType === 'cloze' 
+? "Type your text and select words to hide, then click '{...}'" 
+: "Type your question here..."}
+className={`w-full min-h-[120px] p-3 rounded-xl text-lg outline-none focus:ring-2 focus:ring-ios-blue resize-none transition-colors ${
+isDark ? 'bg-gray-800 text-white border border-ios-darkSeparator' : 'bg-ios-bg text-black'
+}`}
+/>
+<label className={`block text-xs font-bold uppercase tracking-wider mt-4 mb-2 ${
+isDark ? 'text-gray-400' : 'text-ios-gray'
+}`}>
+Back (Optional)
+</label>
+<textarea
+value={backText}
+onChange={(e) => setBackText(e.target.value)}
+placeholder="Additional information or context..."
+className={`w-full min-h-[80px] p-3 rounded-xl text-lg outline-none focus:ring-2 focus:ring-ios-blue resize-none transition-colors ${
+isDark ? 'bg-gray-800 text-white border border-ios-darkSeparator' : 'bg-ios-bg text-black'
+}`}
+/>
+</div>
+{/* Save Button */}
+<button
+onClick={handleSaveCard}
+disabled={isProcessing}
+className={`w-full py-4 rounded-2xl font-bold text-lg shadow-md transition-all ${
+isProcessing
+? 'bg-gray-400 cursor-not-allowed'
+: 'bg-ios-blue text-white active:scale-[0.98] hover:bg-opacity-90'
+}`}
+>
+{isProcessing ? (
+<div className="flex items-center justify-center">
+<div className="loader mr-2"></div>
+<span>Adding Card...</span>
+</div>
+) : (
+'Add to Deck'
+)}
+</button>
+{/* Cloze Example (if cloze type is selected) */}
+{cardType === 'cloze' && (
+<div className={`mt-4 p-4 rounded-xl ${
+isDark ? 'bg-gray-800 border border-ios-darkSeparator' : 'bg-ios-bg'
+}`}>
+<p className="font-medium mb-2">Cloze Example:</p>
+<p className="text-sm">
+Use the format <code className="bg-black/10 dark:bg-white/10 px-1 rounded">{'{{c1::word}}'}</code> to hide words.
+For multiple clozes, use different numbers: <code className="bg-black/10 dark:bg-white/10 px-1 rounded">{'{{c2::another word}}'}</code>
+</p>
+</div>
+)}
+</div>
+{/* Toast Notifications */}
+{toast && (
+<Toast 
+key={toast.id} 
+message={toast.message} 
+type={toast.type} 
+onClose={() => setToast(null)} 
+/>
+)}
+</div>
+);
+};
 
-                        <button onClick={save} className="w-full bg-ios-blue text-white py-4 rounded-xl font-bold text-[17px] shadow-lg active:scale-[0.98] transition-transform">
-                            Add to Deck
-                        </button>
-                    </div>
-                </div>
-            );
-        };
+// --- Study View ---
+const StudyView = ({ deck, onBack }) => {
+const { isDark } = useContext(ThemeContext);
+const [cards, setCards] = useState([]);
+const [currentIndex, setCurrentIndex] = useState(0);
+const [flipped, setFlipped] = useState(false);
+const [loading, setLoading] = useState(true);
+const [sessionStats, setSessionStats] = useState({ correct: 0, total: 0 });
+const [toast, setToast] = useState(null);
+// Load due cards for the deck
+useEffect(() => {
+const loadCards = async () => {
+try {
+setLoading(true);
+const dueCards = await db.getDueCards(deck.id);
+setCards(dueCards);
+setSessionStats({ correct: 0, total: dueCards.length });
+} catch (error) {
+console.error('Error loading cards:', error);
+setToast({
+id: Date.now(),
+message: 'Failed to load cards. Please try again.',
+type: 'error'
+});
+} finally {
+setLoading(false);
+}
+};
+loadCards();
+}, [deck.id]);
+// Handle card rating
+const handleRateCard = async (rating) => {
+if (rating === 'flip') {
+setFlipped(true);
+return;
+}
+if (currentIndex >= cards.length) return;
+const card = cards[currentIndex];
+try {
+const updatedCard = scheduler(card, rating);
+await db.updateCard(updatedCard);
+// Update session stats
+setSessionStats(prev => ({
+...prev,
+correct: prev.correct + (rating >= 3 ? 1 : 0)
+}));
+// Move to next card
+if (currentIndex < cards.length - 1) {
+setCurrentIndex(prev => prev + 1);
+setFlipped(false);
+} else {
+// Session complete
+setToast({
+id: Date.now(),
+message: `Session complete! ${sessionStats.correct + (rating >= 3 ? 1 : 0)}/${sessionStats.total} correct`,
+type: 'success',
+duration: 5000
+});
+}
+} catch (error) {
+console.error('Error updating card:', error);
+setToast({
+id: Date.now(),
+message: 'Failed to update card. Please try again.',
+type: 'error'
+});
+}
+};
+if (loading) {
+return (
+<div className="h-full flex items-center justify-center">
+<div className="loader"></div>
+</div>
+);
+}
+if (cards.length === 0) {
+return (
+<div className="h-full flex flex-col items-center justify-center p-6 text-center animate-slide-up">
+<div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-lg ${
+isDark ? 'bg-ios-green/20' : 'bg-ios-green/10'
+}`}>
+<i className="fas fa-check text-4xl text-ios-green"></i>
+</div>
+<h2 className="text-3xl font-bold mb-3">All Caught Up!</h2>
+<p className={`text-lg mb-8 opacity-80 ${
+isDark ? 'text-gray-300' : 'text-ios-gray'
+}`}>
+You have no more cards to review in this deck.
+</p>
+<button 
+onClick={onBack}
+className={`px-8 py-4 rounded-2xl font-bold text-lg shadow-md transition-all ${
+isDark 
+? 'bg-gray-800 text-white hover:bg-gray-700' 
+: 'bg-ios-card text-ios-blue hover:bg-gray-50'
+}`}
+>
+Return to Decks
+</button>
+</div>
+);
+}
+const currentCard = cards[currentIndex];
+const isCloze = currentCard.type === 'cloze';
+return (
+<div className="flex flex-col h-full">
+<Header 
+title={`${currentIndex + 1} / ${cards.length}`} 
+onBack={onBack}
+/>
+<div className="flex-1 flex items-center justify-center p-4">
+<StudyCard
+card={currentCard}
+flipped={flipped}
+onFlip={() => setFlipped(true)}
+isCloze={isCloze}
+clozeId={isCloze ? currentCard.clozeId : null}
+/>
+</div>
+<div className={`p-4 border-t transition-colors ${
+isDark ? 'bg-black/80 backdrop-blur-xl border-ios-darkSeparator' : 'bg-ios-bg/80 backdrop-blur-xl border-ios-separator'
+}`}>
+<StudyControls
+flipped={flipped}
+onRate={handleRateCard}
+/>
+</div>
+{/* Session Progress */}
+<div className={`p-3 text-center text-sm font-medium ${
+isDark ? 'text-gray-400' : 'text-ios-gray'
+}`}>
+Session: {sessionStats.correct}/{sessionStats.total} correct
+</div>
+{/* Toast Notifications */}
+{toast && (
+<Toast 
+key={toast.id} 
+message={toast.message} 
+type={toast.type} 
+duration={toast.duration}
+onClose={() => setToast(null)} 
+/>
+)}
+</div>
+);
+};
 
-        // --- Study View ---
-        const Study = ({ deck, onBack }) => {
-            const [cards, setCards] = useState([]);
-            const [index, setIndex] = useState(0);
-            const [flipped, setFlipped] = useState(false);
-            const [loading, setLoading] = useState(true);
+// --- Stats View ---
+const StatsView = () => {
+const { isDark } = useContext(ThemeContext);
+const [stats, setStats] = useState({ decks: 0, cards: 0, due: 0 });
+const [loading, setLoading] = useState(true);
+useEffect(() => {
+const loadStats = async () => {
+try {
+setLoading(true);
+const data = await db.getStats();
+setStats(data);
+} catch (error) {
+console.error('Error loading stats:', error);
+} finally {
+setLoading(false);
+}
+};
+loadStats();
+}, []);
+return (
+<div className="flex flex-col h-full">
+<Header title="Statistics" />
+{loading ? (
+<div className="flex justify-center mt-10">
+<div className="loader"></div>
+</div>
+) : (
+<div className="p-4 space-y-6 flex-1 overflow-y-auto">
+{/* Summary Cards */}
+<div className="grid grid-cols-2 gap-4">
+<div className={`p-5 rounded-2xl shadow-sm flex flex-col items-center justify-center ${
+isDark ? 'bg-ios-darkCard border border-ios-darkSeparator' : 'bg-ios-card'
+}`}>
+<div className="text-4xl font-bold text-ios-blue mb-2">{stats.decks}</div>
+<div className={`text-xs uppercase font-bold tracking-wider ${
+isDark ? 'text-gray-400' : 'text-ios-gray'
+}`}>
+Total Decks
+</div>
+</div>
+<div className={`p-5 rounded-2xl shadow-sm flex flex-col items-center justify-center ${
+isDark ? 'bg-ios-darkCard border border-ios-darkSeparator' : 'bg-ios-card'
+}`}>
+<div className="text-4xl font-bold text-ios-green mb-2">{stats.cards}</div>
+<div className={`text-xs uppercase font-bold tracking-wider ${
+isDark ? 'text-gray-400' : 'text-ios-gray'
+}`}>
+Total Cards
+</div>
+</div>
+</div>
+{/* Due Cards */}
+<div className={`p-5 rounded-2xl shadow-sm ${
+isDark ? 'bg-ios-darkCard border border-ios-darkSeparator' : 'bg-ios-card'
+}`}>
+<div className="flex items-center justify-between mb-3">
+<h3 className="font-semibold text-lg">Due Cards</h3>
+<div className="text-2xl font-bold text-ios-orange">{stats.due}</div>
+</div>
+<div className={`h-2 w-full rounded-full overflow-hidden ${
+isDark ? 'bg-gray-800' : 'bg-ios-bg'
+}`}>
+<div 
+className="h-full bg-ios-orange rounded-full transition-all duration-500"
+style={{ width: stats.cards > 0 ? `${(stats.due / stats.cards) * 100}%` : '0%' }}
+></div>
+</div>
+</div>
+{/* Study Session Info */}
+<div className={`p-5 rounded-2xl shadow-sm ${
+isDark ? 'bg-ios-darkCard border border-ios-darkSeparator' : 'bg-ios-card'
+}`}>
+<h3 className="font-semibold text-lg mb-3">Study Session</h3>
+<div className="space-y-2">
+<div className="flex justify-between">
+<span>Cards Reviewed Today</span>
+<span>0</span>
+</div>
+<div className="flex justify-between">
+<span>Success Rate</span>
+<span>0%</span>
+</div>
+<div className="flex justify-between">
+<span>Estimated Time</span>
+<span>0 min</span>
+</div>
+</div>
+</div>
+{/* App Info */}
+<div className={`mt-8 p-5 rounded-2xl text-center ${
+isDark ? 'bg-ios-darkCard border border-ios-darkSeparator' : 'bg-ios-card'
+}`}>
+<div className={`text-xs uppercase font-bold tracking-wider mb-2 ${
+isDark ? 'text-gray-400' : 'text-ios-gray'
+}`}>
+App Information
+</div>
+<div className="font-medium">Anki macOS Pro</div>
+<div className={`text-sm mt-1 ${
+isDark ? 'text-gray-400' : 'text-ios-gray'
+}`}>
+Version 1.2.0
+</div>
+<div className={`text-xs mt-2 opacity-70 ${
+isDark ? 'text-gray-500' : 'text-ios-gray'
+}`}>
+© 2025 Muhammad Daler. All rights reserved.
+</div>
+</div>
+</div>
+)}
+</div>
+);
+};
 
-            useEffect(() => {
-                db.getDueCards(deck.id).then(c => { setCards(c); setLoading(false); });
-            }, [deck]);
+// --- Main App ---
+const App = () => {
+const [activeTab, setActiveTab] = useState('decks');
+const [selectedDeck, setSelectedDeck] = useState(null);
+// Handle system theme changes
+useEffect(() => {
+const savedTheme = localStorage.getItem('theme');
+if (!savedTheme) {
+const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+document.documentElement.classList.toggle('dark', darkMode);
+}
+}, []);
+// Handle going back from study view
+const handleBackFromStudy = () => {
+setSelectedDeck(null);
+};
+// Handle card added event
+const handleCardAdded = () => {
+// Could refresh stats or do other actions here
+};
+return (
+<ThemeProvider>
+<div className="flex flex-col h-full">
+{selectedDeck ? (
+<StudyView deck={selectedDeck} onBack={handleBackFromStudy} />
+) : (
+<>
+{activeTab === 'decks' && <DecksView onSelectDeck={setSelectedDeck} />}
+{activeTab === 'add' && <AddCardView onCardAdded={handleCardAdded} />}
+{activeTab === 'stats' && <StatsView />}
+<TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+</>
+)}
+</div>
+</ThemeProvider>
+);
+};
 
-            const rate = async (r) => {
-                const card = cards[index];
-                const updated = scheduler(card, r);
-                await db.updateCard(updated);
-                
-                setFlipped(false);
-                if(index < cards.length - 1) {
-                    setTimeout(() => setIndex(i => i + 1), 250);
-                } else {
-                    setCards([]);
-                }
-            };
+// Render the app
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
 
-            const renderCloze = (text, targetId, isBack) => {
-                // Regex handles hints: {{c1::Answer::Hint}}
-                return sanitize(text).replace(/{{c(\d+)::(.*?)(?:::(.*?))?}}/g, (match, id, answer, hint) => {
-                    // Logic: If this is the target Cloze ID (e.g. c1)
-                    if(id === targetId) {
-                        if(isBack) return `<span class="cloze-revealed">${answer}</span>`;
-                        return `<span class="cloze-hidden" title="${hint || ''}">${hint || ''}</span>`;
-                    }
-                    // For other clozes (c2, c3), we usually show the answer in context or keep them hidden?
-                    // Anki standard: Only target is hidden, others are shown.
-                    return `<strong>${answer}</strong>`;
-                });
-            };
-
-            if(loading) return <div className="h-full flex items-center justify-center"><div className="loader"></div></div>;
-
-            if(cards.length === 0) return (
-                <div className="h-full flex flex-col items-center justify-center p-6 bg-ios-bg dark:bg-black text-center animate-enter">
-                    <div className="w-24 h-24 bg-ios-green/20 rounded-full flex items-center justify-center mb-6 shadow-sm"><i className="fas fa-check text-4xl text-ios-green"></i></div>
-                    <h2 className="text-3xl font-bold mb-3">All Caught Up!</h2>
-                    <p className="text-ios-gray text-lg mb-8">You have no more cards to review.</p>
-                    <button onClick={onBack} className="bg-ios-card dark:bg-ios-darkCard text-ios-blue font-semibold px-10 py-4 rounded-xl shadow-native active:scale-95 transition-transform">Return to Decks</button>
-                </div>
-            );
-
-            const active = cards[index];
-            const isCloze = active.type === 'cloze';
-
-            return (
-                <div className="flex flex-col h-full bg-ios-bg dark:bg-black">
-                    <Header title={`${index + 1} / ${cards.length}`} left={<button onClick={onBack} className="text-ios-blue flex items-center gap-1 font-medium"><i className="fas fa-chevron-left"></i> Back</button>} />
-                    
-                    <div className="flex-1 p-4 relative flex flex-col justify-center card-container">
-                        <div className={`card-inner w-full min-h-[400px] flex-1 cursor-pointer ${flipped ? 'card-flipped' : ''}`} onClick={() => !flipped && setFlipped(true)}>
-                            
-                            {/* FRONT FACE */}
-                            <div className="card-face bg-ios-card dark:bg-ios-darkCard rounded-3xl shadow-float p-8 flex flex-col items-center justify-center text-center border border-transparent dark:border-ios-darkSeparator">
-                                <div className="text-2xl md:text-3xl font-medium leading-relaxed max-w-full break-words">
-                                    {isCloze 
-                                        ? <div dangerouslySetInnerHTML={{__html: renderCloze(active.front, active.clozeId, false)}} /> 
-                                        : <div dangerouslySetInnerHTML={{__html: sanitize(active.front)}} />
-                                    }
-                                </div>
-                                <div className="mt-8 text-sm text-ios-gray uppercase font-bold tracking-widest opacity-60">Tap to show answer</div>
-                            </div>
-
-                            {/* BACK FACE */}
-                            <div className="card-face card-back bg-ios-card dark:bg-ios-darkCard rounded-3xl shadow-float p-8 flex flex-col items-center justify-center text-center border border-transparent dark:border-ios-darkSeparator">
-                                <div className="text-xl opacity-60 mb-6 pb-6 border-b border-ios-separator dark:border-ios-darkSeparator w-full">
-                                    {isCloze 
-                                        ? <div dangerouslySetInnerHTML={{__html: renderCloze(active.front, active.clozeId, true)}} /> 
-                                        : <div dangerouslySetInnerHTML={{__html: sanitize(active.front)}} />
-                                    }
-                                </div>
-                                <div className="text-2xl md:text-3xl font-semibold leading-relaxed">
-                                    <div dangerouslySetInnerHTML={{__html: sanitize(active.back)}} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* CONTROLS */}
-                    <div className="bg-ios-bg/90 dark:bg-black/90 backdrop-blur-xl border-t border-ios-separator dark:border-ios-darkSeparator pb-[env(safe-area-inset-bottom)] px-4 py-4">
-                        {!flipped ? (
-                            <button onClick={() => setFlipped(true)} className="w-full bg-ios-blue text-white h-14 rounded-2xl font-bold text-lg shadow-lg active:scale-[0.98] transition-transform">Show Answer</button>
-                        ) : (
-                            <div className="grid grid-cols-4 gap-3 w-full">
-                                <button onClick={() => rate(1)} className="flex flex-col items-center justify-center bg-ios-red/10 h-16 rounded-2xl active:scale-95 transition-transform"><span className="text-ios-red font-bold text-sm">Again</span><span className="text-[10px] text-ios-gray mt-1">1m</span></button>
-                                <button onClick={() => rate(2)} className="flex flex-col items-center justify-center bg-ios-orange/10 h-16 rounded-2xl active:scale-95 transition-transform"><span className="text-ios-orange font-bold text-sm">Hard</span><span className="text-[10px] text-ios-gray mt-1">10m</span></button>
-                                <button onClick={() => rate(3)} className="flex flex-col items-center justify-center bg-ios-green/10 h-16 rounded-2xl active:scale-95 transition-transform"><span className="text-ios-green font-bold text-sm">Good</span><span className="text-[10px] text-ios-gray mt-1">1d</span></button>
-                                <button onClick={() => rate(4)} className="flex flex-col items-center justify-center bg-ios-blue/10 h-16 rounded-2xl active:scale-95 transition-transform"><span className="text-ios-blue font-bold text-sm">Easy</span><span className="text-[10px] text-ios-gray mt-1">4d</span></button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        // --- Stats View ---
-        const Stats = () => {
-            const [data, setData] = useState({decks: 0, cards: 0});
-            useEffect(() => { db.getStats().then(setData); }, []);
-            return (
-                <div className="flex flex-col h-full bg-ios-bg dark:bg-black">
-                    <Header title="Statistics" />
-                    <div className="p-4 grid grid-cols-2 gap-4">
-                        <div className="bg-ios-card dark:bg-ios-darkCard p-6 rounded-2xl shadow-native flex flex-col items-center">
-                            <span className="text-4xl font-bold mb-2 text-ios-blue">{data.decks}</span>
-                            <span className="text-xs text-ios-gray uppercase font-bold tracking-wider">Total Decks</span>
-                        </div>
-                        <div className="bg-ios-card dark:bg-ios-darkCard p-6 rounded-2xl shadow-native flex flex-col items-center">
-                            <span className="text-4xl font-bold mb-2 text-ios-green">{data.cards}</span>
-                            <span className="text-xs text-ios-gray uppercase font-bold tracking-wider">Total Cards</span>
-                        </div>
-                    </div>
-                    
-                    <div className="mt-auto mb-24 text-center opacity-40">
-                         <p className="text-xs font-medium text-ios-gray">Made by Muhammad Daler</p>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- Main App ---
-        const App = () => {
-            const [tab, setTab] = useState('decks');
-            const [activeDeck, setActiveDeck] = useState(null);
-
-            useEffect(() => {
-                if(window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.classList.add('dark');
-                }
-            }, []);
-
-            if(activeDeck) return <Study deck={activeDeck} onBack={() => setActiveDeck(null)} />;
-
-            return (
-                <Fragment>
-                    <div className="flex-1 overflow-hidden relative">
-                        {tab === 'decks' && <Decks onSelect={setActiveDeck} />}
-                        {tab === 'add' && <AddCard />}
-                        {tab === 'stats' && <Stats />}
-                    </div>
-                    <TabBar active={tab} onChange={setTab} />
-                </Fragment>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+// Register service worker for PWA functionality
+if ('serviceWorker' in navigator) {
+window.addEventListener('load', () => {
+navigator.serviceWorker.register('/sw.js').catch(error => {
+console.error('Service Worker registration failed:', error);
+});
+});
+}
+</script>
 </body>
 </html>
