@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Anki Pro - Ultimate</title>
-    
+
     <!-- PWA Manifest -->
     <meta name="theme-color" content="#007AFF">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="data:application/manifest+json,{}">
-    
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Anki%20Pro%22%2C%22short_name%22%3A%22AnkiPro%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F5F5F7%22%2C%22theme_color%22%3A%22%23007AFF%22%2C%22icons%22%3A%5B%5D%7D">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <!-- Chart.js for Stats -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -37,10 +37,8 @@
     </script>
 
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-        
+        * { -webkit-tap-highlight-color: transparent; }
+
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
             height: 100vh; 
@@ -48,43 +46,33 @@
             flex-direction: column; 
             overflow: hidden;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
-        
-        /* PWA Support */
-        @media (display-mode: standalone) {
-            body {
-                height: 100vh;
-            }
-        }
-        
-        /* Custom Scrollbar */
+
+        @media (display-mode: standalone) { body { height: 100vh; } }
+
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #C1C1C1; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #555; }
-        
-        /* Animations */
+
         @keyframes fadeIn { 
             from { opacity: 0; transform: translateY(5px); } 
             to { opacity: 1; transform: translateY(0); } 
         }
         .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        
-        /* Table Styles */
+
         .anki-table { width: 100%; border-collapse: separate; border-spacing: 0; }
         .anki-table th { text-align: left; font-size: 12px; padding: 10px 16px; border-bottom: 1px solid; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .anki-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid; transition: background 0.2s; }
-        
+
         .light .anki-table th { color: #86868b; border-color: #D1D1D6; background: #F5F5F7; }
         .light .anki-table td { border-color: #E5E5EA; color: #1D1D1F; background: white; }
         .light .anki-table tr:hover td { background: #F2F2F7; }
-        
+
         .dark .anki-table th { color: #98989D; border-color: #38383A; background: #1C1C1E; }
         .dark .anki-table td { border-color: #38383A; color: #F5F5F7; background: #2C2C2E; }
         .dark .anki-table tr:hover td { background: #3A3A3C; }
-        
-        /* Card Face */
+
         .card-display {
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             border-radius: 12px;
@@ -99,15 +87,12 @@
             line-height: 1.5;
             border: 1px solid; 
             transition: all 0.3s;
-            position: relative;
             word-break: break-word;
-            overflow-wrap: break-word;
         }
-        
+
         .light .card-display { background: white; border-color: #E5E5EA; }
         .dark .card-display { background: #2C2C2E; border-color: #3A3A3C; }
-        
-        /* Inputs */
+
         .editor-field {
             min-height: 100px; 
             padding: 12px; 
@@ -119,12 +104,11 @@
             transition: border 0.2s;
             overflow-y: auto;
         }
-        
+
         .light .editor-field { background: white; border-color: #D1D1D6; }
         .dark .editor-field { background: #1C1C1E; border-color: #3A3A3C; color: white; }
         .editor-field:focus { border-color: #007AFF; outline: 2px solid rgba(0,122,255,0.2); }
-        
-        /* Cloze Styles */
+
         .cloze-hidden { 
             color: #007AFF; 
             font-weight: 700; 
@@ -134,7 +118,7 @@
             cursor: pointer; 
             border-bottom: 2px dashed currentColor;
         }
-        
+
         .cloze-revealed { 
             color: #34C759; 
             font-weight: 700; 
@@ -142,43 +126,10 @@
             padding: 2px 6px;
             border-radius: 4px;
         }
-        
+
         .dark .cloze-hidden { color: #409CFF; background: rgba(64,156,255,0.2); }
         .dark .cloze-revealed { color: #32D74B; background: rgba(50,215,75,0.2); }
-        
-        /* Study Mode Controls */
-        .study-controls-fixed {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(245,245,247,0.95), rgba(245,245,247,0.85));
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-top: 1px solid;
-            padding: 16px;
-            z-index: 40;
-        }
-        
-        .dark .study-controls-fixed {
-            background: linear-gradient(to top, rgba(28,28,30,0.95), rgba(28,28,30,0.85));
-            border-color: #38383A;
-        }
-        
-        /* Mobile Optimizations */
-        @media (max-width: 640px) {
-            .card-display {
-                padding: 20px;
-                min-height: 200px;
-                font-size: 18px;
-            }
-            
-            .study-controls-fixed {
-                padding: 12px;
-            }
-        }
-        
-        /* Edit Modal */
+
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -188,9 +139,8 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .modal-content {
-            background: var(--bg-color);
             border-radius: 12px;
             width: 90%;
             max-width: 500px;
@@ -198,8 +148,10 @@
             overflow-y: auto;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
-        
-        /* Selection Context Menu */
+
+        .light .modal-content { background: white; }
+        .dark .modal-content { background: #2C2C2E; }
+
         .context-menu {
             position: fixed;
             background: white;
@@ -209,31 +161,22 @@
             min-width: 180px;
             overflow: hidden;
         }
-        
-        .dark .context-menu {
-            background: #2C2C2E;
-            border: 1px solid #3A3A3C;
-        }
-        
-        /* SM-2 Fields */
+
+        .dark .context-menu { background: #2C2C2E; border: 1px solid #3A3A3C; }
+
         .sm2-field {
-            width: 100px;
-            padding: 6px 10px;
+            width: 100%;
+            padding: 8px 12px;
             border-radius: 6px;
             border: 1px solid;
             font-size: 14px;
         }
-        
-        .light .sm2-field { 
-            background: white; 
-            border-color: #D1D1D6; 
-            color: #1D1D1F; 
-        }
-        
-        .dark .sm2-field { 
-            background: #1C1C1E; 
-            border-color: #3A3A3C; 
-            color: #F5F5F7; 
+
+        .light .sm2-field { background: white; border-color: #D1D1D6; color: #1D1D1F; }
+        .dark .sm2-field { background: #1C1C1E; border-color: #3A3A3C; color: #F5F5F7; }
+
+        @media (max-width: 640px) {
+            .card-display { padding: 20px; min-height: 200px; font-size: 18px; }
         }
     </style>
 </head>
@@ -246,14 +189,14 @@
                 <i class="fa-solid fa-layer-group text-anki-blue mr-2"></i>Anki Pro
             </h1>
             <nav class="hidden md:flex gap-1 bg-gray-100 dark:bg-[#3A3A3C] p-1 rounded-lg">
-                <button onclick="Router.nav('decks')" id="nav-decks" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all bg-white shadow-sm text-black dark:bg-[#505050] dark:text-white">Decks</button>
-                <button onclick="Router.nav('add')" id="nav-add" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 dark:text-gray-400">Add</button>
-                <button onclick="Router.nav('browse')" id="nav-browse" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 dark:text-gray-400">Browse</button>
-                <button onclick="Router.nav('study')" id="nav-study" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 dark:text-gray-400">Study</button>
-                <button onclick="Router.nav('stats')" id="nav-stats" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 dark:text-gray-400">Stats</button>
+                <button onclick="Router.nav('decks')" id="nav-decks" class="nav-btn px-4 py-1.5 rounded-md text-sm font-medium transition-all">Decks</button>
+                <button onclick="Router.nav('add')" id="nav-add" class="nav-btn px-4 py-1.5 rounded-md text-sm font-medium transition-all">Add</button>
+                <button onclick="Router.nav('browse')" id="nav-browse" class="nav-btn px-4 py-1.5 rounded-md text-sm font-medium transition-all">Browse</button>
+                <button onclick="Router.nav('study')" id="nav-study" class="nav-btn px-4 py-1.5 rounded-md text-sm font-medium transition-all">Study</button>
+                <button onclick="Router.nav('stats')" id="nav-stats" class="nav-btn px-4 py-1.5 rounded-md text-sm font-medium transition-all">Stats</button>
             </nav>
         </div>
-        
+
         <div class="flex items-center gap-3">
             <button class="md:hidden text-xl" onclick="UI.toggleMobileMenu()">
                 <i class="fa-solid fa-bars"></i>
@@ -286,21 +229,19 @@
     </div>
 
     <!-- MAIN VIEWPORT -->
-    <main id="app-viewport" class="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center relative w-full pb-20 md:pb-24">
-        <!-- Dynamic Content Injected Here -->
-    </main>
+    <main id="app-viewport" class="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center relative w-full pb-20 md:pb-8"></main>
 
-    <!-- TOAST NOTIFICATION -->
+    <!-- TOAST -->
     <div id="toast" class="fixed bottom-20 md:bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-black px-5 py-3 rounded-full shadow-lg text-sm font-semibold opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2">
         <i class="fa-solid fa-check"></i>
-        <span>Action Completed</span>
+        <span id="toast-text">Action Completed</span>
     </div>
 
-    <!-- CONTEXT MENU FOR CLOZE -->
+    <!-- CONTEXT MENU -->
     <div id="context-menu" class="context-menu hidden">
         <button onclick="Cloze.insertClozeWithSelection()" class="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-white/5 text-sm font-medium flex items-center gap-3">
-            <i class="fa-solid fa-brackets-curly text-anki-blue"></i>
-            <span>Create Cloze</span>
+            <i class="fa-solid fa-eye-slash text-anki-blue"></i>
+            <span>Create Cloze (Ctrl+Shift+C)</span>
         </button>
         <button onclick="Cloze.insertClozeWithHint()" class="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-white/5 text-sm font-medium flex items-center gap-3">
             <i class="fa-solid fa-comment-dots text-anki-green"></i>
@@ -308,453 +249,233 @@
         </button>
         <div class="h-px bg-gray-200 dark:bg-gray-700"></div>
         <button onclick="UI.formatText('bold')" class="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-white/5 text-sm font-medium flex items-center gap-3">
-            <i class="fa-solid fa-bold"></i>
-            <span>Bold</span>
+            <i class="fa-solid fa-bold"></i> Bold (Ctrl+B)
         </button>
         <button onclick="UI.formatText('italic')" class="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-white/5 text-sm font-medium flex items-center gap-3">
-            <i class="fa-solid fa-italic"></i>
-            <span>Italic</span>
+            <i class="fa-solid fa-italic"></i> Italic (Ctrl+I)
         </button>
     </div>
 
-    <!-- STUDY CONTROLS (will be inserted by JavaScript) -->
-    
+    <!-- EDIT MODAL -->
+    <div id="edit-modal" class="modal-overlay hidden">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Edit Card</h3>
+                <button onclick="UI.closeEditModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div id="edit-modal-content"></div>
+        </div>
+    </div>
+
     <script>
-        /**
-         * CORE APP LOGIC - ULTIMATE VERSION
-         * All errors fixed, all features implemented
-         */
-
-        // Service Worker Registration for PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(() => {
-                    // Silently fail if service worker not available
-                });
-            });
-        }
-
+        // ========== UTILITIES ==========
         const Utils = {
             id: () => 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-            
-            sanitize: (str) => {
-                if (!str) return '';
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
-            },
-            
             escapeHtml: (text) => {
-                const map = {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                };
-                return text.replace(/[&<>"']/g, m => map[m]);
+                if (!text) return '';
+                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                return String(text).replace(/[&<>"']/g, m => map[m]);
             },
-            
-            formatTime: (ms) => {
-                const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-                
-                if (days > 0) return `${days}d`;
-                if (hours > 0) return `${hours}h`;
-                if (minutes > 0) return `${minutes}m`;
-                return 'now';
-            },
-            
-            debounce: (func, wait) => {
-                let timeout;
-                return (...args) => {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => func.apply(this, args), wait);
-                };
+            formatInterval: (days) => {
+                if (days < 1) return '< 1d';
+                if (days < 30) return Math.round(days) + 'd';
+                if (days < 365) return Math.round(days / 30) + 'mo';
+                return (days / 365).toFixed(1) + 'y';
             }
         };
 
+        // ========== THEME ==========
         const Theme = {
             init() {
                 const saved = localStorage.getItem('anki_theme');
                 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                
-                if (saved === 'dark' || (!saved && prefersDark)) {
-                    this.enableDark();
-                } else {
-                    this.enableLight();
-                }
-                
-                // Listen for system theme changes
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                    if (!localStorage.getItem('anki_theme')) {
-                        if (e.matches) {
-                            this.enableDark();
-                        } else {
-                            this.enableLight();
-                        }
-                    }
-                });
+                if (saved === 'dark' || (!saved && prefersDark)) this.enableDark();
+                else this.enableLight();
             },
-            
             enableDark() {
                 document.documentElement.classList.add('dark');
                 document.getElementById('theme-icon').className = 'fa-solid fa-sun';
-                document.documentElement.style.setProperty('--bg-color', '#2C2C2E');
             },
-            
             enableLight() {
                 document.documentElement.classList.remove('dark');
                 document.getElementById('theme-icon').className = 'fa-solid fa-moon';
-                document.documentElement.style.setProperty('--bg-color', '#FFFFFF');
             },
-            
             toggle() {
                 const isDark = document.documentElement.classList.contains('dark');
-                if (isDark) {
-                    this.enableLight();
-                    localStorage.setItem('anki_theme', 'light');
-                } else {
-                    this.enableDark();
-                    localStorage.setItem('anki_theme', 'dark');
-                }
-                
-                // Refresh charts if on stats page
-                if (Router.currentPage === 'stats' && window.statsChart) {
-                    window.statsChart.destroy();
-                    Router.renderStats(document.getElementById('app-viewport'));
-                }
-            }
+                if (isDark) { this.enableLight(); localStorage.setItem('anki_theme', 'light'); }
+                else { this.enableDark(); localStorage.setItem('anki_theme', 'dark'); }
+                if (Router.currentPage === 'stats') Stats.renderChart();
+            },
+            isDark() { return document.documentElement.classList.contains('dark'); }
         };
 
-        // CLOZE+++ IMPLEMENTATION
+        // ========== CLOZE+++ ==========
         const Cloze = {
-            getNextClozeIndex(text) {
-                const matches = text.match(/{{c(\d+)::/g) || [];
+            getNextIndex(text) {
+                const matches = text.match(/\{\{c(\d+)::/g) || [];
                 const indices = matches.map(m => parseInt(m.match(/\d+/)[0]));
                 if (indices.length === 0) return 1;
-                
                 indices.sort((a, b) => a - b);
                 for (let i = 0; i < indices.length; i++) {
-                    if (indices[i] !== i + 1) {
-                        return i + 1;
-                    }
+                    if (indices[i] !== i + 1) return i + 1;
                 }
                 return indices.length + 1;
             },
-            
             insertClozeWithSelection() {
                 const field = document.activeElement;
-                if (!field || !field.classList.contains('editor-field')) return;
-                
-                const selection = window.getSelection();
-                if (selection.rangeCount === 0 || selection.isCollapsed) {
-                    this.insertEmptyCloze(field);
+                if (!field || !field.classList.contains('editor-field')) {
+                    UI.hideContextMenu();
                     return;
                 }
-                
-                const range = selection.getRangeAt(0);
-                const selectedText = selection.toString();
-                const nextIndex = this.getNextClozeIndex(field.innerHTML);
-                
-                const clozeSpan = document.createElement('span');
-                clozeSpan.innerHTML = `{{c${nextIndex}::${selectedText}}}`;
-                range.deleteContents();
-                range.insertNode(clozeSpan);
-                
-                UI.hideContextMenu();
-                field.focus();
-            },
-            
-            insertClozeWithHint() {
-                const field = document.activeElement;
-                if (!field || !field.classList.contains('editor-field')) return;
-                
-                const hint = prompt('Enter hint (optional):', '');
-                if (hint === null) return;
-                
                 const selection = window.getSelection();
-                const nextIndex = this.getNextClozeIndex(field.innerHTML);
-                
-                if (selection.rangeCount === 0 || selection.isCollapsed) {
-                    const clozeText = hint ? `{{c${nextIndex}::text::${hint}}}` : `{{c${nextIndex}::text}}`;
-                    document.execCommand('insertText', false, clozeText);
+                const selectedText = selection.toString();
+                const nextIndex = this.getNextIndex(field.innerText || field.textContent);
+
+                if (!selectedText) {
+                    document.execCommand('insertText', false, '{{c' + nextIndex + '::}}');
                 } else {
-                    const selectedText = selection.toString();
-                    const clozeText = hint ? `{{c${nextIndex}::${selectedText}::${hint}}}` : `{{c${nextIndex}::${selectedText}}}`;
-                    document.execCommand('insertText', false, clozeText);
+                    document.execCommand('insertText', false, '{{c' + nextIndex + '::' + selectedText + '}}');
                 }
-                
                 UI.hideContextMenu();
                 field.focus();
             },
-            
-            insertEmptyCloze(field) {
-                const nextIndex = this.getNextClozeIndex(field.innerHTML);
-                document.execCommand('insertText', false, `{{c${nextIndex}::}}`);
-                field.focus();
-                
-                // Move cursor inside the cloze
-                setTimeout(() => {
-                    const text = field.innerText;
-                    const pos = text.indexOf(`{{c${nextIndex}::}}`) + `{{c${nextIndex}::`.length;
-                    const range = document.createRange();
-                    const sel = window.getSelection();
-                    range.setStart(field.childNodes[0] || field, pos);
-                    range.collapse(true);
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                }, 10);
-            },
-            
-            parseCloze(text) {
-                // Parse cloze syntax and return array of cloze objects
-                const regex = /\{\{c(\d+)::(.*?)(?:::(.*?))?\}\}/g;
-                const clozes = [];
-                let match;
-                
-                while ((match = regex.exec(text)) !== null) {
-                    clozes.push({
-                        index: parseInt(match[1]),
-                        text: match[2],
-                        hint: match[3] || ''
-                    });
+            insertClozeWithHint() {
+                const hint = prompt('Enter hint (optional):');
+                if (hint === null) return;
+                const field = document.activeElement;
+                if (!field || !field.classList.contains('editor-field')) {
+                    UI.hideContextMenu();
+                    return;
                 }
-                
-                return clozes.sort((a, b) => a.index - b.index);
+                const selection = window.getSelection();
+                const selectedText = selection.toString() || 'text';
+                const nextIndex = this.getNextIndex(field.innerText || field.textContent);
+                const clozeText = hint ? '{{c' + nextIndex + '::' + selectedText + '::' + hint + '}}' : '{{c' + nextIndex + '::' + selectedText + '}}';
+                document.execCommand('insertText', false, clozeText);
+                UI.hideContextMenu();
+                field.focus();
             },
-            
             renderForStudy(text, revealAll = false) {
-                if (!text.includes('{{c')) return Utils.escapeHtml(text);
-                
-                let index = 0;
+                if (!text || !text.includes('{{c')) return Utils.escapeHtml(text);
                 return text.replace(/\{\{c(\d+)::(.*?)(?:::(.*?))?\}\}/g, (match, clozeNum, clozeText, hint) => {
-                    index++;
                     if (revealAll) {
-                        return `<span class="cloze-revealed">${Utils.escapeHtml(clozeText)}</span>`;
+                        return '<span class="cloze-revealed">' + Utils.escapeHtml(clozeText) + '</span>';
                     } else {
-                        const display = hint ? `[${hint}]` : '[...]';
-                        return `<span class="cloze-hidden" data-cloze-index="${clozeNum}" data-cloze-text="${Utils.escapeHtml(clozeText)}" onclick="Study.revealSingleCloze(this)">${display}</span>`;
+                        const display = hint ? '[' + Utils.escapeHtml(hint) + ']' : '[...]';
+                        return '<span class="cloze-hidden" data-text="' + Utils.escapeHtml(clozeText) + '" onclick="Study.revealCloze(this)">' + display + '</span>';
                     }
                 });
             },
-            
             renderForPreview(text) {
                 return this.renderForStudy(text, false);
+            },
+            hasCloze(text) {
+                return text && text.includes('{{c');
             }
         };
 
+        // ========== DATABASE ==========
         const DB = {
-            key: 'anki_pro_ultimate_v2',
-            data: { 
-                decks: [], 
-                cards: [],
-                version: 2,
-                settings: { 
-                    version: 2,
-                    dailyNewCards: 20,
-                    maxReviews: 200 
-                }
-            },
-            
+            key: 'anki_pro_v3',
+            data: { decks: [], cards: [], version: 3 },
             init() {
                 try {
                     const loaded = localStorage.getItem(this.key);
                     if (loaded) {
-                        const parsed = JSON.parse(loaded);
-                        // Migration from old version
-                        if (!parsed.version || parsed.version < 2) {
-                            this.migrateFromV1(parsed);
-                        } else {
-                            this.data = parsed;
-                        }
+                        this.data = JSON.parse(loaded);
+                        this.migrate();
                     } else {
                         this.seed();
                     }
                 } catch (e) {
-                    console.error('DB init error:', e);
+                    console.error('DB error:', e);
                     this.seed();
                 }
                 this.save();
             },
-            
-            migrateFromV1(oldData) {
-                this.data.decks = oldData.decks || [];
-                this.data.cards = (oldData.cards || []).map(card => ({
+            migrate() {
+                this.data.cards = this.data.cards.map(card => ({
                     ...card,
-                    // Add SM-2 fields if missing
-                    factor: card.factor || 2500,
-                    repetitions: card.repetitions || 0,
-                    interval: card.interval || 0,
                     ease: card.ease || 2.5,
-                    lastReview: card.lastReview || Date.now(),
-                    // Ensure all required fields exist
+                    interval: card.interval || 0,
+                    repetitions: card.repetitions || 0,
                     state: card.state || 'new',
-                    due: card.due || Date.now()
+                    due: card.due || Date.now(),
+                    reviews: card.reviews || 0
                 }));
-                this.data.settings = oldData.settings || this.data.settings;
-                this.data.version = 2;
             },
-            
             save() {
-                try {
-                    localStorage.setItem(this.key, JSON.stringify(this.data));
-                } catch (e) {
-                    console.error('Failed to save DB:', e);
-                }
+                try { localStorage.setItem(this.key, JSON.stringify(this.data)); }
+                catch (e) { console.error('Save failed:', e); }
             },
-            
             seed() {
                 this.data = {
                     decks: [
-                        { id: 'd_default', name: 'General Knowledge', createdAt: Date.now(), desc: 'General knowledge cards' },
-                        { id: 'd_code', name: 'Programming', createdAt: Date.now(), desc: 'Programming concepts and algorithms' },
-                        { id: 'd_lang', name: 'Languages', createdAt: Date.now(), desc: 'Vocabulary and grammar' }
+                        { id: 'd1', name: 'General', desc: 'General knowledge', createdAt: Date.now() },
+                        { id: 'd2', name: 'Programming', desc: 'Code concepts', createdAt: Date.now() }
                     ],
                     cards: [
-                        { 
-                            id: 'c1', 
-                            deckId: 'd_default', 
-                            front: 'The capital of France is {{c1::Paris}}.', 
-                            back: 'Paris is known as the City of Light.', 
-                            type: 'cloze', 
-                            due: Date.now(),
-                            factor: 2500,
-                            repetitions: 3,
-                            interval: 86400000 * 7, // 7 days
-                            ease: 2.5,
-                            state: 'review',
-                            createdAt: Date.now(),
-                            lastReview: Date.now() - 86400000,
-                            reviews: 5
-                        },
-                        { 
-                            id: 'c2', 
-                            deckId: 'd_code', 
-                            front: '{{c1::JavaScript}} is a {{c2::programming language}} used for {{c3::web development::where?}}.', 
-                            back: 'JavaScript can be used on both client and server side.', 
-                            type: 'cloze', 
-                            due: Date.now() - 3600000,
-                            factor: 2200,
-                            repetitions: 1,
-                            interval: 86400000,
-                            ease: 2.2,
-                            state: 'learning',
-                            createdAt: Date.now(),
-                            lastReview: Date.now(),
-                            reviews: 2
-                        },
-                        { 
-                            id: 'c3', 
-                            deckId: 'd_lang', 
-                            front: 'Hello in Spanish', 
-                            back: 'Hola', 
-                            type: 'basic', 
-                            due: Date.now(),
-                            factor: 2600,
-                            repetitions: 5,
-                            interval: 86400000 * 30,
-                            ease: 2.6,
-                            state: 'review',
-                            createdAt: Date.now(),
-                            lastReview: Date.now() - 86400000 * 2,
-                            reviews: 8
-                        }
+                        { id: 'c1', deckId: 'd1', front: 'The capital of France is {{c1::Paris}}.', back: 'Paris is the City of Light.', type: 'cloze', ease: 2.5, interval: 7, repetitions: 3, state: 'review', due: Date.now(), createdAt: Date.now(), lastReview: Date.now(), reviews: 5 },
+                        { id: 'c2', deckId: 'd2', front: '{{c1::JavaScript}} is a {{c2::programming language}} for {{c3::web development::where}}.', back: 'JS works client and server side.', type: 'cloze', ease: 2.2, interval: 1, repetitions: 1, state: 'learning', due: Date.now(), createdAt: Date.now(), lastReview: Date.now(), reviews: 2 },
+                        { id: 'c3', deckId: 'd1', front: 'Hello in Spanish', back: 'Hola', type: 'basic', ease: 2.6, interval: 30, repetitions: 5, state: 'review', due: Date.now(), createdAt: Date.now(), lastReview: Date.now(), reviews: 8 }
                     ],
-                    settings: {
-                        dailyNewCards: 20,
-                        maxReviews: 200,
-                        version: 2
-                    },
-                    version: 2
+                    version: 3
                 };
             },
-            
             addDeck(name, desc = '') {
-                const deck = { 
-                    id: Utils.id(), 
-                    name: name.trim(), 
-                    desc: desc.trim(),
-                    createdAt: Date.now() 
-                };
+                const deck = { id: Utils.id(), name: name.trim(), desc: desc.trim(), createdAt: Date.now() };
                 this.data.decks.push(deck);
                 this.save();
                 return deck;
             },
-            
             updateDeck(id, updates) {
                 const deck = this.data.decks.find(d => d.id === id);
-                if (deck) {
-                    Object.assign(deck, updates);
-                    this.save();
-                }
+                if (deck) Object.assign(deck, updates);
+                this.save();
                 return deck;
             },
-            
             deleteDeck(id) {
                 this.data.decks = this.data.decks.filter(d => d.id !== id);
                 this.data.cards = this.data.cards.filter(c => c.deckId !== id);
                 this.save();
             },
-            
-            addCard(cardData) {
+            addCard(data) {
                 const now = Date.now();
+                const type = Cloze.hasCloze(data.front) ? 'cloze' : 'basic';
                 const card = {
-                    id: Utils.id(),
-                    deckId: cardData.deckId,
-                    front: cardData.front.trim(),
-                    back: cardData.back.trim(),
-                    type: cardData.type || 'basic',
-                    due: now,
-                    factor: 2500,
-                    repetitions: 0,
-                    interval: 0,
-                    ease: 2.5,
-                    state: 'new',
-                    createdAt: now,
-                    lastReview: now,
-                    reviews: 0,
-                    tags: cardData.tags || []
+                    id: Utils.id(), deckId: data.deckId, front: data.front.trim(), back: data.back.trim(),
+                    type, ease: 2.5, interval: 0, repetitions: 0, state: 'new',
+                    due: now, createdAt: now, lastReview: now, reviews: 0
                 };
                 this.data.cards.push(card);
                 this.save();
                 return card;
             },
-            
             updateCard(card) {
-                const index = this.data.cards.findIndex(c => c.id === card.id);
-                if (index !== -1) {
-                    this.data.cards[index] = card;
-                    this.save();
-                }
+                const idx = this.data.cards.findIndex(c => c.id === card.id);
+                if (idx !== -1) this.data.cards[idx] = card;
+                this.save();
             },
-            
             deleteCard(id) {
                 this.data.cards = this.data.cards.filter(c => c.id !== id);
                 this.save();
             },
-            
             getCardsByDeck(deckId) {
                 return this.data.cards.filter(c => c.deckId === deckId);
             },
-            
             getDueCards(deckId = null) {
                 const now = Date.now();
-                const cards = deckId 
-                    ? this.data.cards.filter(c => c.deckId === deckId)
-                    : this.data.cards;
-                
-                return cards.filter(c => c.due <= now);
+                let cards = deckId ? this.data.cards.filter(c => c.deckId === deckId) : this.data.cards;
+                return cards.filter(c => c.due <= now).sort((a, b) => {
+                    const order = { new: 0, learning: 1, review: 2 };
+                    return (order[a.state] || 0) - (order[b.state] || 0);
+                });
             },
-            
             getCounts(deckId = null) {
-                const cards = deckId 
-                    ? this.data.cards.filter(c => c.deckId === deckId)
-                    : this.data.cards;
-                
                 const now = Date.now();
-                
+                const cards = deckId ? this.data.cards.filter(c => c.deckId === deckId) : this.data.cards;
                 return {
                     new: cards.filter(c => c.state === 'new').length,
                     learning: cards.filter(c => c.state === 'learning').length,
@@ -762,1358 +483,546 @@
                     total: cards.length
                 };
             },
-            
-            getDeckStats() {
-                return this.data.decks.map(deck => ({
-                    ...deck,
-                    stats: this.getCounts(deck.id)
-                }));
-            }
+            getDeckById(id) { return this.data.decks.find(d => d.id === id); }
         };
 
-        // FULL SM-2 ALGORITHM IMPLEMENTATION
+        // ========== SM-2 SCHEDULER ==========
         const Scheduler = {
-            // SM-2 parameters
-            intervals: [1, 6], // in days for first and second reviews
-            easyBonus: 1.3,
-            hardInterval: 1.2,
-            
             answer(card, quality) {
-                // quality: 0 (again), 1 (hard), 2 (good), 3 (easy)
+                // quality: 0=Again, 1=Hard, 2=Good, 3=Easy
                 const now = Date.now();
                 const day = 86400000;
-                
                 card.reviews = (card.reviews || 0) + 1;
                 card.lastReview = now;
-                
-                if (quality < 2) { // Again or Hard for learning cards
+
+                if (quality === 0) { // Again
                     card.state = 'learning';
                     card.repetitions = 0;
-                    card.interval = 1; // 1 day
-                    
-                    if (quality === 0) { // Again
-                        card.ease = Math.max(1.3, card.ease - 0.2);
-                    } else { // Hard
-                        card.ease = Math.max(1.3, card.ease - 0.15);
-                    }
-                } else {
-                    if (card.state === 'learning' || card.state === 'new') {
-                        // Card graduates from learning
+                    card.interval = 0.00694; // ~10 min in days
+                    card.ease = Math.max(1.3, card.ease - 0.2);
+                } else if (quality === 1) { // Hard
+                    card.state = 'learning';
+                    card.interval = Math.max(1, card.interval * 1.2);
+                    card.ease = Math.max(1.3, card.ease - 0.15);
+                } else if (quality === 2) { // Good
+                    if (card.state === 'new' || card.state === 'learning') {
                         card.state = 'review';
                         card.repetitions = 1;
-                        card.interval = this.intervals[0]; // First review interval
+                        card.interval = 1;
                     } else {
-                        // Review card
-                        card.repetitions = card.repetitions + 1;
-                        
-                        // Calculate new interval using SM-2 formula
-                        if (quality === 2) { // Good
-                            card.interval = Math.round(card.interval * card.ease);
-                        } else { // Easy
-                            card.interval = Math.round(card.interval * card.ease * this.easyBonus);
-                        }
-                        
-                        // Update ease factor
-                        card.ease = card.ease + (0.1 - (3 - quality) * (0.08 + (3 - quality) * 0.02));
-                        card.ease = Math.max(1.3, Math.min(card.ease, 2.5));
+                        card.repetitions++;
+                        card.interval = Math.round(card.interval * card.ease);
                     }
+                } else if (quality === 3) { // Easy
+                    card.state = 'review';
+                    card.repetitions++;
+                    if (card.interval < 1) card.interval = 1;
+                    card.interval = Math.round(card.interval * card.ease * 1.3);
+                    card.ease = Math.min(2.5, card.ease + 0.15);
                 }
-                
-                // Convert interval to milliseconds
-                card.interval = Math.max(1, card.interval);
+
+                card.interval = Math.max(0.00694, card.interval);
                 card.due = now + (card.interval * day);
-                
-                // Update factor (store as integer for compatibility)
-                card.factor = Math.round(card.ease * 1000);
-                
                 return card;
             },
-            
-            // Manual SM-2 parameter editing
-            updateSM2Params(card, params) {
-                if (params.ease !== undefined) {
-                    card.ease = parseFloat(params.ease);
-                    card.factor = Math.round(card.ease * 1000);
-                }
-                if (params.repetitions !== undefined) {
-                    card.repetitions = parseInt(params.repetitions);
-                }
-                if (params.interval !== undefined) {
-                    card.interval = parseFloat(params.interval);
-                    card.due = Date.now() + (card.interval * 86400000);
-                }
-                return card;
+            getIntervalText(card, quality) {
+                let interval = card.interval || 0;
+                if (quality === 0) interval = 0.00694;
+                else if (quality === 1) interval = Math.max(1, interval * 1.2);
+                else if (quality === 2) interval = card.state === 'new' ? 1 : Math.max(1, Math.round(interval * card.ease));
+                else if (quality === 3) interval = Math.max(1, Math.round((interval || 1) * card.ease * 1.3));
+                return Utils.formatInterval(interval);
             }
         };
 
-        const Router = {
-            currentPage: 'decks',
-            currentParam: null,
-            
-            nav(page, param = null) {
-                this.currentPage = page;
-                this.currentParam = param;
-                const vp = document.getElementById('app-viewport');
-                vp.innerHTML = '';
-                
-                // Update navigation
-                document.querySelectorAll('nav button').forEach(b => {
-                    b.classList.remove('bg-white', 'shadow-sm', 'text-black', 'dark:bg-[#505050]', 'dark:text-white');
-                    b.classList.add('text-gray-500', 'hover:text-gray-900', 'dark:text-gray-400');
-                });
-                
-                const activeBtn = document.getElementById('nav-' + page);
-                if (activeBtn) {
-                    activeBtn.classList.remove('text-gray-500', 'hover:text-gray-900', 'dark:text-gray-400');
-                    activeBtn.classList.add('bg-white', 'shadow-sm', 'text-black', 'dark:bg-[#505050]', 'dark:text-white');
-                }
-                
-                // Show/hide study controls
-                const studyControls = document.getElementById('study-controls');
-                if (studyControls) {
-                    studyControls.style.display = page === 'study' ? 'block' : 'none';
-                }
-                
-                // Render page
-                switch(page) {
-                    case 'decks': this.renderDecks(vp); break;
-                    case 'add': this.renderAdd(vp); break;
-                    case 'study': this.renderStudy(vp, param); break;
-                    case 'browse': this.renderBrowse(vp); break;
-                    case 'stats': this.renderStats(vp); break;
-                    case 'edit': this.renderEdit(vp, param); break;
-                    default: this.renderDecks(vp);
-                }
-                
-                // Scroll to top
-                vp.scrollTop = 0;
-            },
-            
-            renderDecks(root) {
-                const deckStats = DB.getDeckStats();
-                let rows = '';
-                
-                deckStats.forEach(deck => {
-                    rows += `
-                        <tr class="group cursor-pointer hover:bg-gray-50 dark:hover:bg-[#3A3A3C] transition-colors">
-                            <td onclick="Router.nav('study', '${deck.id}')" class="font-semibold text-[15px] py-4 pl-6">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 rounded-lg ${deck.id === 'd_default' ? 'bg-blue-100 dark:bg-blue-900/20' : deck.id === 'd_code' ? 'bg-green-100 dark:bg-green-900/20' : 'bg-orange-100 dark:bg-orange-900/20'} flex items-center justify-center mr-3">
-                                        <i class="fa-solid ${deck.id === 'd_default' ? 'fa-globe' : deck.id === 'd_code' ? 'fa-code' : 'fa-language'} ${deck.id === 'd_default' ? 'text-blue-600 dark:text-blue-400' : deck.id === 'd_code' ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}"></i>
-                                    </div>
-                                    <div>
-                                        <div class="font-semibold">${Utils.escapeHtml(deck.name)}</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${deck.stats.total} cards</div>
-                                        ${deck.desc ? `<div class="text-xs text-gray-400 dark:text-gray-500 mt-1">${Utils.escapeHtml(deck.desc)}</div>` : ''}
-                                    </div>
-                                </div>
-                            </td>
-                            <td onclick="Router.nav('study', '${deck.id}')" class="text-center">
-                                <span class="inline-block px-3 py-1 rounded-full text-sm font-bold ${deck.stats.new > 0 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}">
-                                    ${deck.stats.new}
-                                </span>
-                            </td>
-                            <td onclick="Router.nav('study', '${deck.id}')" class="text-center">
-                                <span class="inline-block px-3 py-1 rounded-full text-sm font-bold ${deck.stats.learning > 0 ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}">
-                                    ${deck.stats.learning}
-                                </span>
-                            </td>
-                            <td onclick="Router.nav('study', '${deck.id}')" class="text-center">
-                                <span class="inline-block px-3 py-1 rounded-full text-sm font-bold ${deck.stats.review > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}">
-                                    ${deck.stats.review}
-                                </span>
-                            </td>
-                            <td class="pr-6">
-                                <div class="flex justify-end gap-2">
-                                    <button onclick="event.stopPropagation(); Actions.editDeck('${deck.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <i class="fa-solid fa-pencil text-gray-600 dark:text-gray-300 text-sm"></i>
-                                    </button>
-                                    <button onclick="event.stopPropagation(); Actions.confirmDeleteDeck('${deck.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/30 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <i class="fa-solid fa-trash-can text-red-500 text-sm"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                root.innerHTML = `
-                    <div class="w-full max-w-5xl mt-4 md:mt-8 px-4 animate-fade-in">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                            <div>
-                                <h2 class="text-2xl font-bold">Decks</h2>
-                                <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your study decks</p>
-                            </div>
-                            <div class="flex gap-3">
-                                <button onclick="Actions.createDeck()" class="bg-anki-blue text-white px-5 py-2.5 rounded-lg font-semibold hover:brightness-110 active:scale-95 transition-all shadow-lg flex items-center gap-2">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <span class="hidden md:inline">Create Deck</span>
-                                    <span class="md:hidden">New</span>
-                                </button>
-                                <button onclick="Router.nav('add')" class="bg-anki-green text-white px-5 py-2.5 rounded-lg font-semibold hover:brightness-110 active:scale-95 transition-all shadow-lg flex items-center gap-2">
-                                    <i class="fa-solid fa-plus-circle"></i>
-                                    <span class="hidden md:inline">Add Card</span>
-                                    <span class="md:hidden">Add</span>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-xl shadow-sm overflow-hidden">
-                            <div class="overflow-x-auto">
-                                <table class="anki-table min-w-full">
-                                    <thead>
-                                        <tr>
-                                            <th class="pl-6">Deck Name</th>
-                                            <th class="text-center">New</th>
-                                            <th class="text-center">Learning</th>
-                                            <th class="text-center">Due</th>
-                                            <th class="pr-6"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>${rows}</tbody>
-                                </table>
-                            </div>
-                            
-                            ${deckStats.length === 0 ? `
-                                <div class="p-8 md:p-12 text-center">
-                                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="fa-solid fa-layer-group text-2xl text-gray-400"></i>
-                                    </div>
-                                    <h3 class="font-semibold text-lg mb-2">No decks yet</h3>
-                                    <p class="text-gray-500 dark:text-gray-400 mb-6">Create your first deck to start studying</p>
-                                    <button onclick="Actions.createDeck()" class="bg-anki-blue text-white px-6 py-2 rounded-lg font-medium hover:brightness-110">
-                                        Create Deck
-                                    </button>
-                                </div>
-                            ` : ''}
-                        </div>
-                        
-                        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
-                                <h4 class="font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
-                                    <i class="fa-solid fa-lightbulb"></i> Quick Start
-                                </h4>
-                                <p class="text-sm text-blue-700 dark:text-blue-400">
-                                    Select a deck to start studying, or create a new deck for your topics.
-                                </p>
-                            </div>
-                            <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800">
-                                <h4 class="font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-2">
-                                    <i class="fa-solid fa-bolt"></i> Shortcuts
-                                </h4>
-                                <p class="text-sm text-green-700 dark:text-green-400">
-                                    Press Space to reveal answers, 1-4 to rate cards in Study mode.
-                                </p>
-                            </div>
-                            <div class="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800">
-                                <h4 class="font-medium text-purple-800 dark:text-purple-300 mb-2 flex items-center gap-2">
-                                    <i class="fa-solid fa-magic"></i> Cloze+++
-                                </h4>
-                                <p class="text-sm text-purple-700 dark:text-purple-400">
-                                    Select text and right-click for Cloze menu, or use Cloze button.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-            
-            renderAdd(root) {
-                const deckOpts = DB.data.decks.map(d => 
-                    `<option value="${d.id}">${Utils.escapeHtml(d.name)}</option>`
-                ).join('');
-                
-                root.innerHTML = `
-                    <div class="w-full max-w-3xl mt-4 md:mt-6 px-4 flex flex-col animate-fade-in pb-20">
-                        <div class="mb-6">
-                            <h2 class="text-2xl font-bold">Add New Card</h2>
-                            <p class="text-gray-500 dark:text-gray-400 mt-1">Create basic or cloze deletion cards with Cloze+++</p>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Card Type</label>
-                                <select id="add-type" onchange="UI.toggleAddFields()" class="w-full bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-lg px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-anki-blue">
-                                    <option value="basic">Basic (Front/Back)</option>
-                                    <option value="cloze">Cloze (Fill-in-blank)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Deck</label>
-                                <select id="add-deck" class="w-full bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-lg px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-anki-blue">
-                                    ${deckOpts}
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Editor -->
-                        <div class="bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-xl shadow-sm overflow-hidden mb-6">
-                            <div class="bg-gray-50 dark:bg-[#323232] border-b border-light-border dark:border-dark-border p-3 flex gap-2 flex-wrap">
-                                <button onclick="UI.formatText('bold')" class="w-8 h-8 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-bold" title="Bold">
-                                    <i class="fa-solid fa-bold"></i>
-                                </button>
-                                <button onclick="UI.formatText('italic')" class="w-8 h-8 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-sm italic" title="Italic">
-                                    <i class="fa-solid fa-italic"></i>
-                                </button>
-                                <button onclick="UI.formatText('underline')" class="w-8 h-8 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-sm underline" title="Underline">
-                                    <i class="fa-solid fa-underline"></i>
-                                </button>
-                                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-2 self-center"></div>
-                                <button onclick="Cloze.insertClozeWithSelection()" id="btn-cloze-insert" class="hidden px-3 h-8 rounded bg-anki-blue/10 hover:bg-anki-blue/20 dark:bg-anki-blue/20 dark:hover:bg-anki-blue/30 text-sm font-bold text-anki-blue dark:text-anki-blue flex items-center gap-1">
-                                    <i class="fa-solid fa-brackets-curly"></i> Cloze
-                                </button>
-                                <div class="flex-1"></div>
-                                <button onclick="UI.clearFields()" class="px-3 h-8 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-sm flex items-center gap-1">
-                                    <i class="fa-solid fa-eraser"></i> Clear
-                                </button>
-                            </div>
-
-                            <div class="p-4 md:p-6 space-y-6">
-                                <div>
-                                    <label id="front-label" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Front / Text</label>
-                                    <div id="field-front" contenteditable="true" class="editor-field min-h-[120px] prose dark:prose-invert max-w-none" 
-                                         placeholder="Enter your question or text here... Press Ctrl+Space for Cloze menu" 
-                                         oncontextmenu="return UI.showContextMenu(event, this)"></div>
-                                    <div id="cloze-help" class="hidden mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                        <i class="fa-solid fa-circle-info mr-1"></i> Select text and use Cloze button or right-click for Cloze menu
-                                    </div>
-                                </div>
-                                <div id="container-back">
-                                    <label id="back-label" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Back / Extra</label>
-                                    <div id="field-back" contenteditable="true" class="editor-field min-h-[100px] prose dark:prose-invert max-w-none" 
-                                         placeholder="Enter the answer or extra information..."></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                            <button onclick="Router.nav('decks')" class="px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-white/10 transition-colors w-full md:w-auto">
-                                Cancel
-                            </button>
-                            <div class="flex items-center gap-3 w-full md:w-auto">
-                                <button onclick="Actions.addCard(true)" class="px-6 py-3 rounded-lg text-sm font-medium border border-anki-blue text-anki-blue hover:bg-anki-blue/10 dark:hover:bg-anki-blue/20 transition-colors flex-1 md:flex-none">
-                                    Add & New
-                                </button>
-                                <button onclick="Actions.addCard(false)" class="bg-anki-blue text-white px-6 py-3 rounded-lg text-sm font-bold hover:brightness-110 shadow-md active:scale-95 transition-transform flex-1 md:flex-none">
-                                    Add Card <span class="text-xs opacity-80 ml-1 hidden md:inline">(Ctrl+Enter)</span>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
-                            <h4 class="font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
-                                <i class="fa-solid fa-lightbulb"></i> Cloze+++ Tips
-                            </h4>
-                            <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1">
-                                <li><span class="font-medium">Automatic indices:</span> Cloze numbers (c1, c2, c3...) are assigned automatically</li>
-                                <li><span class="font-medium">Hints:</span> Add hints with {{c1::text::your hint}}</li>
-                                <li><span class="font-medium">Shortcut:</span> Select text + right-click or use Cloze button</li>
-                                <li><span class="font-medium">Preview:</span> Cloze preview shows correctly in Study mode</li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-                
-                // Set default deck if available
-                if (DB.data.decks.length > 0) {
-                    document.getElementById('add-deck').value = DB.data.decks[0].id;
-                }
-                
-                // Focus on front field
-                setTimeout(() => {
-                    const frontField = document.getElementById('field-front');
-                    if (frontField) {
-                        frontField.focus();
-                    }
-                    UI.toggleAddFields();
-                }, 100);
-            },
-            
-            renderStudy(root, deckId = null) {
-                let queue = [];
-                let deck = null;
-                
-                if (deckId) {
-                    deck = DB.data.decks.find(d => d.id === deckId);
-                    if (deck) {
-                        queue = DB.getDueCards(deckId);
-                    }
-                } else {
-                    // Study all due cards
-                    queue = DB.getDueCards();
-                }
-                
-                if (!deck && deckId) {
-                    root.innerHTML = `
-                        <div class="flex flex-col items-center justify-center h-full text-center p-6 animate-fade-in">
-                            <div class="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-3xl text-red-500 mb-6">
-                                <i class="fa-solid fa-exclamation-triangle"></i>
-                            </div>
-                            <h2 class="text-2xl font-bold mb-2">Deck Not Found</h2>
-                            <p class="text-gray-500 dark:text-gray-400 mb-8">The requested deck doesn't exist.</p>
-                            <button onclick="Router.nav('decks')" class="bg-anki-blue text-white px-6 py-2 rounded-lg font-medium hover:brightness-110">
-                                Back to Decks
-                            </button>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                const totalCounts = deckId ? DB.getCounts(deckId) : DB.getCounts();
-                
-                if (queue.length === 0) {
-                    root.innerHTML = `
-                        <div class="flex flex-col items-center justify-center h-full text-center p-6 animate-fade-in">
-                            <div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-4xl text-anki-green mb-6">
-                                <i class="fa-solid fa-check"></i>
-                            </div>
-                            <h2 class="text-2xl font-bold mb-2">You're all caught up!</h2>
-                            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md">
-                                ${deck ? `No cards due in <span class="font-semibold">${Utils.escapeHtml(deck.name)}</span>` : 'No cards due'} right now.
-                            </p>
-                            <div class="flex gap-3 flex-wrap justify-center">
-                                <button onclick="Router.nav('decks')" class="bg-gray-200 dark:bg-[#3A3A3C] px-6 py-2 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-[#4A4A4C]">
-                                    Back to Decks
-                                </button>
-                                <button onclick="Router.nav('add')" class="bg-anki-blue text-white px-6 py-2 rounded-lg font-medium hover:brightness-110">
-                                    Add Cards
-                                </button>
-                                ${!deckId ? `
-                                    <button onclick="Router.nav('study', 'd_default')" class="bg-anki-green text-white px-6 py-2 rounded-lg font-medium hover:brightness-110">
-                                        Study Default Deck
-                                    </button>
-                                ` : ''}
-                            </div>
-                            
-                            <div class="mt-12 grid grid-cols-3 gap-6 text-center">
-                                <div>
-                                    <div class="text-2xl font-bold text-anki-blue">${totalCounts.new}</div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">New</div>
-                                </div>
-                                <div>
-                                    <div class="text-2xl font-bold text-anki-red">${totalCounts.learning}</div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">Learning</div>
-                                </div>
-                                <div>
-                                    <div class="text-2xl font-bold text-anki-green">${totalCounts.review}</div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">Review</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                Study.activeCard = queue[0];
-                Study.isAnswerShown = false;
-                Study.deckId = deckId;
-                Study.revealedClozes = new Set();
-                
-                let frontContent = Study.activeCard.type === 'cloze' 
-                    ? Cloze.renderForStudy(Study.activeCard.front)
-                    : Utils.escapeHtml(Study.activeCard.front);
-                
-                root.innerHTML = `
-                    <div class="w-full max-w-3xl mt-4 md:mt-6 px-4 flex flex-col animate-fade-in pb-32">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                            <div>
-                                <h2 class="text-2xl font-bold">${deck ? Utils.escapeHtml(deck.name) : 'All Due Cards'}</h2>
-                                <div class="flex items-center gap-4 mt-2">
-                                    <span class="text-sm text-gray-500 dark:text-gray-400">
-                                        <span class="font-medium">${queue.length}</span> cards due
-                                    </span>
-                                    <span class="text-xs px-2 py-1 rounded-full ${Study.activeCard.state === 'new' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30' : Study.activeCard.state === 'learning' ? 'bg-red-100 text-red-800 dark:bg-red-900/30' : 'bg-green-100 text-green-800 dark:bg-green-900/30'}">
-                                        ${Study.activeCard.state === 'new' ? 'New' : Study.activeCard.state === 'learning' ? 'Learning' : 'Review'}
-                                    </span>
-                                </div>
-                            </div>
-                            <button onclick="Router.nav('decks')" class="px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
-                                Exit Study
-                            </button>
-                        </div>
-
-                        <!-- Progress bar -->
-                        <div class="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2 mb-8">
-                            <div id="study-progress" class="bg-anki-blue h-2 rounded-full transition-all duration-500" style="width: ${((queue.length - 1) / Math.max(queue.length, 1)) * 100}%"></div>
-                        </div>
-
-                        <!-- Card Display -->
-                        <div class="card-display mb-8 min-h-[300px] md:min-h-[350px] cursor-pointer" onclick="Study.showAnswer()">
-                            <div id="card-front-content" class="w-full break-words prose dark:prose-invert max-w-none text-left">
-                                ${frontContent}
-                            </div>
-                            
-                            <div id="answer-area" class="w-full hidden border-t border-light-border dark:border-dark-border mt-8 pt-8 animate-fade-in">
-                                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-4">Answer</div>
-                                <div id="card-back-content" class="w-full prose dark:prose-invert max-w-none text-left">
-                                    ${Utils.escapeHtml(Study.activeCard.back)}
-                                </div>
-                                ${Study.activeCard.type === 'cloze' ? `
-                                    <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Cloze Revealed</div>
-                                        <div id="cloze-revealed-content" class="prose dark:prose-invert max-w-none">
-                                            ${Cloze.renderForStudy(Study.activeCard.front, true)}
-                                        </div>
-                                    </div>
-                                ` : ''}
-                                
-                                <div class="mt-8 text-sm text-gray-500 dark:text-gray-400">
-                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        <div>
-                                            <div class="font-medium">Repetitions</div>
-                                            <div>${Study.activeCard.repetitions}</div>
-                                        </div>
-                                        <div>
-                                            <div class="font-medium">Ease Factor</div>
-                                            <div>${(Study.activeCard.ease || 2.5).toFixed(2)}</div>
-                                        </div>
-                                        <div>
-                                            <div class="font-medium">Interval</div>
-                                            <div>${Study.activeCard.interval} days</div>
-                                        </div>
-                                        <div>
-                                            <div class="font-medium">Reviews</div>
-                                            <div>${Study.activeCard.reviews || 0}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-            
-            renderBrowse(root) {
-                const cards = DB.data.cards;
-                let rows = '';
-                
-                cards.forEach(card => {
-                    const deck = DB.data.decks.find(d => d.id === card.deckId);
-                    const deckName = deck ? deck.name : 'Unknown Deck';
-                    const frontText = Utils.escapeHtml(card.front.replace(/<[^>]*>/g, '').substring(0, 60));
-                    const backText = card.back ? Utils.escapeHtml(card.back.replace(/<[^>]*>/g, '').substring(0, 40)) : '-';
-                    const dueDate = new Date(card.due).toLocaleDateString();
-                    const stateClass = card.state === 'new' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30' : 
-                                      card.state === 'learning' ? 'bg-red-100 text-red-800 dark:bg-red-900/30' : 
-                                      'bg-green-100 text-green-800 dark:bg-green-900/30';
-                    
-                    rows += `
-                        <tr class="group hover:bg-gray-50 dark:hover:bg-[#3A3A3C] transition-colors">
-                            <td class="pl-4 md:pl-6">
-                                <div class="font-medium">${frontText}${frontText.length === 60 ? '...' : ''}</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    <span class="px-2 py-1 rounded ${stateClass}">${card.state}</span>
-                                    <span class="ml-2">${card.type}</span>
-                                </div>
-                            </td>
-                            <td class="hidden md:table-cell">${backText}${backText.length === 40 ? '...' : ''}</td>
-                            <td class="hidden lg:table-cell">${Utils.escapeHtml(deckName)}</td>
-                            <td>${dueDate}</td>
-                            <td class="pr-4 md:pr-6">
-                                <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onclick="event.stopPropagation(); Router.nav('edit', '${card.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700">
-                                        <i class="fa-solid fa-pencil text-gray-600 dark:text-gray-300 text-sm"></i>
-                                    </button>
-                                    <button onclick="event.stopPropagation(); Actions.deleteCard('${card.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/30">
-                                        <i class="fa-solid fa-trash text-red-500 text-sm"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                root.innerHTML = `
-                    <div class="w-full h-full flex flex-col max-w-6xl mt-4 md:mt-6 px-4 pb-6">
-                        <div class="mb-6">
-                            <h2 class="text-2xl font-bold">Browse Cards</h2>
-                            <p class="text-gray-500 dark:text-gray-400 mt-1">All cards: ${cards.length} total</p>
-                        </div>
-                        
-                        <div class="bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col">
-                            <div class="overflow-auto flex-1">
-                                <table class="anki-table">
-                                    <thead class="sticky top-0 z-10">
-                                        <tr>
-                                            <th class="pl-4 md:pl-6">Front</th>
-                                            <th class="hidden md:table-cell">Back</th>
-                                            <th class="hidden lg:table-cell">Deck</th>
-                                            <th>Due Date</th>
-                                            <th class="pr-4 md:pr-6"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>${rows}</tbody>
-                                </table>
-                                
-                                ${cards.length === 0 ? `
-                                    <div class="p-8 md:p-12 text-center">
-                                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <i class="fa-solid fa-cards text-2xl text-gray-400"></i>
-                                        </div>
-                                        <h3 class="font-semibold text-lg mb-2">No cards yet</h3>
-                                        <p class="text-gray-500 dark:text-gray-400 mb-6">Add your first card to get started</p>
-                                        <button onclick="Router.nav('add')" class="bg-anki-blue text-white px-6 py-2 rounded-lg font-medium hover:brightness-110">
-                                            Add Card
-                                        </button>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-            
-            renderEdit(root, cardId) {
-                const card = DB.data.cards.find(c => c.id === cardId);
-                if (!card) {
-                    root.innerHTML = '<div class="p-6">Card not found</div>';
-                    return;
-                }
-                
-                const deck = DB.data.decks.find(d => d.id === card.deckId);
-                const deckOpts = DB.data.decks.map(d => 
-                    `<option value="${d.id}" ${d.id === card.deckId ? 'selected' : ''}>${Utils.escapeHtml(d.name)}</option>`
-                ).join('');
-                
-                root.innerHTML = `
-                    <div class="w-full max-w-3xl mt-6 px-4 animate-fade-in">
-                        <div class="mb-6">
-                            <h2 class="text-2xl font-bold">Edit Card</h2>
-                            <p class="text-gray-500 dark:text-gray-400 mt-1">Edit card content and SM-2 parameters</p>
-                        </div>
-                        
-                        <div class="bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-xl shadow-sm overflow-hidden mb-6">
-                            <div class="p-6 space-y-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Deck</label>
-                                    <select id="edit-deck" class="w-full bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-lg px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-anki-blue">
-                                        ${deckOpts}
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Front</label>
-                                    <div id="edit-front" contenteditable="true" class="editor-field min-h-[100px]">${Utils.escapeHtml(card.front)}</div>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Back</label>
-                                    <div id="edit-back" contenteditable="true" class="editor-field min-h-[100px]">${Utils.escapeHtml(card.back)}</div>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type</label>
-                                    <select id="edit-type" class="w-full bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-lg px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-anki-blue">
-                                        <option value="basic" ${card.type === 'basic' ? 'selected' : ''}>Basic</option>
-                                        <option value="cloze" ${card.type === 'cloze' ? 'selected' : ''}>Cloze</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                                    <h3 class="text-lg font-semibold mb-4">SM-2 Parameters</h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ease Factor</label>
-                                            <input type="number" id="edit-ease" step="0.01" min="1.3" max="2.5" value="${card.ease || 2.5}" class="sm2-field">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Repetitions</label>
-                                            <input type="number" id="edit-repetitions" min="0" value="${card.repetitions}" class="sm2-field">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Interval (days)</label>
-                                            <input type="number" id="edit-interval" step="0.1" min="0" value="${card.interval}" class="sm2-field">
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">State</label>
-                                            <select id="edit-state" class="sm2-field">
-                                                <option value="new" ${card.state === 'new' ? 'selected' : ''}>New</option>
-                                                <option value="learning" ${card.state === 'learning' ? 'selected' : ''}>Learning</option>
-                                                <option value="review" ${card.state === 'review' ? 'selected' : ''}>Review</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Due Date</label>
-                                            <input type="datetime-local" id="edit-due" value="${new Date(card.due).toISOString().slice(0, 16)}" class="sm2-field">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-between items-center gap-4">
-                            <button onclick="Router.nav('browse')" class="px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
-                                Cancel
-                            </button>
-                            <div class="flex items-center gap-3">
-                                <button onclick="Actions.saveEditedCard('${card.id}')" class="bg-anki-blue text-white px-8 py-3 rounded-lg text-sm font-bold hover:brightness-110 shadow-md active:scale-95 transition-transform">
-                                    Save Changes
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-            
-            renderStats(root) {
-                const counts = DB.getCounts();
-                const deckStats = DB.getDeckStats();
-                const today = new Date();
-                today.setHours(0,0,0,0);
-                
-                const cardsDueToday = DB.data.cards.filter(c => {
-                    const dueDate = new Date(c.due);
-                    dueDate.setHours(0,0,0,0);
-                    return dueDate.getTime() === today.getTime();
-                }).length;
-                
-                const cardsAddedToday = DB.data.cards.filter(c => {
-                    const createdDate = new Date(c.createdAt);
-                    createdDate.setHours(0,0,0,0);
-                    return createdDate.getTime() === today.getTime();
-                }).length;
-                
-                const isDark = document.documentElement.classList.contains('dark');
-                const textColor = isDark ? '#F5F5F7' : '#1D1D1F';
-                const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-                
-                root.innerHTML = `
-                    <div class="w-full max-w-6xl mt-4 md:mt-6 px-4 pb-20 animate-fade-in">
-                        <h2 class="text-2xl font-bold mb-2">Statistics</h2>
-                        <p class="text-gray-500 dark:text-gray-400 mb-8">Track your learning progress</p>
-                        
-                        <!-- Summary Cards -->
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
-                            <div class="bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-xl p-4 md:p-6">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Cards</div>
-                                        <div class="text-2xl md:text-3xl font-bold">${DB.data.cards.length}</div>
-                                    </div>
-                                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                                        <i class="fa-solid fa-cards text-xl md:text-2xl text-anki-blue"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-xl p-4 md:p-6">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Due Today</div>
-                                        <div class="text-2xl md:text-3xl font-bold text-anki-green">${cardsDueToday}</div>
-                                    </div>
-                                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                        <i class="fa-solid fa-calendar-day text-xl md:text-2xl text-anki-green"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-xl p-4 md:p-6">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Added Today</div>
-                                        <div class="text-2xl md:text-3xl font-bold text-anki-orange">${cardsAddedToday}</div>
-                                    </div>
-                                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                                        <i class="fa-solid fa-plus-circle text-xl md:text-2xl text-anki-orange"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-xl p-4 md:p-6">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Decks</div>
-                                        <div class="text-2xl md:text-3xl font-bold text-anki-red">${DB.data.decks.length}</div>
-                                    </div>
-                                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                                        <i class="fa-solid fa-layer-group text-xl md:text-2xl text-anki-red"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-                            <!-- Chart Card -->
-                            <div class="bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-xl shadow-sm p-4 md:p-6">
-                                <h3 class="text-lg font-semibold mb-4">Card Distribution</h3>
-                                <div class="relative h-64 w-full">
-                                    <canvas id="statsChart"></canvas>
-                                </div>
-                            </div>
-
-                            <!-- Deck Stats -->
-                            <div class="bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-xl shadow-sm p-4 md:p-6">
-                                <h3 class="text-lg font-semibold mb-4">Deck Overview</h3>
-                                <div class="space-y-4 max-h-64 overflow-y-auto">
-                                    ${deckStats.map(deck => {
-                                        return `
-                                            <div class="border-b border-gray-100 dark:border-gray-800 pb-4 last:border-0 last:pb-0">
-                                                <div class="flex justify-between items-center mb-2">
-                                                    <span class="font-medium truncate">${Utils.escapeHtml(deck.name)}</span>
-                                                    <span class="text-sm text-gray-500 whitespace-nowrap">${deck.stats.total} cards</span>
-                                                </div>
-                                                <div class="flex gap-2 flex-wrap">
-                                                    <span class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">${deck.stats.new} new</span>
-                                                    <span class="text-xs px-2 py-1 rounded bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">${deck.stats.learning} learning</span>
-                                                    <span class="text-xs px-2 py-1 rounded bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">${deck.stats.review} due</span>
-                                                </div>
-                                            </div>
-                                        `;
-                                    }).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                // Render Chart
-                setTimeout(() => {
-                    const ctx = document.getElementById('statsChart');
-                    if (ctx) {
-                        if (window.statsChart) {
-                            window.statsChart.destroy();
-                        }
-                        
-                        window.statsChart = new Chart(ctx.getContext('2d'), {
-                            type: 'doughnut',
-                            data: {
-                                labels: ['New', 'Learning', 'Review'],
-                                datasets: [{
-                                    data: [counts.new, counts.learning, counts.review],
-                                    backgroundColor: [
-                                        'rgba(0, 122, 255, 0.8)',
-                                        'rgba(255, 59, 48, 0.8)',
-                                        'rgba(52, 199, 89, 0.8)'
-                                    ],
-                                    borderColor: [
-                                        'rgb(0, 122, 255)',
-                                        'rgb(255, 59, 48)',
-                                        'rgb(52, 199, 89)'
-                                    ],
-                                    borderWidth: 1,
-                                    hoverOffset: 15
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: { 
-                                        position: 'bottom', 
-                                        labels: { 
-                                            color: textColor,
-                                            padding: 20,
-                                            font: { size: 12 }
-                                        }
-                                    }
-                                },
-                                cutout: '65%'
-                            }
-                        });
-                    }
-                }, 100);
-            }
-        };
-
-        const Study = {
-            activeCard: null,
-            isAnswerShown: false,
-            deckId: null,
-            revealedClozes: new Set(),
-            currentQueue: [],
-            
-            showAnswer() {
-                if (!this.activeCard || this.isAnswerShown) return;
-                this.isAnswerShown = true;
-                
-                const answerArea = document.getElementById('answer-area');
-                if (answerArea) {
-                    answerArea.classList.remove('hidden');
-                }
-                
-                UI.toast('Answer revealed');
-            },
-            
-            revealSingleCloze(element) {
-                if (!this.activeCard || this.activeCard.type !== 'cloze') return;
-                
-                const clozeIndex = element.getAttribute('data-cloze-index');
-                const clozeText = element.getAttribute('data-cloze-text');
-                
-                if (clozeIndex && clozeText) {
-                    element.classList.remove('cloze-hidden');
-                    element.classList.add('cloze-revealed');
-                    element.innerHTML = Utils.escapeHtml(clozeText);
-                    this.revealedClozes.add(clozeIndex);
-                    
-                    // Check if all clozes are revealed
-                    const allClozes = document.querySelectorAll('.cloze-hidden');
-                    if (allClozes.length === 0 && !this.isAnswerShown) {
-                        this.showAnswer();
-                    }
-                }
-            },
-            
-            rate(quality) {
-                if (!this.activeCard || !this.isAnswerShown) return;
-                
-                // Update card with SM-2 algorithm
-                const updatedCard = Scheduler.answer(this.activeCard, quality);
-                DB.updateCard(updatedCard);
-                
-                // Get next card
-                const queue = this.deckId ? DB.getDueCards(this.deckId) : DB.getDueCards();
-                
-                if (queue.length > 0) {
-                    // Go to next card
-                    Router.nav('study', this.deckId);
-                } else {
-                    // No more cards, show completion
-                    Router.nav('study', this.deckId);
-                }
-                
-                // Show rating feedback
-                const ratings = ['Again', 'Hard', 'Good', 'Easy'];
-                UI.toast(`Rated: ${ratings[quality]}`);
-            }
-        };
-
-        const Actions = {
-            createDeck() {
-                const name = prompt("Enter new deck name:");
-                if (name && name.trim()) {
-                    const desc = prompt("Enter deck description (optional):", "");
-                    const deck = DB.addDeck(name, desc || '');
-                    UI.toast(`Deck "${deck.name}" created`);
-                    Router.nav('decks');
-                }
-            },
-            
-            editDeck(deckId) {
-                const deck = DB.data.decks.find(d => d.id === deckId);
-                if (!deck) return;
-                
-                const newName = prompt("Edit deck name:", deck.name);
-                if (newName && newName.trim() && newName !== deck.name) {
-                    const newDesc = prompt("Edit deck description:", deck.desc || '');
-                    DB.updateDeck(deckId, { 
-                        name: newName.trim(),
-                        desc: newDesc || ''
-                    });
-                    UI.toast("Deck updated");
-                    Router.nav('decks');
-                }
-            },
-            
-            confirmDeleteDeck(deckId) {
-                const deck = DB.data.decks.find(d => d.id === deckId);
-                if (!deck) return;
-                
-                const cardCount = DB.getCardsByDeck(deckId).length;
-                if (confirm(`Delete deck "${deck.name}"? This will also delete ${cardCount} cards in this deck.`)) {
-                    DB.deleteDeck(deckId);
-                    UI.toast("Deck deleted");
-                    Router.nav('decks');
-                }
-            },
-            
-            addCard(andNew = false) {
-                const deckId = document.getElementById('add-deck').value;
-                const type = document.getElementById('add-type').value;
-                const front = document.getElementById('field-front').innerHTML.trim();
-                const back = document.getElementById('field-back').innerHTML.trim();
-
-                if (!front) {
-                    alert("Front field cannot be empty");
-                    return;
-                }
-                
-                // Validate cloze cards
-                if (type === 'cloze') {
-                    // Check if it contains cloze syntax
-                    const clozeRegex = /\{\{c\d+::/;
-                    if (!clozeRegex.test(front)) {
-                        if (!confirm("This doesn't look like a cloze card. Do you want to create it as a Basic card instead?")) {
-                            return;
-                        }
-                        document.getElementById('add-type').value = 'basic';
-                        UI.toggleAddFields();
-                    }
-                }
-
-                const cardData = {
-                    deckId,
-                    type,
-                    front,
-                    back
-                };
-
-                DB.addCard(cardData);
-                UI.toast("Card added successfully");
-
-                if (andNew) {
-                    UI.clearFields();
-                    document.getElementById('field-front').focus();
-                } else {
-                    Router.nav('decks');
-                }
-            },
-            
-            saveEditedCard(cardId) {
-                const card = DB.data.cards.find(c => c.id === cardId);
-                if (!card) return;
-                
-                card.deckId = document.getElementById('edit-deck').value;
-                card.front = document.getElementById('edit-front').innerHTML.trim();
-                card.back = document.getElementById('edit-back').innerHTML.trim();
-                card.type = document.getElementById('edit-type').value;
-                
-                // Update SM-2 parameters
-                card.ease = parseFloat(document.getElementById('edit-ease').value) || 2.5;
-                card.factor = Math.round(card.ease * 1000);
-                card.repetitions = parseInt(document.getElementById('edit-repetitions').value) || 0;
-                card.interval = parseFloat(document.getElementById('edit-interval').value) || 0;
-                card.state = document.getElementById('edit-state').value;
-                
-                const dueInput = document.getElementById('edit-due').value;
-                if (dueInput) {
-                    card.due = new Date(dueInput).getTime();
-                }
-                
-                DB.updateCard(card);
-                UI.toast("Card updated");
-                Router.nav('browse');
-            },
-            
-            deleteCard(cardId) {
-                if (confirm("Delete this card?")) {
-                    DB.deleteCard(cardId);
-                    UI.toast("Card deleted");
-                    Router.nav('browse');
-                }
-            }
-        };
-
+        // ========== UI ==========
         const UI = {
+            toast(msg) {
+                const t = document.getElementById('toast');
+                document.getElementById('toast-text').textContent = msg;
+                t.classList.remove('opacity-0', 'pointer-events-none');
+                t.classList.add('opacity-100');
+                setTimeout(() => {
+                    t.classList.remove('opacity-100');
+                    t.classList.add('opacity-0', 'pointer-events-none');
+                }, 2500);
+            },
             toggleMobileMenu() {
-                const menu = document.getElementById('mobile-menu');
-                menu.classList.toggle('hidden');
+                document.getElementById('mobile-menu').classList.toggle('hidden');
             },
-            
-            toggleAddFields() {
-                const type = document.getElementById('add-type').value;
-                const btnCloze = document.getElementById('btn-cloze-insert');
-                const clozeHelp = document.getElementById('cloze-help');
-                const frontLabel = document.getElementById('front-label');
-                const backLabel = document.getElementById('back-label');
-                
-                if (type === 'cloze') {
-                    if (btnCloze) btnCloze.classList.remove('hidden');
-                    if (clozeHelp) clozeHelp.classList.remove('hidden');
-                    if (frontLabel) frontLabel.innerHTML = 'Text with Cloze Deletions';
-                    if (backLabel) backLabel.innerHTML = 'Extra Information (Optional)';
-                } else {
-                    if (btnCloze) btnCloze.classList.add('hidden');
-                    if (clozeHelp) clozeHelp.classList.add('hidden');
-                    if (frontLabel) frontLabel.innerHTML = 'Front / Question';
-                    if (backLabel) backLabel.innerHTML = 'Back / Answer';
-                }
+            showContextMenu(e) {
+                e.preventDefault();
+                const menu = document.getElementById('context-menu');
+                menu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
+                menu.style.top = Math.min(e.clientY, window.innerHeight - 200) + 'px';
+                menu.classList.remove('hidden');
             },
-            
+            hideContextMenu() {
+                document.getElementById('context-menu').classList.add('hidden');
+            },
             formatText(cmd) {
                 document.execCommand(cmd, false, null);
                 this.hideContextMenu();
             },
-            
-            clearFields() {
-                if (confirm("Clear all fields?")) {
-                    document.getElementById('field-front').innerHTML = '';
-                    document.getElementById('field-back').innerHTML = '';
-                    document.getElementById('field-front').focus();
-                }
+            openEditModal(cardId) {
+                const card = DB.data.cards.find(c => c.id === cardId);
+                if (!card) return;
+                const content = document.getElementById('edit-modal-content');
+                content.innerHTML = \`
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Front</label>
+                            <div id="edit-front" class="editor-field" contenteditable="true">\${card.front}</div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Back</label>
+                            <div id="edit-back" class="editor-field" contenteditable="true">\${card.back}</div>
+                        </div>
+                        <div class="border-t pt-4 mt-4">
+                            <h4 class="font-semibold mb-3">SM-2 Parameters</h4>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Ease Factor</label>
+                                    <input type="number" step="0.1" min="1.3" max="2.5" id="edit-ease" class="sm2-field" value="\${card.ease.toFixed(2)}">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Repetitions</label>
+                                    <input type="number" min="0" id="edit-reps" class="sm2-field" value="\${card.repetitions}">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Interval (days)</label>
+                                    <input type="number" step="0.1" min="0" id="edit-interval" class="sm2-field" value="\${card.interval.toFixed(1)}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button onclick="UI.saveEditModal('\${card.id}')" class="flex-1 bg-anki-blue text-white py-2 rounded-lg font-medium hover:bg-blue-600">Save</button>
+                            <button onclick="UI.closeEditModal()" class="flex-1 bg-gray-200 dark:bg-gray-700 py-2 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600">Cancel</button>
+                        </div>
+                    </div>
+                \`;
+                document.getElementById('edit-modal').classList.remove('hidden');
             },
-            
-            showContextMenu(e, field) {
-                e.preventDefault();
-                
-                const menu = document.getElementById('context-menu');
-                menu.style.left = e.pageX + 'px';
-                menu.style.top = e.pageY + 'px';
-                menu.classList.remove('hidden');
-                
-                // Close menu when clicking elsewhere
-                const closeMenu = (event) => {
-                    if (!menu.contains(event.target)) {
-                        menu.classList.add('hidden');
-                        document.removeEventListener('click', closeMenu);
-                    }
-                };
-                
-                setTimeout(() => {
-                    document.addEventListener('click', closeMenu);
-                }, 10);
-                
-                return false;
+            saveEditModal(cardId) {
+                const card = DB.data.cards.find(c => c.id === cardId);
+                if (!card) return;
+                card.front = document.getElementById('edit-front').innerText.trim();
+                card.back = document.getElementById('edit-back').innerText.trim();
+                card.type = Cloze.hasCloze(card.front) ? 'cloze' : 'basic';
+                card.ease = parseFloat(document.getElementById('edit-ease').value) || 2.5;
+                card.repetitions = parseInt(document.getElementById('edit-reps').value) || 0;
+                card.interval = parseFloat(document.getElementById('edit-interval').value) || 0;
+                card.due = Date.now() + (card.interval * 86400000);
+                DB.updateCard(card);
+                this.closeEditModal();
+                UI.toast('Card updated!');
+                Router.nav('browse');
             },
-            
-            hideContextMenu() {
-                const menu = document.getElementById('context-menu');
-                menu.classList.add('hidden');
-            },
-            
-            toast(msg) {
-                const el = document.getElementById('toast');
-                el.innerHTML = `<i class="fa-solid fa-check"></i><span>${msg}</span>`;
-                el.classList.remove('opacity-0', 'translate-y-4');
-                el.classList.add('opacity-100');
-                
-                setTimeout(() => {
-                    el.classList.remove('opacity-100');
-                    el.classList.add('opacity-0', 'translate-y-4');
-                }, 2000);
+            closeEditModal() {
+                document.getElementById('edit-modal').classList.add('hidden');
             }
         };
 
-        // KEYBOARD SHORTCUTS
-        document.addEventListener('keydown', (e) => {
-            // Study mode shortcuts
-            if (Router.currentPage === 'study') {
-                switch(e.key) {
-                    case ' ':
-                    case 'Spacebar':
-                        e.preventDefault();
-                        if (!Study.isAnswerShown) {
-                            Study.showAnswer();
-                        } else {
-                            Study.rate(2); // Good by default
-                        }
-                        break;
-                    case 'Enter':
-                        e.preventDefault();
-                        if (!Study.isAnswerShown) {
-                            Study.showAnswer();
-                        }
-                        break;
-                    case '1':
-                        if (Study.isAnswerShown) Study.rate(0); // Again
-                        break;
-                    case '2':
-                        if (Study.isAnswerShown) Study.rate(1); // Hard
-                        break;
-                    case '3':
-                        if (Study.isAnswerShown) Study.rate(2); // Good
-                        break;
-                    case '4':
-                        if (Study.isAnswerShown) Study.rate(3); // Easy
-                        break;
-                    case 'Escape':
-                        Router.nav('decks');
-                        break;
-                }
-            }
-            
-            // Add mode shortcuts
-            if (Router.currentPage === 'add') {
-                if (e.ctrlKey || e.metaKey) {
-                    switch(e.key) {
-                        case 'Enter':
-                            e.preventDefault();
-                            Actions.addCard(false);
-                            break;
-                        case 'n':
-                        case 'N':
-                            if (e.shiftKey) {
-                                e.preventDefault();
-                                Actions.addCard(true);
+        // ========== STATS ==========
+        const Stats = {
+            chart: null,
+            renderChart() {
+                const ctx = document.getElementById('stats-chart');
+                if (!ctx) return;
+                if (this.chart) this.chart.destroy();
+
+                const counts = DB.getCounts();
+                const isDark = Theme.isDark();
+
+                this.chart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['New', 'Learning', 'Review'],
+                        datasets: [{
+                            data: [counts.new, counts.learning, counts.review],
+                            backgroundColor: ['#007AFF', '#FF9500', '#34C759'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: isDark ? '#F5F5F7' : '#1D1D1F', padding: 20, font: { size: 14 } }
                             }
-                            break;
-                        case 'b':
-                            e.preventDefault();
-                            UI.formatText('bold');
-                            break;
-                        case 'i':
-                            e.preventDefault();
-                            UI.formatText('italic');
-                            break;
-                        case 'u':
-                            e.preventDefault();
-                            UI.formatText('underline');
-                            break;
-                        case ' ':
-                            e.preventDefault();
-                            const field = document.activeElement;
-                            if (field && field.classList.contains('editor-field')) {
-                                UI.showContextMenu({ 
-                                    pageX: e.pageX, 
-                                    pageY: e.pageY,
-                                    preventDefault: () => {}
-                                }, field);
-                            }
-                            break;
+                        }
                     }
-                }
+                });
             }
-            
-            // Global shortcuts
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key.toLowerCase()) {
-                    case 'd':
-                        e.preventDefault();
-                        Router.nav('decks');
-                        break;
-                    case 'n':
-                        if (!e.shiftKey) {
-                            e.preventDefault();
-                            Router.nav('add');
-                        }
-                        break;
-                    case 'b':
-                        e.preventDefault();
-                        Router.nav('browse');
-                        break;
-                    case 's':
-                        e.preventDefault();
-                        if (e.shiftKey) {
-                            Router.nav('stats');
-                        } else {
-                            Router.nav('study');
-                        }
-                        break;
-                    case 'l':
-                        e.preventDefault();
-                        Theme.toggle();
-                        break;
+        };
+
+        // ========== STUDY ==========
+        const Study = {
+            queue: [],
+            currentIndex: 0,
+            showingAnswer: false,
+            currentDeckId: null,
+            start(deckId = null) {
+                this.currentDeckId = deckId;
+                this.queue = DB.getDueCards(deckId);
+                this.currentIndex = 0;
+                this.showingAnswer = false;
+                Router.nav('study', deckId);
+            },
+            revealCloze(el) {
+                el.innerHTML = el.dataset.text;
+                el.className = 'cloze-revealed';
+            },
+            showAnswer() {
+                this.showingAnswer = true;
+                this.render();
+            },
+            answer(quality) {
+                if (this.queue.length === 0) return;
+                let card = this.queue[this.currentIndex];
+                card = Scheduler.answer(card, quality);
+                DB.updateCard(card);
+                this.queue.splice(this.currentIndex, 1);
+                if (this.currentIndex >= this.queue.length) this.currentIndex = 0;
+                this.showingAnswer = false;
+                this.render();
+            },
+            render() {
+                const vp = document.getElementById('app-viewport');
+                if (this.queue.length === 0) {
+                    vp.innerHTML = \`
+                        <div class="w-full max-w-xl mx-auto p-4 pt-8 animate-fade-in text-center">
+                            <div class="text-6xl mb-4">🎉</div>
+                            <h2 class="text-2xl font-bold mb-2">Congratulations!</h2>
+                            <p class="text-gray-500 dark:text-gray-400 mb-6">You have finished all due cards.</p>
+                            <button onclick="Router.nav('decks')" class="bg-anki-blue text-white px-6 py-3 rounded-lg font-medium">Back to Decks</button>
+                        </div>
+                    \`;
+                    return;
                 }
+                const card = this.queue[this.currentIndex];
+                const deck = DB.getDeckById(card.deckId);
+                const frontHtml = Cloze.renderForStudy(card.front, this.showingAnswer);
+                const remaining = this.queue.length;
+
+                let controls = '';
+                if (!this.showingAnswer) {
+                    controls = \`
+                        <div class="mt-6">
+                            <button onclick="Study.showAnswer()" class="w-full bg-anki-blue text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-600 transition-colors">
+                                Show Answer <span class="text-blue-200 ml-2">(Space)</span>
+                            </button>
+                        </div>
+                    \`;
+                } else {
+                    controls = \`
+                        <div class="mt-4 p-4 bg-gray-100 dark:bg-[#1C1C1E] rounded-xl">
+                            <div class="text-sm text-gray-500 mb-2">Back:</div>
+                            <div class="text-lg">\${Utils.escapeHtml(card.back)}</div>
+                        </div>
+                        <div class="mt-6 grid grid-cols-4 gap-2">
+                            <button onclick="Study.answer(0)" class="bg-anki-red text-white py-3 rounded-xl font-medium text-sm hover:opacity-90">
+                                Again<br><span class="text-xs opacity-75">\${Scheduler.getIntervalText(card, 0)}</span>
+                            </button>
+                            <button onclick="Study.answer(1)" class="bg-anki-orange text-white py-3 rounded-xl font-medium text-sm hover:opacity-90">
+                                Hard<br><span class="text-xs opacity-75">\${Scheduler.getIntervalText(card, 1)}</span>
+                            </button>
+                            <button onclick="Study.answer(2)" class="bg-anki-green text-white py-3 rounded-xl font-medium text-sm hover:opacity-90">
+                                Good<br><span class="text-xs opacity-75">\${Scheduler.getIntervalText(card, 2)}</span>
+                            </button>
+                            <button onclick="Study.answer(3)" class="bg-anki-blue text-white py-3 rounded-xl font-medium text-sm hover:opacity-90">
+                                Easy<br><span class="text-xs opacity-75">\${Scheduler.getIntervalText(card, 3)}</span>
+                            </button>
+                        </div>
+                        <div class="text-center text-xs text-gray-400 mt-2">Keys: 1=Again, 2=Hard, 3=Good, 4=Easy</div>
+                    \`;
+                }
+
+                vp.innerHTML = \`
+                    <div class="w-full max-w-xl mx-auto p-4 pt-4 animate-fade-in">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-sm text-gray-500">\${deck ? deck.name : 'All Decks'}</span>
+                            <span class="text-sm font-medium text-anki-blue">\${remaining} remaining</span>
+                        </div>
+                        <div class="card-display mb-4">
+                            <div>\${frontHtml}</div>
+                        </div>
+                        \${controls}
+                    </div>
+                \`;
             }
-            
-            // Escape key
-            if (e.key === 'Escape') {
-                if (Router.currentPage === 'add' || Router.currentPage === 'browse' || Router.currentPage === 'stats') {
-                    Router.nav('decks');
+        };
+
+        // ========== ROUTER ==========
+        const Router = {
+            currentPage: 'decks',
+            nav(page, param = null) {
+                this.currentPage = page;
+                document.querySelectorAll('.nav-btn').forEach(b => {
+                    b.classList.remove('bg-white', 'shadow-sm', 'text-black', 'dark:bg-[#505050]', 'dark:text-white');
+                    b.classList.add('text-gray-500');
+                });
+                const btn = document.getElementById('nav-' + page);
+                if (btn) {
+                    btn.classList.add('bg-white', 'shadow-sm', 'text-black', 'dark:bg-[#505050]', 'dark:text-white');
+                    btn.classList.remove('text-gray-500');
+                }
+                const vp = document.getElementById('app-viewport');
+                vp.scrollTop = 0;
+
+                switch(page) {
+                    case 'decks': this.renderDecks(vp); break;
+                    case 'add': this.renderAdd(vp); break;
+                    case 'browse': this.renderBrowse(vp); break;
+                    case 'study': Study.render(); break;
+                    case 'stats': this.renderStats(vp); break;
+                    default: this.renderDecks(vp);
+                }
+            },
+            renderDecks(vp) {
+                const decks = DB.data.decks;
+                let rows = decks.map(d => {
+                    const counts = DB.getCounts(d.id);
+                    return \`
+                        <tr class="cursor-pointer" onclick="Study.start('\${d.id}')">
+                            <td class="font-medium">\${Utils.escapeHtml(d.name)}</td>
+                            <td><span class="text-anki-blue font-semibold">\${counts.new}</span></td>
+                            <td><span class="text-anki-orange font-semibold">\${counts.learning}</span></td>
+                            <td><span class="text-anki-green font-semibold">\${counts.review}</span></td>
+                            <td class="text-right">
+                                <button onclick="event.stopPropagation(); Router.editDeck('\${d.id}')" class="text-gray-400 hover:text-anki-blue px-2"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="event.stopPropagation(); Router.deleteDeck('\${d.id}')" class="text-gray-400 hover:text-anki-red px-2"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    \`;
+                }).join('');
+
+                vp.innerHTML = \`
+                    <div class="w-full max-w-3xl mx-auto p-4 animate-fade-in">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Your Decks</h2>
+                            <button onclick="Router.addDeck()" class="bg-anki-blue text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600">
+                                <i class="fa-solid fa-plus mr-1"></i> New Deck
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-light-border dark:border-dark-border">
+                            <table class="anki-table">
+                                <thead><tr><th>Deck</th><th>New</th><th>Learn</th><th>Due</th><th></th></tr></thead>
+                                <tbody>\${rows || '<tr><td colspan="5" class="text-center text-gray-500 py-8">No decks yet</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4">
+                            <button onclick="Study.start()" class="w-full bg-anki-green text-white py-3 rounded-xl font-semibold hover:bg-green-600">
+                                <i class="fa-solid fa-graduation-cap mr-2"></i> Study All Due Cards
+                            </button>
+                        </div>
+                    </div>
+                \`;
+            },
+            addDeck() {
+                const name = prompt('Enter deck name:');
+                if (name && name.trim()) {
+                    DB.addDeck(name);
+                    UI.toast('Deck created!');
+                    this.nav('decks');
+                }
+            },
+            editDeck(id) {
+                const deck = DB.getDeckById(id);
+                if (!deck) return;
+                const name = prompt('Edit deck name:', deck.name);
+                if (name && name.trim()) {
+                    DB.updateDeck(id, { name: name.trim() });
+                    UI.toast('Deck updated!');
+                    this.nav('decks');
+                }
+            },
+            deleteDeck(id) {
+                if (confirm('Delete this deck and all its cards?')) {
+                    DB.deleteDeck(id);
+                    UI.toast('Deck deleted!');
+                    this.nav('decks');
+                }
+            },
+            renderAdd(vp) {
+                const decks = DB.data.decks;
+                const options = decks.map(d => \`<option value="\${d.id}">\${Utils.escapeHtml(d.name)}</option>\`).join('');
+
+                vp.innerHTML = \`
+                    <div class="w-full max-w-xl mx-auto p-4 animate-fade-in">
+                        <h2 class="text-xl font-bold mb-4">Add New Card</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Deck</label>
+                                <select id="add-deck" class="w-full p-3 rounded-lg border border-light-border dark:border-dark-border bg-white dark:bg-[#1C1C1E]">
+                                    \${options}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Front (supports Cloze: right-click for menu)</label>
+                                <div id="add-front" class="editor-field" contenteditable="true" oncontextmenu="UI.showContextMenu(event)"></div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Back</label>
+                                <div id="add-back" class="editor-field" contenteditable="true"></div>
+                            </div>
+                            <div class="bg-gray-100 dark:bg-[#1C1C1E] p-4 rounded-lg">
+                                <div class="text-sm font-medium mb-2">Preview:</div>
+                                <div id="add-preview" class="text-gray-600 dark:text-gray-400"></div>
+                            </div>
+                            <button onclick="Router.saveCard()" class="w-full bg-anki-blue text-white py-3 rounded-xl font-semibold hover:bg-blue-600">
+                                <i class="fa-solid fa-plus mr-2"></i> Add Card
+                            </button>
+                        </div>
+                    </div>
+                \`;
+
+                const frontField = document.getElementById('add-front');
+                frontField.addEventListener('input', () => {
+                    document.getElementById('add-preview').innerHTML = Cloze.renderForPreview(frontField.innerText);
+                });
+            },
+            saveCard() {
+                const deckId = document.getElementById('add-deck').value;
+                const front = document.getElementById('add-front').innerText.trim();
+                const back = document.getElementById('add-back').innerText.trim();
+
+                if (!front) { UI.toast('Front is required!'); return; }
+                if (!deckId) { UI.toast('Select a deck!'); return; }
+
+                DB.addCard({ deckId, front, back });
+                UI.toast('Card added!');
+                document.getElementById('add-front').innerText = '';
+                document.getElementById('add-back').innerText = '';
+                document.getElementById('add-preview').innerHTML = '';
+            },
+            renderBrowse(vp) {
+                const cards = DB.data.cards;
+                let rows = cards.map(c => {
+                    const deck = DB.getDeckById(c.deckId);
+                    const frontPreview = c.front.length > 50 ? c.front.substring(0, 50) + '...' : c.front;
+                    return \`
+                        <tr>
+                            <td>\${Utils.escapeHtml(deck ? deck.name : 'Unknown')}</td>
+                            <td>\${Utils.escapeHtml(frontPreview)}</td>
+                            <td><span class="px-2 py-1 rounded text-xs font-medium \${c.state === 'new' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : c.state === 'learning' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}">\${c.state}</span></td>
+                            <td>\${Utils.formatInterval(c.interval)}</td>
+                            <td class="text-right">
+                                <button onclick="UI.openEditModal('\${c.id}')" class="text-gray-400 hover:text-anki-blue px-2"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="Router.deleteCard('\${c.id}')" class="text-gray-400 hover:text-anki-red px-2"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    \`;
+                }).join('');
+
+                vp.innerHTML = \`
+                    <div class="w-full max-w-4xl mx-auto p-4 animate-fade-in">
+                        <h2 class="text-xl font-bold mb-4">Browse Cards (\${cards.length})</h2>
+                        <div class="overflow-x-auto rounded-xl border border-light-border dark:border-dark-border">
+                            <table class="anki-table">
+                                <thead><tr><th>Deck</th><th>Front</th><th>State</th><th>Interval</th><th></th></tr></thead>
+                                <tbody>\${rows || '<tr><td colspan="5" class="text-center text-gray-500 py-8">No cards yet</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                \`;
+            },
+            deleteCard(id) {
+                if (confirm('Delete this card?')) {
+                    DB.deleteCard(id);
+                    UI.toast('Card deleted!');
+                    this.nav('browse');
+                }
+            },
+            renderStats(vp) {
+                const counts = DB.getCounts();
+                const totalReviews = DB.data.cards.reduce((sum, c) => sum + (c.reviews || 0), 0);
+
+                vp.innerHTML = \`
+                    <div class="w-full max-w-xl mx-auto p-4 animate-fade-in">
+                        <h2 class="text-xl font-bold mb-4">Statistics</h2>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-white dark:bg-[#2C2C2E] p-4 rounded-xl border border-light-border dark:border-dark-border">
+                                <div class="text-2xl font-bold text-anki-blue">\${counts.total}</div>
+                                <div class="text-sm text-gray-500">Total Cards</div>
+                            </div>
+                            <div class="bg-white dark:bg-[#2C2C2E] p-4 rounded-xl border border-light-border dark:border-dark-border">
+                                <div class="text-2xl font-bold text-anki-green">\${totalReviews}</div>
+                                <div class="text-sm text-gray-500">Total Reviews</div>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-[#2C2C2E] p-4 rounded-xl border border-light-border dark:border-dark-border">
+                            <h3 class="font-semibold mb-4">Card Distribution</h3>
+                            <div style="height: 250px;">
+                                <canvas id="stats-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="mt-4 bg-white dark:bg-[#2C2C2E] p-4 rounded-xl border border-light-border dark:border-dark-border">
+                            <h3 class="font-semibold mb-2">Today's Summary</h3>
+                            <div class="flex justify-between text-sm">
+                                <span>New: <strong class="text-anki-blue">\${counts.new}</strong></span>
+                                <span>Learning: <strong class="text-anki-orange">\${counts.learning}</strong></span>
+                                <span>Due: <strong class="text-anki-green">\${counts.review}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                \`;
+                setTimeout(() => Stats.renderChart(), 100);
+            }
+        };
+
+        // ========== KEYBOARD SHORTCUTS ==========
+        document.addEventListener('keydown', (e) => {
+            if (e.target.isContentEditable || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'c') {
+                    e.preventDefault();
+                    Cloze.insertClozeWithSelection();
+                }
+                return;
+            }
+
+            if (Router.currentPage === 'study') {
+                if (e.code === 'Space' && !Study.showingAnswer) {
+                    e.preventDefault();
+                    Study.showAnswer();
+                } else if (Study.showingAnswer) {
+                    if (e.key === '1') Study.answer(0);
+                    else if (e.key === '2') Study.answer(1);
+                    else if (e.key === '3') Study.answer(2);
+                    else if (e.key === '4') Study.answer(3);
+                    else if (e.code === 'Space') Study.answer(2);
                 }
             }
         });
 
-        // Initialize the application
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#context-menu')) UI.hideContextMenu();
+        });
+
+        // ========== INIT ==========
         document.addEventListener('DOMContentLoaded', () => {
             Theme.init();
             DB.init();
             Router.nav('decks');
-            
-            // Add study controls to the document
-            const studyControlsHTML = `
-                <div id="study-controls" class="study-controls-fixed" style="display: none;">
-                    <div class="max-w-3xl mx-auto">
-                        <button id="btn-show" onclick="Study.showAnswer()" class="w-full bg-anki-blue text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg hover:brightness-110 active:scale-95 transition-all md:text-base">
-                            <i class="fa-solid fa-eye mr-2"></i>Show Answer (Space)
-                        </button>
-                        
-                        <div id="btns-rate" class="hidden w-full grid grid-cols-4 gap-2 md:gap-3 mt-3">
-                            <button onclick="Study.rate(0)" class="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl border-2 border-anki-red text-anki-red hover:bg-anki-red hover:text-white transition-all active:scale-95">
-                                <span class="text-xs font-semibold mb-1">1m</span>
-                                <span class="font-bold">Again (1)</span>
-                            </button>
-                            <button onclick="Study.rate(1)" class="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl border border-gray-400 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 transition-all active:scale-95">
-                                <span class="text-xs font-semibold mb-1">10m</span>
-                                <span class="font-bold">Hard (2)</span>
-                            </button>
-                            <button onclick="Study.rate(2)" class="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl border-2 border-anki-green text-anki-green hover:bg-anki-green hover:text-white transition-all active:scale-95">
-                                <span class="text-xs font-semibold mb-1">1d</span>
-                                <span class="font-bold">Good (3)</span>
-                            </button>
-                            <button onclick="Study.rate(3)" class="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl border-2 border-anki-blue text-anki-blue hover:bg-anki-blue hover:text-white transition-all active:scale-95">
-                                <span class="text-xs font-semibold mb-1">3d</span>
-                                <span class="font-bold">Easy (4)</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.insertAdjacentHTML('beforeend', studyControlsHTML);
-            
-            // Update study controls visibility
-            const originalNav = Router.nav;
-            Router.nav = function(page, param) {
-                originalNav.call(this, page, param);
-                
-                const studyControls = document.getElementById('study-controls');
-                const btnShow = document.getElementById('btn-show');
-                const btnsRate = document.getElementById('btns-rate');
-                
-                if (studyControls) {
-                    if (page === 'study') {
-                        studyControls.style.display = 'block';
-                        if (Study.isAnswerShown) {
-                            if (btnShow) btnShow.classList.add('hidden');
-                            if (btnsRate) {
-                                btnsRate.classList.remove('hidden');
-                                btnsRate.classList.add('grid');
-                            }
-                        } else {
-                            if (btnShow) btnShow.classList.remove('hidden');
-                            if (btnsRate) {
-                                btnsRate.classList.add('hidden');
-                                btnsRate.classList.remove('grid');
-                            }
-                        }
-                    } else {
-                        studyControls.style.display = 'none';
-                    }
-                }
-            };
-            
-            // Handle offline/online status
-            window.addEventListener('online', () => {
-                UI.toast('Back online');
-            });
-            
-            window.addEventListener('offline', () => {
-                UI.toast('Working offline');
-            });
-            
-            // Prevent accidental page reload
-            window.addEventListener('beforeunload', (e) => {
-                if (Router.currentPage === 'study' || Router.currentPage === 'add') {
-                    e.preventDefault();
-                    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-                }
-            });
         });
 
-        // Service Worker content (embedded in HTML for PWA)
-        const swContent = `
-            self.addEventListener('install', (event) => {
-                event.waitUntil(
-                    caches.open('anki-pro-v1').then((cache) => {
-                        return cache.addAll([
-                            '/',
-                            '/?utm_source=homescreen'
-                        ]);
-                    })
-                );
-            });
-            
-            self.addEventListener('fetch', (event) => {
-                event.respondWith(
-                    caches.match(event.request).then((response) => {
-                        return response || fetch(event.request);
-                    })
-                );
-            });
-        `;
-        
-        // Create a Blob URL for the service worker
+        // ========== SERVICE WORKER (Inline) ==========
         if ('serviceWorker' in navigator) {
-            const blob = new Blob([swContent], { type: 'application/javascript' });
-            const swUrl = URL.createObjectURL(blob);
-            
-            navigator.serviceWorker.register(swUrl).catch(console.error);
+            const swCode = \`
+                const CACHE_NAME = 'anki-pro-v1';
+                const urlsToCache = ['/'];
+                self.addEventListener('install', e => {
+                    e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+                });
+                self.addEventListener('fetch', e => {
+                    e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+                });
+            \`;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
         }
-
     </script>
 </body>
 </html>
